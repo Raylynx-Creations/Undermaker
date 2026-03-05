@@ -3,18 +3,18 @@ enum FLEE_EVENT{
 	IMPROVED
 }
 
-function flee_event(_type, _success) constructor{
+function FleeEvent(_type, _success) constructor{
 	type = _type
 	success = _success
 	is_finished = false
 	
 	switch (_type){
-		case FLEE_EVENT.IMPROVED:
+		case FLEE_EVENT.IMPROVED:{
 			timer = 0
 			
 			audio_play_sound(snd_flee, 100, false)
 			
-			update = function(){
+			step = function(){
 				with (obj_player_battle){
 					if (!other.success and x <= 42){
 						if (x == 42){
@@ -53,13 +53,13 @@ function flee_event(_type, _success) constructor{
 					}
 				}
 			}
-		break
-		case FLEE_EVENT.NORMAL:
+		break}
+		default:{ //FLEE_EVENT.NORMAL
 			if (!success){
 				is_finished = true
 			}
 			
-			update = function(){
+			step = function(){
 				with (obj_player_battle){
 					x--
 				
@@ -68,6 +68,6 @@ function flee_event(_type, _success) constructor{
 					}
 				}
 			}
-		break
+		break}
 	}
 }

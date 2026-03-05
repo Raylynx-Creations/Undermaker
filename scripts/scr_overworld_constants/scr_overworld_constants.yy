@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_overworld_constants",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_overworld_constants",
+  "parent":{
+    "name":"Overworld",
+    "path":"folders/Scripts/Engine/Overworld.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

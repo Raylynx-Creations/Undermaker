@@ -1,7 +1,7 @@
 /// @description Variable method runs if set
 
-if (!is_undefined(update)){
-	update()
+if (!is_undefined(step)){
+	step()
 }
 
 if (type == PLATFORM_TYPE.CONVEYOR){

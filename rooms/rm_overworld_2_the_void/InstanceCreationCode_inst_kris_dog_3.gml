@@ -10,11 +10,11 @@ instance_talk = function(_inst){
 }
 
 interaction = function(){
-	overworld_dialog(["[bind_instance:" + string(real(id)) + "][func:" + string(method_get_index(instance_talk)) + "," + string(real(inst_kris_dog_cotton.id)) + "]I'm not part of the kris dog group either.","However I use a function to make the rightmost kris group entity talk and me only.","This is a more proper way to animate multiple entities to talk simultaneously.","[func:" + string(method_get_index(instance_talk)) + "," + string(real(inst_plate_1.id)) + "]Now I switch and make the button flicker alongside with me[w:10], nice."],, false)
+	overworld_dialog(["[bind_instance:" + string(real(id)) + "][func:" + string(id) + ",instance_talk," + string(real(inst_kris_dog_cotton.id)) + "]I'm not part of the kris dog group either.","However I use a function to make the rightmost kris group entity talk and me only.","This is a more proper way to animate multiple entities to talk simultaneously.","[func:" + string(id) + ",instance_talk," + string(real(inst_plate_1.id)) + "]Now I switch and make the button flicker alongside with me[w:10], nice."],, false)
 	inst_plate_1.can_update = false
 }
 
-update = function(){
+step = function(){
 	if (!is_undefined(instance)){
 		if (!obj_game.dialog.is_finished()){
 			if (obj_game.dialog.is_talking() or instance.image_index > 0){

@@ -2,32 +2,63 @@
 
 width = 565
 height = 130
+
+//(The origin of the box is in the middle bottom)
 x = 320
 y = 390
+
 resize_speed = 20
 movement_speed = 10
 rotation_speed = 5
+
+//--------------------------------------------------------------------
+
 box_size = {x: 565, y: 130}
 box_position = {x: 320, y: 390}
 box_rotation = 0
-box_center_offset = {x: 0, y: -5 - round(height)/2}
-box_collision_updated = false
-can_collide = true
+box_center_offset = {x: 0, y: -5 - round(height)/2} //Offset to move the origin of the box for the rotation of it
+
+//Data for the collision of the box with player
+box_collision_updated = false //Flag to avoid repeating collision logic more than once
+can_collide = true //You can set the box to not collide at all if you want
+
+/*
+Definition of the polygon points for the box
+The way points are defined in this struct is that defined variable sets the points to use for your custom box shape
+the inside, outside and direction are automatically calculated to fit the defined points shape
+in case the defined points are empty (like now), then 4 automatic points are put in inside, outside and direction variables
+
+Points are stored in the arrays like this: [x1, y1, x2, y2, x3, y3, ..., xn, yn], you don't set structs, just put the numbers in that order, use battle_set_box_polygon_points() to set the points with that order.
+*/
 box_polygon_points = {
-	defined: [],
-	inside: [],
+	defined: [], //Use the battle_set_box_polygon_points() to set the points for your own polygonal box, if not defined, the 4 corners of the rectangular box are used for the box drawing
+	inside: [], //Don't touch the rest of the variables in this struct
 	outside: [],
 	direction: []
 }
 box_background_color = c_black
 
+/*
+Method of the box that determinates how should if it should push the player out of the collision given certain parameters.
+The collisions of the box's walls are made of lines that are checked if the player is colliding with them.
+Since it's a line, some special conditions are made to determinate how should it and when should it push out of the collision.
+You see those conditions in the obj_platform, since this is a box, it's always meant to collide, so some arguments are not really used.
+
+INTEGER _id ------------------> ID of the player instance that is colliding.
+REAL _push_direction ---------> Direction in degrees in which the player is going to be pushed.
+BOOL _counter_clockwise_push -> (This argument is not used for this method, but it's used in obj_platform's method) Tells if the direction in which is being pushed was calculated doing a 90° counter-clockwise rotation, useful for determinating the normal angle of the line collision.
+
+RETURNS -> ARRAY[BOOL, REAL] --The BOOL tells if it should push out of the collision or not, the REAL indicates in what direction to push, overriding the _push_direction given (normally you return the same number as the _push_direction, but since there's a grip mechanic for the blue soul, it can be another direction).
+*/
 player_collision_function = function(_id, _push_direction, _counter_clockwise_push){
+	//If the box cannot collide with the player, we do nothing.
 	if (!can_collide){
-		return [false, 0]
+		return [false, 0] //Return false as first element to prevent collision being executed, the second element doesn't matter if the first one is false.
 	}
 	
-	var _grip = _push_direction
+	var _grip = _push_direction //Grip mechanic, usually is the same direction as _push_direction unless stated otherwise.
 	
+	//The grip mechanic only applies to the gravity soul, no changes are made if it's not this soul mode.
 	if (_id.mode == SOUL_MODE.GRAVITY){
 		var _offset_to_grip = abs(_id.gravity_data.allowed_angle_range_to.grip)
 		var _base_angle_to_jump = 90 + 90*_id.gravity_data.direction

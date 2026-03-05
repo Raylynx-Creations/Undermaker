@@ -1,7 +1,7 @@
 collided_with_player = false
 innactive_timer = 0
 
-update = function(){
+step = function(){
 	if (collided_with_player){
 		innactive_timer++
 		

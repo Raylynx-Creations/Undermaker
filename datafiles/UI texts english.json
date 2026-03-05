@@ -35,7 +35,7 @@
     "battle spare": "Spare",
     "battle flee": "Flee",
     "battle won": "YOU WON!\nYou earned [ExpWon] EXP and [GoldWon] Gold.",
-    "battle love up": "Your LOVE incrased.",
+    "battle love up": "Your LOVE increased.",
     "battle flee earning": "Got [ExpWon] EXP and [GoldWon] Gold with you.",
     "battle no enemy": "No one",
     "battle no acts": "Can't act",
@@ -63,6 +63,15 @@
         "Dimentional Box B",
         "Load Game"
     ],
+    "controller":{
+        "discovered": "Controller/Gamepad detected!\nConfiguration done automatically.",
+        "discovered with no mapping": "Controller/Gamepad detected but\nno mapping for it could be found.\n\nPress Enter on your keyboard to start\nmapping your controller/gamepad.",
+        "mapping button": "Press the button on your\nController/Gamepad you want to\nassign for [Action].",
+        "mapping complete": "Controller/Gamepad mapping complete!\n\nTest your mapping on this section.",
+        "mapping error": "Your controller/gamepad was lost\nduring the mapping, no configuration\nwill be saved.\n\nReconnect your controller/gamepad\nto start the mapping process again.\n\nPress Enter on your keyboard\nto go back to the game.",
+        "mapping again": "If you want to change it, press\nBackspace on your keyboard to start\nthe mapping process again.\n\nOtherwise, press Enter on your\nkeyboard to confirm your mapping\nand play the game.",
+        "lost": "Your controller/gamepad was lost.\nYour input is now controlled by the keyboard."
+    },
 	"no items": {
 		"normal": [
 			"Nothing.",

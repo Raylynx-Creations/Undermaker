@@ -1,3 +1,11 @@
+global.game_settings = {
+	language: "english",
+	resolution_active: 0,
+	resolution_last_active: -1,
+	border_active: false,
+	border_id: 0
+}
+
 /*
 This is a list of all the stats you get when you reach the specific level by reaching the EXP needed for it, these apply when you level up which can only happen when you kill monsters, triggering the battle_apply_rewards() function in the battle functions.
 If you need to trigger leveling by other means outside of the battle, copy the battle_apply_rewards() function and edit it to your needs to make sure levels are met up (try to make sure EXP is met and makes sense with the next_exp requirements from before too).
@@ -25,6 +33,8 @@ global.stat_levels = [
 	{atk: 38, def: 4, max_hp: 99, hp_bar_width: 119, next_exp: infinity} //Level 20 (Last level, when next_exp is infinity, in the game is actually displayed as "None")
 ]
 
+global.dialogues = {}
+
 global.player = {
 	max_hp: 20,
 	hp: 20,
@@ -48,7 +58,7 @@ global.player = {
 	invulnerability_frames: PLAYER_BASE_INVULNERABILITY_FRAMES, //Frames the player will be invulnerable when getting hit, this variable is free to change at any point in the game and will take effect immediatelly after getting hit.
 	cell: true,
 	cell_options: [CELL.CALL_GASTER, CELL.DIMENTIONAL_BOX_B, CELL.DIMENTIONAL_BOX_A, CELL.CALL_GASTER, CELL.LOAD_GAME],
-	inventory: [ITEM.EDIBLE_DIRT, ITEM.INSTANT_NOODLES, ITEM.WILTED_VINE, ITEM.OLD_BRICK, ITEM.BANDAGE],
+	inventory: [ITEM.EDIBLE_DIRT, ITEM.INSTANT_NOODLES, ITEM.WILTED_VINE, ITEM.OLD_BRICK],
 	inventory_size: 8,
 	status_effect: {
 		type: PLAYER_STATUS_EFFECT.NONE,
@@ -58,7 +68,7 @@ global.player = {
 }
 
 global.box = {
-	inventory: [[ITEM.CHOCOLATE, ITEM.BANDAGE], []], //For multiple box inventories, like multi-dimensional box B or more.
+	inventory: [[ITEM.CHOCOLATE, ITEM.BANDAGE, ITEM.STICK], []], //For multiple box inventories, like multi-dimensional box B or more.
 	inventory_size: [10, 10]
 }
 
@@ -66,9 +76,9 @@ global.minutes = 0
 global.seconds = 0
 
 global.save_data = {
-	wall_1_moved: true,
-	puzzle_1: true,
-	cutscene_1: true
+	wall_1_moved: false,
+	puzzle_1: false,
+	cutscene_1: false
 }
 
 global.confirm_button = 0

@@ -6,7 +6,7 @@ can_update = true //Variable for handling its animation with one of the kris dog
 depth = 100 //Background depth
 sprite_index = spr_rock_button
 
-update = function(){
+step = function(){
 	if (can_update){
 		if (place_meeting(x, y, inst_rock_1) or place_meeting(x, y, inst_rock_2)){
 			image_index = 1

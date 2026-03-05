@@ -10,7 +10,7 @@
   "compression":0,
   "compressionQuality":4,
   "conversionMode":0,
-  "duration":0.098209,
+  "duration":0.09820861,
   "exportDir":"",
   "name":"snd_papyrus_voice",
   "parent":{

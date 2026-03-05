@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"scr_global_variables",
   "parent":{
-    "name":"Scripts",
-    "path":"folders/Scripts.yy",
+    "name":"Engine",
+    "path":"folders/Scripts/Engine.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

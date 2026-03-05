@@ -13,7 +13,7 @@ depth_ordering = true
 interaction_key = "confirm"
 
 before_update = undefined
-update = undefined
+step = undefined
 after_update = undefined
 before_draw = undefined
 draw = undefined

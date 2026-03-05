@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_platform_constants",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_platform_constants",
+  "parent":{
+    "name":"Battle",
+    "path":"folders/Scripts/Custom Stuff/Battle.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

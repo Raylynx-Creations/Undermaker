@@ -2,7 +2,7 @@ collided_with_player = false
 innactive_timer = 0
 timer = 0
 
-update = function(){
+step = function(){
 	if (obj_game.state == GAME_STATE.PLAYER_CONTROL){
 		timer++
 		

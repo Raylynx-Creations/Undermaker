@@ -9,7 +9,7 @@ interaction = function(){
 	
 	var _start_attack = function(){
 		obj_game.dialog.next_dialog()
-		start_attack(ENEMY_ATTACK.PLATFORM_1,,,, 320, 240)
+		start_attack(ENEMY_ATTACK.PLATFORM_1,,,,, 320, 240)
 	}
 	
 	var _no_attack = function(){

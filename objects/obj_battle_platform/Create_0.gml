@@ -1,6 +1,6 @@
 /// @description Initial variables
 
-update = undefined
+step = undefined
 on_destroy = undefined
 
 surface = -1

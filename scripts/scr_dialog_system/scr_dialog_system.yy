@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"scr_dialog_system",
   "parent":{
-    "name":"Utils",
-    "path":"folders/Scripts/Utils.yy",
+    "name":"Systems",
+    "path":"folders/Scripts/Engine/Systems.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

@@ -9,19 +9,6 @@ enum ITEM{
 	CHOCOLATE
 }
 
-function load_items_info(_path){
-	var _file = file_text_open_read(working_directory + "/" + _path)
-	var _text = ""
-	
-	while (!file_text_eof(_file)){
-		_text += file_text_read_string(_file)
-		file_text_readln(_file)
-	}
-	file_text_close(_file)
-	
-	global.item_pool = json_parse(_text)
-}
-
 function use_item(_inventory_index){
 	var _item_index = global.player.inventory[_inventory_index]
 	var _item_data = variable_clone(global.item_pool[_item_index])

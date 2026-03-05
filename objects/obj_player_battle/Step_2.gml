@@ -13,7 +13,7 @@ if (mode == SOUL_MODE.NORMAL){
 	conveyor_push.y = 0
 }
 
-if (obj_game.battle_state == BATTLE_STATE.ENEMY_ATTACK or obj_game.battle_state == BATTLE_STATE.END_DODGE_ATTACK){
+if (get_battle_state() == BATTLE_STATE.ENEMY_ATTACK or get_battle_state() == BATTLE_STATE.END_DODGE_ATTACK){
 	if (move_x != 0 or move_y != 0){
 		var _finish = false
 		var _is_x_longer = (abs(move_x) >= abs(move_y))

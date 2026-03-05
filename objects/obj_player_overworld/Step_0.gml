@@ -23,8 +23,6 @@ switch (obj_game.state){
 				player_anim_stop()
 			break}
 			case PLAYER_STATE.MOVEMENT:{
-				x_previous = x
-				y_previous = y
 				player_movement_update()
 			break}
 		}

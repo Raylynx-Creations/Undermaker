@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_room_transition_system",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_room_transition_system",
+  "parent":{
+    "name":"Systems",
+    "path":"folders/Scripts/Engine/Systems.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

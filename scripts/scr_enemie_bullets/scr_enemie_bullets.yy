@@ -6,7 +6,7 @@
   "name":"scr_enemie_bullets",
   "parent":{
     "name":"Battle",
-    "path":"folders/Scripts/Utils/Battle.yy",
+    "path":"folders/Scripts/Custom Stuff/Battle.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

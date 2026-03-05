@@ -2,13 +2,13 @@ if (global.save_data.wall_1_moved){
 	y = 240
 }
 
+epic_movement = function(){
+	move_wall = true
+}
+
 interaction = function(){
 	if (!global.save_data.wall_1_moved){
 		move_wall = false
-	
-		epic_movement = function(){
-			inst_movable_interactable_wall_1.move_wall = true
-		}
 	
 		var _option_1 = function(){
 			overworld_dialog("[asterisk:true]Go kill yourself instead[w:20], he's not that important in the story to be the center of everything.",, false)
@@ -23,7 +23,7 @@ interaction = function(){
 		}
 	
 		var _option_4 = function(){
-			overworld_dialog(["[asterisk:true]...[w:20]Well[w:20], at least you're honest[w:20], you may pass then.","[func:" + string(method_get_index(epic_movement)) + "][next]"],, false)
+			overworld_dialog(["[asterisk:true]...[w:20]Well[w:20], at least you're honest[w:20], you may pass then.","[func:" + string(id) + ",epic_movement][next]"],, false)
 		}
 	
 		create_plus_choice_option(PLUS_CHOICE_DIRECTION.LEFT, 110, "Sans", _option_1)

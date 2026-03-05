@@ -1,6 +1,6 @@
 /// @description Initial variables
 
-update = undefined
+step = undefined
 draw_begin = undefined
 draw = draw_self
 draw_end = undefined

@@ -3,7 +3,7 @@ enum DAMAGE_UI_ANIMATION_TYPE{
 	NORMAL
 }
 
-function damage_ui_animation(_type, _text, _text_color, _x, _y, _draw_bar=true, _hp=100, _max_hp=100, _damage=100, _bar_width=100, _bar_color=c_lime) constructor{
+function DamageUIAnimation(_type, _text, _text_color, _x, _y, _draw_bar=true, _hp=100, _max_hp=100, _damage=100, _bar_width=100, _bar_color=c_lime) constructor{
 	x = _x
 	y = _y
 	timer = 0

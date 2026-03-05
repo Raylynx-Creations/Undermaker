@@ -10,7 +10,7 @@ end_battle = function(_enemies_left, _enemies_killed, _enemies_spared, _battle_f
 		var _enemy = _enemies_left[_i]
 		_text += string_concat(_enemy.name, " was left alive.\n")
 	}
-		
+	
 	_length = array_length(_enemies_killed)
 	for (var _i=0; _i<_length; _i++){
 		var _enemy = _enemies_killed[_i]
@@ -46,7 +46,7 @@ trigger_function = function(){
 			var _dialog = get_encounter_initial_dialog(_enemies)
 			//var _data = get_encounter_functions(_enemies) //We don't use this since we are supplementing our custom functions instead
 			
-			start_battle(_enemies, _dialog, BATTLE_START_ANIMATION.NO_WARNING,, end_battle)
+			start_battle(_enemies, _dialog, BATTLE_START_ANIMATION.NO_WARNING,,, end_battle)
 		}
 	}
 }

@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"scr_constants",
+  "%Name":"scr_battle_system",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"scr_constants",
+  "name":"scr_battle_system",
   "parent":{
-    "name":"Scripts",
-    "path":"folders/Scripts.yy",
+    "name":"Systems",
+    "path":"folders/Scripts/Engine/Systems.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

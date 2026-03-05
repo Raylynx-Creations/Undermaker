@@ -1,6 +1,6 @@
 timer = 0
 
-update = function(){
+step = function(){
 	timer += 2
 	
 	if (timer >= 360){

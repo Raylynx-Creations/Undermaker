@@ -1,8 +1,8 @@
 timer = 0
 has_interacted = false
-dialog_1 = new DisplayDialog(440, 740, [], 50,,,,,,, spr_box_normal, spr_box_normal_tiny_tail, spr_box_normal_mask)
-dialog_2 = new DisplayDialog(360, 780, [], 50,,,,,,, spr_box_normal, spr_box_normal_tiny_tail, spr_box_normal_mask)
-dialog_3 = new DisplayDialog(490, 780, [], 50,,,,,,, spr_box_normal, spr_box_normal_tiny_tail, spr_box_normal_mask)
+dialog_1 = new DialogSystem(440, 740, [], 50,,,,,,, spr_box_normal, spr_box_normal_tiny_tail, spr_box_normal_mask)
+dialog_2 = new DialogSystem(360, 780, [], 50,,,,,,, spr_box_normal, spr_box_normal_tiny_tail, spr_box_normal_mask)
+dialog_3 = new DialogSystem(490, 780, [], 50,,,,,,, spr_box_normal, spr_box_normal_tiny_tail, spr_box_normal_mask)
 dialog_1.set_container_tail_position(22, 50)
 dialog_2.set_container_tail_position(90, 30)
 dialog_3.set_container_tail_position(-15, 30)
@@ -22,7 +22,7 @@ interaction = function(){
 	}
 }
 
-update = function(){
+step = function(){
 	timer++
 	
 	//You will flow and slow your game if you keep using add_dialogues constantly and stay in the same room, eventually the array becomes too big to handle and we get somewhat of a memory leak, use instead set_dialogues.

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_battle_constants",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_battle_constants",
+  "parent":{
+    "name":"Battle",
+    "path":"folders/Scripts/Engine/Battle.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

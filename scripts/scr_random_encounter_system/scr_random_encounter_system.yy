@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_random_encounter_system",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_random_encounter_system",
+  "parent":{
+    "name":"Systems",
+    "path":"folders/Scripts/Engine/Systems.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -15,7 +15,7 @@ interaction = function(_direction){
 	image_index = (8 + _direction/22.5)%16
 }
 
-update = function(){
+step = function(){
 	if (count){
 		timer++
 	}else if (obj_game.dialog.is_finished()){

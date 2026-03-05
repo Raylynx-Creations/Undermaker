@@ -1,5 +1,5 @@
 /// @description Update event
 
-if (!is_undefined(update)){
-	update()
+if (!is_undefined(step)){
+	step()
 }

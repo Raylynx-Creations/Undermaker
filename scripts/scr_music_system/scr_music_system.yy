@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_music_system",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_music_system",
+  "parent":{
+    "name":"Systems",
+    "path":"folders/Scripts/Engine/Systems.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

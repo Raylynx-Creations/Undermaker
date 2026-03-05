@@ -95,5 +95,5 @@ trigger_function = function(){
 		}
 	}
 	
-	change_room(rm_overworld_3_hallway, inst_spawn_point_hall_0,,,, _end_room, _start_room, _after_transition)
+	change_room(rm_overworld_3_hallway, inst_spawn_point_hall_0,,,,,, _end_room, _start_room, _after_transition)
 }

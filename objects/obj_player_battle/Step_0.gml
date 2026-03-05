@@ -3,12 +3,12 @@
 if (invulnerability_frames > 0){
 	invulnerability_frames--
 	
-	if (obj_game.battle_state != BATTLE_STATE.TURN_END and obj_game.battle_state != BATTLE_STATE.PLAYER_ATTACK and obj_game.battle_state != BATTLE_STATE.PLAYER_DIALOG_RESULT and obj_game.battle_state != BATTLE_STATE.PLAYER_FLEE and obj_game.battle_state != BATTLE_STATE.PLAYER_WON){ //Change it so only flickers only when it's on the player's control and not displaying text or dialog, etc.
+	if (get_battle_state() != BATTLE_STATE.TURN_END and get_battle_state() != BATTLE_STATE.PLAYER_ATTACK and get_battle_state() != BATTLE_STATE.PLAYER_DIALOG_RESULT and get_battle_state() != BATTLE_STATE.PLAYER_FLEE and get_battle_state() != BATTLE_STATE.PLAYER_WON){
 		image_alpha = 1 - floor((invulnerability_frames%10)/5)
 	}
 }
 
-switch (obj_game.battle_state){
+switch (get_battle_state()){
 	case BATTLE_STATE.END_DODGE_ATTACK:
 	case BATTLE_STATE.ENEMY_ATTACK:{
 		var _current_movement_speed = (movement_speed/((get_cancel_button()) ? 2 : 1))

@@ -83,6 +83,7 @@
             "battle": ["You ate the Chocolate.\nIt fills you with energy.","[HealMessage]\nATK and DEF increased by 10!"]
         },
         "info dialog": "Chocolate - Heals 20 HP.\nIt can overheal your HP by 10.\nIncreases your ATK and DEF.",
+        "amount": 20,
         "atk": 10,
         "def": 10
     }

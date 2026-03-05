@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"scr_dialog_tree",
   "parent":{
-    "name":"Utils",
-    "path":"folders/Scripts/Utils.yy",
+    "name":"Custom Stuff",
+    "path":"folders/Scripts/Custom Stuff.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

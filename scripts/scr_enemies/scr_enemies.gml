@@ -12,7 +12,11 @@ enum ACT_COMMAND{
 	DISTRACT
 }
 
-function enemy(_monster, _x_pos, _y_pos) constructor{
+function calculate_enemy_damage_amount(_enemy){
+	return ceil(_enemy.atk/5 - global.player.def) //You can make your separate calculations based on many other data from the enemy
+}
+
+function Enemy(_monster, _x_pos, _y_pos) constructor{
 	{ //Variable definition
 	x = _x_pos
 	y = _y_pos
@@ -38,6 +42,7 @@ function enemy(_monster, _x_pos, _y_pos) constructor{
 	
 	next_dialog = undefined
 	next_attack = undefined
+	next_menu_attack = undefined
 	
 	turn_starts = undefined
 	spare = undefined
@@ -46,7 +51,7 @@ function enemy(_monster, _x_pos, _y_pos) constructor{
 	dialog_starts = undefined
 	attack_starts = undefined
 	turn_ends = undefined
-	update = undefined
+	step = undefined
 	draw = undefined
 	destroy = undefined
 	forgiven = undefined
@@ -144,7 +149,7 @@ function enemy(_monster, _x_pos, _y_pos) constructor{
 				next_dialog = "I have a dialog after the attack too!"
 			}
 			
-			update = function(){
+			step = function(){
 				timer += 10
 				y += dcos(timer)/3
 				var _angle = 12*dsin(timer)
@@ -224,7 +229,7 @@ function enemy(_monster, _x_pos, _y_pos) constructor{
 				next_attack = choose(ENEMY_ATTACK.MAD_DUMMY_1, ENEMY_ATTACK.MAD_DUMMY_2)
 			}
 			
-			update = function(){
+			step = function(){
 				timer += 6
 				y += dcos(timer)/3
 				
@@ -258,6 +263,7 @@ function enemy(_monster, _x_pos, _y_pos) constructor{
 			dust_y_pixels_amount_per_frame = 4
 			bubble_sprite = spr_box_round
 			bubble_tail_sprite = spr_box_normal_tiny_tail
+			bubble_tail_mask_sprite = spr_box_round_mask
 			
 			hp = 100
 			max_hp = 100
@@ -336,7 +342,7 @@ function enemy(_monster, _x_pos, _y_pos) constructor{
 				return _dialog
 			}
 			
-			update = function(){
+			step = function(){
 				if (timer >= 0){
 					timer++
 					
@@ -387,6 +393,7 @@ function enemy(_monster, _x_pos, _y_pos) constructor{
 			dust_y_pixels_amount_per_frame = 4
 			bubble_sprite = spr_box_normal
 			bubble_tail_sprite = spr_box_normal_tail
+			bubble_tail_mask_sprite = spr_box_normal_mask
 			
 			hp = 10
 			max_hp = 10
@@ -438,6 +445,10 @@ function enemy(_monster, _x_pos, _y_pos) constructor{
 				}
 			}
 			
+			turn_starts = function(){
+				next_menu_attack = choose(MENU_ATTACK.MENU_ATTACK, MENU_ATTACK.BUTTON_ATTACK, MENU_ATTACK.MENU_AND_BUTTON_ATTACK)
+			}
+			
 			item_used = function(_item_index){ //ITEM
 				if (!distracted){
 					next_dialog = "[effect:shake][color_rgb:255,255,255]WHY I DON'T HAVE ITEMS?!"
@@ -479,7 +490,7 @@ function enemy(_monster, _x_pos, _y_pos) constructor{
 				return _dialog
 			}
 			
-			update = function(){
+			step = function(){
 				if (dodge >= 0){
 					dodge++
 					var _scale = 1 - 0.5*dsin(90*min(dodge/20, 1) + 90*clamp((dodge - 80)/20, 0, 1))

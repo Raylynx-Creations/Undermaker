@@ -7,7 +7,7 @@ enum ENEMY_ATTACK{
 	PLATFORM_3
 }
 
-function enemy_attack(_attack_name, _position, _damage) constructor{
+function EnemyAttack(_attack_name, _position, _damage) constructor{
 	timer = 0 //Every attack contains a timer for you to do stuff, if you don't need it ignore it, if you plan to design your attacks without a timer, might as well remove it, I do not recommend it tho.
 	attack_done = false //A variable to read when the attack is flagged as finished and therefor must end the enemy attack state.
 	draw = undefined
@@ -32,7 +32,7 @@ function enemy_attack(_attack_name, _position, _damage) constructor{
 				spawn_platform(100, -100, 110,,,,, PLATFORM_TYPE.STICKY,, 60, 120)
 			)
 			
-			update = function(){
+			step = function(){
 				if (keyboard_check_pressed(ord("1"))){
 					set_soul_mode(SOUL_MODE.NORMAL)
 				}
@@ -93,13 +93,13 @@ function enemy_attack(_attack_name, _position, _damage) constructor{
 			set_soul_mode(SOUL_MODE.GRAVITY)
 			damage = _damage
 			
-			update = function(){
+			step = function(){
 				timer++
 				
 				if (timer%90 == 30){
 					with (spawn_platform(250, 30, 180, 100, -2,,, PLATFORM_TYPE.NORMAL,, 0, 120)){
 						image_alpha = 0
-						update = function(){
+						step = function(){
 							if (x <= 70){
 								image_alpha -= 0.05
 							}else{
@@ -141,14 +141,14 @@ function enemy_attack(_attack_name, _position, _damage) constructor{
 			set_soul_mode(SOUL_MODE.GRAVITY, {orange_mode: true})
 			damage = _damage
 			
-			update = function(){
+			step = function(){
 				timer++
 				
 				if (timer%90 == 30){
 					for (var _i = 0; _i < 2; _i++){
 						with (spawn_platform(250 - 500*_i, 30 - 60*_i, 180*_i, 80, 3*_i - 1.5,,, (_i ? ((timer%180 == 30) ? PLATFORM_TYPE.STICKY : PLATFORM_TYPE.TRAMPOLINE) : PLATFORM_TYPE.CONVEYOR), 2 - 4*irandom(1), 60 - 60*_i, 120, false)){
 							image_alpha = 0
-							update = function(){
+							step = function(){
 								if (x < 70 or x > 570){
 									image_alpha -= 0.05
 								}else{
@@ -178,7 +178,7 @@ function enemy_attack(_attack_name, _position, _damage) constructor{
 			timer -= 15*_position
 			damage = _damage
 			
-			update = function(){
+			step = function(){
 				timer++
 				
 				if (timer%30 == 10){
@@ -196,7 +196,7 @@ function enemy_attack(_attack_name, _position, _damage) constructor{
 			direction = 0
 			damage = _damage
 			
-			update = function(){
+			step = function(){
 				timer++
 				
 				if (timer%30 == 10){
@@ -210,7 +210,7 @@ function enemy_attack(_attack_name, _position, _damage) constructor{
 			}
 		break}
 		case ENEMY_ATTACK.SPARE: { //Yeah this is just a Spare Attack
-			update = function(){
+			step = function(){
 				timer++
 				
 				if (timer > 60){

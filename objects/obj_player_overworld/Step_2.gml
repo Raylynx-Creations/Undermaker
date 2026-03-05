@@ -8,6 +8,9 @@ if (_move_x != 0 or _move_y != 0){
 	move_y = _move_y
 }
 
+x_previous = x
+y_previous = y
+
 if (move_x != 0 or move_y != 0){
 	var _finish = false
 	var _is_x_longer = (abs(move_x) >= abs(move_y))
@@ -77,15 +80,12 @@ if (obj_game.state == GAME_STATE.PLAYER_CONTROL){
 		}
 	}
 	
-	if (!_is_interacting and can_open_menu and global.menu_button and obj_game.dialog.is_finished()){
-		obj_game.state = GAME_STATE.PLAYER_MENU_CONTROL
-		obj_game.player_menu_state = PLAYER_MENU_STATE.INITIAL
-		obj_game.player_menu_selection[0] = 0
-		obj_game.player_menu_top = ((y - camera_get_view_y(view_camera[0])) < 310)
+	if (!_is_interacting and can_open_menu and get_menu_button(false) and obj_game.dialog.is_finished()){
+		if (obj_game.player_menu_system.open_menu()){
+			player_anim_stop()
 		
-		player_anim_stop()
-		
-		audio_play_sound(snd_menu_selecting, 0, false)
+			audio_play_sound(snd_menu_selecting, 0, false)
+		}
 	}
 }
 

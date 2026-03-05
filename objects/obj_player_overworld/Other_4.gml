@@ -28,9 +28,25 @@ if (!is_undefined(spawn_point_reference)){
 				other.y = y + _y_center*dcos(image_angle) - _x_center*dsin(image_angle)
 			break
 			case 1:
-				var _offset = clamp(other.spawn_point_offset, -abs(_y_center) - other.bbox_top + other.y, abs(_y_center) - other.bbox_bottom + other.y)
-				other.x = x + _x_center*dcos(image_angle) + _y_center*dsin(image_angle) + _offset*abs(dsin(image_angle))
-				other.y = y + _y_center*dcos(image_angle) + _offset*abs(dcos(image_angle)) - _x_center*dsin(image_angle)
+				var _sprite_index = other.sprite_index
+				var _image_yscale = other.image_yscale
+				var _image_xscale = other.image_xscale
+				var _y_offset = sprite_get_yoffset(_sprite_index)
+				var _x_offset = sprite_get_xoffset(_sprite_index)
+				
+				var _top_offset = (_y_offset - sprite_get_bbox_top(_sprite_index))*_image_yscale
+				var _bottom_offset = (sprite_get_bbox_bottom(_sprite_index) + 1 - _y_offset)*_image_yscale
+				var _left_offset = (_x_offset - sprite_get_bbox_left(_sprite_index))*_image_xscale
+				var _right_offset = (sprite_get_bbox_right(_sprite_index) + 1 - _x_offset)*_image_xscale
+				
+				var _vertical_min = ((dcos(image_angle) > 0) ? _bottom_offset : _top_offset)*abs(dcos(image_angle))
+				var _horizontal_min = ((dsin(image_angle) > 0) ? _right_offset : _left_offset)*abs(dsin(image_angle))
+				var _vertical_max = ((dcos(image_angle) > 0) ? _top_offset : _bottom_offset)*abs(dcos(image_angle))
+				var _horizontal_max = ((dsin(image_angle) > 0) ? _left_offset : _right_offset)*abs(dsin(image_angle))
+				
+				var _offset = clamp(other.spawn_point_offset, -abs(_y_center) + _vertical_min + _horizontal_min, abs(_y_center) - _vertical_max - _horizontal_max)
+				other.x = x + _x_center*dcos(image_angle) + _y_center*dsin(image_angle) - _offset*abs(dsin(image_angle))
+				other.y = y + _y_center*dcos(image_angle) - _x_center*dsin(image_angle) - _offset*abs(dcos(image_angle))
 			break
 		}
 	}

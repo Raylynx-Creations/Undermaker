@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"scr_player_functions",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"scr_player_functions",
+  "parent":{
+    "name":"Overworld",
+    "path":"folders/Scripts/Engine/Overworld.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

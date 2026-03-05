@@ -1,7 +1,5 @@
 /// @description Variable declaration
 
-x = 320
-y = 240
 movement_speed = 2
 mode = -1
 invulnerability_frames = 0

@@ -108,7 +108,7 @@ INTEGER _container_sprite -------------------> ID of the sprite to be used as a 
 INTEGER _container_tail_sprite --------------> ID of the sprite to be used as the tail of the container, used to make the dialog bubbles with tail, so you don't have to make multiple sprites with different position of the tail, the heavy calculation for its positioning was already made by me and a friend, really heavy math XD.
 INTEGER _container_tail_mask_sprite ---------> ID of the sprite to be used as a mask region to determinate where the tail should be drawn, can be any size but have in mind that it will scale to fit the size of the container itself.
 */
-function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=1, _voices=snd_monster_voice, _face_sprite=undefined, _face_subimages=undefined, _container_sprite=undefined, _container_tail_sprite=undefined, _container_tail_mask_sprite=undefined) constructor{
+function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=1, _voices=snd_monster_voice, _face_sprite=undefined, _face_subimages=undefined, _container_sprite=undefined, _container_tail_sprite=undefined, _container_tail_mask_sprite=undefined) constructor{
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	//INITIALIZATION OF VARIABLES
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -134,7 +134,7 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 	y = _y
 	dialog_width = max(_width, 1) //Width cannot be 0 or negative, minimum of 1.
 	dialog_height = 0 //This will be calculated.
-	dialog_minimum_height = max(_height, 0) //Same as width, cannot be negative, except this time it can be 0.
+	dialog_minimum_height = max(_height, 1) //Same as width, cannot be negative, except this time it can be 0.
 	dialog_heights = [] //For each dialog height calculated, will be inserted here in order to keep the height of the dialogues and not recalculate them (as it is impossible to recaculate once they are calculated).
 	dialog_x_offset = 0 //Offset of the dialog's position depending of the container sprite.
 	dialog_y_offset = 0 //If it's not given, these remain on 0, these will contain the top and left sides of the bbox collision of the sprite, which is where the text will be.
@@ -231,6 +231,7 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 	container_y_offset = 0
 	container_x = 0
 	container_y = 0
+	container_original_origins = false //There are no origins set, so it starts as false.
 	
 	//Variables for handling the tail's container.
 	container_tail_sprite = undefined
@@ -397,7 +398,7 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 				
 					var _found_not_space = false //This is a flag that sets to true once any character that is not a jump line or a space is found, this is to make a sound in the dialog.
 					switch (display_mode){
-						case DISPLAY_TEXT.LETTERS: //Dialog may advance by letters, one by one, set by the amount of letters that you want to be displayed on the dialog.
+						case DISPLAY_TEXT.LETTERS:{ //Dialog may advance by letters, one by one, set by the amount of letters that you want to be displayed on the dialog.
 							for (var _i = 0; _i < display_amount; _i++){
 								string_index++
 							
@@ -417,8 +418,8 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 									break
 								}
 							}
-						break
-						case DISPLAY_TEXT.WORDS: //Dialogs may advance by whole words instead, word by word, set by the amount of words that you want to display on the dialog.
+						break}
+						case DISPLAY_TEXT.WORDS:{ //Dialogs may advance by whole words instead, word by word, set by the amount of words that you want to display on the dialog.
 							//If it's the beggining of the dialog and asterisk must be displayed, just advance one and stop doing it, next frame do the words.
 							if (string_index < 0){
 								string_index++
@@ -500,7 +501,7 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 								//Update the _search_index by setting it one ahead of the current index.
 								_search_index = string_index + 1
 							}
-						break
+						break}
 					}
 				
 					//--------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1109,7 +1110,7 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 			return
 		}
 		
-		array_push(dialog_pop_ups, {timer: 0, mode: _mode, x: _x, y: _y, system: new DisplayDialog(0, 0, _dialog, 2*_width,, xscale/2, yscale/2,, _face_sprite, _face_subimages)})
+		array_push(dialog_pop_ups, {timer: 0, mode: _mode, x: _x, y: _y, system: new DialogSystem(0, 0, _dialog, 2*_width,, xscale/2, yscale/2,, _face_sprite, _face_subimages)})
 		dialog_pop_ups_amount++
 		
 		var _system = dialog_pop_ups[dialog_pop_ups_amount - 1].system
@@ -1153,21 +1154,10 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 		container_sprite_height = sprite_get_height(container_sprite)
 		container_x_origin = sprite_get_xoffset(container_sprite)
 		container_y_origin = sprite_get_yoffset(container_sprite)
+		container_original_origins = true
 		
 		//Call the function to update parameters of the container sprite once the variables have been set.
 		update_container_sprite()
-		
-		container_x_offset = container_x_origin*container_width
-		container_y_offset = container_y_origin*container_height
-		
-		//Once the container_x_origin has been set, in case the container has been scaled, to keep the relation of the origin set originally in the sprite, a multiplication is done.
-		//This does not affect the container in any way, as this variable is not used to display it, only to position the tail if it has any.
-		if (container_x_origin > 0){
-			container_x_origin *= container_width
-		}
-		if (container_y_origin > 0){
-			container_y_origin *= container_height
-		}
 		
 		//In case a tail exists, send the container's new origin to set the tail's position and if a mask also exists, update the information.
 		set_container_tail_position(container_x_origin, container_y_origin)
@@ -1261,12 +1251,13 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 		//Set the position.
 		container_x_origin = _x
 		container_y_origin = _y
+		container_original_origins = false
 		
 		//All these variables are not meant to be preserved as it is just temporary information used to get the correct position and angle of the tail, after that it is useless.
 		var _container_x_origin_offset = container_x_origin - dialog_x_offset //The coordinates are made into local coordinates where the origin is the top left corner of the dialog bounding box itself and not the container's top left corner anymore so it calculates the position and angle of the tail.
 		var _container_y_origin_offset = container_y_origin - dialog_y_offset
-		var _tail_top_size = container_tail_y_origin //These 2 variables determinate the size above and below the tail sprite using its original, it basically divides the sprite in 2, needed for the correct rotation of the tail.
-		var _tail_bottom_size = container_tail_height_pixels - container_tail_y_origin
+		var _tail_top_size = container_tail_y_origin*container_tail_height //These 2 variables determinate the size above and below the tail sprite using its original, it basically divides the sprite in 2, needed for the correct rotation of the tail.
+		var _tail_bottom_size = (container_tail_height_pixels - container_tail_y_origin)*container_tail_height
 		var _tail_alignment_top_left_x = _tail_top_size //These corner variables determinate the points where the tail should start rotating as its in a corner, but it takes the origin of the tail in account for that, to know the point the sprite is at the limit of exiting the dialog's bounding box.
 		var _tail_alignment_top_left_y = _tail_bottom_size
 		var _tail_alignment_top_right_x = dialog_width - _tail_bottom_size
@@ -1412,15 +1403,15 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 					
 					//Sort the type of command, fill the data of it and flag it properly as visual or action.
 					switch (_command_content[0]){
-						case "wait": case "w":
+						case "wait": case "w":{
 							_command_data.type = COMMAND_TYPE.WAIT
 							_command_data.value = real(_command_content[1])
-						break
-						case "text_speed": case "talk_speed":
+						break}
+						case "text_speed": case "talk_speed":{
 							_command_data.type = COMMAND_TYPE.SET_TEXT_SPEED
 							_command_data.value = real(_command_content[1])
-						break
-						case "sprite":
+						break}
+						case "sprite":{
 							var _arguments = string_split(_command_content[1], ",")
 							
 							if (_arguments[0] == "" or (_j > 1 and (!sprite_exists(final_face_sprite) or sprite_exists(int64(_arguments[0]))))){
@@ -1431,7 +1422,14 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 							_command_data.value = _arguments
 							var _command_arguments_length = array_length(_arguments)
 							
-							for (var _k = 0; _k < _command_arguments_length; _k++){
+							var _spr = asset_get_index(_arguments[0])
+							if (_spr != -1){
+								_arguments[0] = _spr
+							}else{
+								_arguments[0] = int64(_arguments[0])
+							}
+							
+							for (var _k = 1; _k < _command_arguments_length; _k++){
 								_arguments[_k] = int64(_arguments[_k])
 							}
 							
@@ -1444,23 +1442,23 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 									final_text_align_x += sprite_get_width(final_face_sprite) + 10
 								}
 							}
-						break
-						case "subimages":
+						break}
+						case "subimages":{
 							_command_data.type = COMMAND_TYPE.SET_SUBIMAGES
 							_command_data.value = string_split(_command_content[1], ",")
-							_command_arguments_length = array_length(_command_data.value)
+							var _command_arguments_length = array_length(_command_data.value)
 							
 							for (var _k = 0; _k < _command_arguments_length; _k++){
 								_command_data.value[_k] = int64(_command_data.value[_k])
 							}
-						break
-						case "bind_instance":
+						break}
+						case "bind_instance":{ //TODO: Find a way to use named instances as arguments
 							_command_data.type = COMMAND_TYPE.BIND_INSTANCE
 							_command_data.value = string_split(_command_content[1], ",")
-							_command_data.inst = real(_command_data.value[0])
+							_command_data.inst = int64(_command_data.value[0])
 							
 							array_delete(_command_data.value, 0, 1)
-							_command_arguments_length = array_length(_command_data.value)
+							var _command_arguments_length = array_length(_command_data.value)
 							
 							if (_command_arguments_length > 0){
 								for (var _k = 0; _k < _command_arguments_length; _k++){
@@ -1469,9 +1467,9 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 							}else{
 								_command_data.value = undefined
 							}
-						break
-						case "pop_up": //The format is _mode, _x, _y, _dialog, _width, _face_sprite, _face_subimages
-							_arguments = string_split(_command_content[1], ",", false, 3)
+						break}
+						case "pop_up":{ //The format is _mode, _x, _y, _dialog, _width, _face_sprite, _face_subimages
+							var _arguments = string_split(_command_content[1], ",", false, 3)
 							var _argument_length = string_length(_arguments[3])
 							var _escape_sequence_offset = string_length(_command_content[0]) + string_length(_arguments[0]) + string_length(_arguments[1]) + string_length(_arguments[2]) + 4
 							var _index = 0
@@ -1506,39 +1504,39 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 							
 							//After all _arguments are parsed correctly, it is time to get the constant for the mode.
 							switch (_arguments[0]){
-								case "fade":
+								case "fade":{
 									_arguments[0] = POP_UP_MODE.FADE
-								break
-								case "instant":
+								break}
+								case "instant":{
 									_arguments[0] = POP_UP_MODE.INSTANT
-								break
-								case "left":
+								break}
+								case "left":{
 									_arguments[0] = POP_UP_MODE.LEFT
-								break
-								case "right":
+								break}
+								case "right":{
 									_arguments[0] = POP_UP_MODE.RIGHT
-								break
-								case "up":
+								break}
+								case "up":{
 									_arguments[0] = POP_UP_MODE.UP
-								break
-								case "down":
+								break}
+								case "down":{
 									_arguments[0] = POP_UP_MODE.DOWN
-								break
-								case "left_instant": case "left instant":
+								break}
+								case "left_instant": case "left instant":{
 									_arguments[0] = POP_UP_MODE.LEFT_INSTANT
-								break
-								case "right_instant": case "right instant":
+								break}
+								case "right_instant": case "right instant":{
 									_arguments[0] = POP_UP_MODE.RIGHT_INSTANT
-								break
-								case "up_instant": case "up instant":
+								break}
+								case "up_instant": case "up instant":{
 									_arguments[0] = POP_UP_MODE.UP_INSTANT
-								break
-								case "down_instant": case "down instant":
+								break}
+								case "down_instant": case "down instant":{
 									_arguments[0] = POP_UP_MODE.DOWN_INSTANT
-								break
-								default:
+								break}
+								default:{
 									_arguments[0] = POP_UP_MODE.NONE
-								break
+								break}
 							}
 							
 							_length = array_length(_arguments)
@@ -1552,36 +1550,42 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 								
 								_arguments[_k] = int64(_arguments[_k])
 							}
-						break
-						case "animation_speed": case "anim_speed": case "sprite_speed":
+						break}
+						case "animation_speed": case "anim_speed": case "sprite_speed":{
 							_command_data.type = COMMAND_TYPE.SET_SPRITE_SPEED
 							_command_data.value = real(_command_content[1])
-						break
-						case "voice": case "voices": //Notice this command has a condition break.
+						break}
+						case "voice": case "voices":{ //Notice this command has a condition break.
 							if (array_length(_command_content) > 1){ //If no arguments is provided to the voice command, it becomes an unmute command instead.
 								_command_data.type = COMMAND_TYPE.SET_VOICE
 								_command_data.value = string_split(_command_content[1], ",")
-								_command_arguments_length = array_length(_command_data.value)
+								var _command_arguments_length = array_length(_command_data.value)
 							
 								for (var _k = 0; _k < _command_arguments_length; _k++){
-									_command_data.value[_k] = int64(_command_data.value[_k])
+									var _snd = asset_get_index(_command_data.value[_k])
+									if (_snd != -1){
+										_command_data.value[_k] = _snd
+									}else{
+										_command_data.value[_k] = int64(_command_data.value[_k])
+									}
 								}
 							
 								break
 							}
-						case "unmute":
+						}
+						case "unmute":{
 							_command_data.type = COMMAND_TYPE.VOICE_MUTING
 							_command_data.value = true
-						break
-						case "no_voice": case "no_voices": case "mute":
+						break}
+						case "no_voice": case "no_voices": case "mute":{
 							_command_data.type = COMMAND_TYPE.VOICE_MUTING
 							_command_data.value = false
-						break
-						case "play_sound":
+						break}
+						case "play_sound":{
 							_command_data.type = COMMAND_TYPE.PLAY_SOUND
 							_command_data.value = int64(_command_content[1])
-						break
-						case "color_rgb":
+						break}
+						case "color_rgb":{
 							_command_data.type = COMMAND_TYPE.COLOR_RGB
 							_command_data.value = string_split(_command_content[1], ",")
 						
@@ -1590,8 +1594,8 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 							}
 						
 							_command_action = false //Flag command as visual
-						break
-						case "color_hsv":
+						break}
+						case "color_hsv":{
 							_command_data.type = COMMAND_TYPE.COLOR_HSV
 							_command_data.value = string_split(_command_content[1], ",")
 						
@@ -1600,16 +1604,16 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 							}
 						
 							_command_action = false //Flag command as visual
-						break
-						case "effect":
+						break}
+						case "effect":{
 							_command_data.type = COMMAND_TYPE.TEXT_EFFECT
 							var _command_arguments = string_split(_command_content[1], ",")
 							
 							switch (_command_arguments[0]){
-								case "zoom":
+								case "zoom":{
 									_command_data.subtype = EFFECT_TYPE.ZOOM
-								break
-								case "slide":
+								break}
+								case "slide":{
 									_command_data.subtype = EFFECT_TYPE.SLIDE
 									
 									if (array_length(_command_arguments) > 1 and _command_arguments[1] != ""){
@@ -1623,8 +1627,8 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 									}else{
 										_command_data.alpha = 1
 									}
-								break
-								case "twitch":
+								break}
+								case "twitch":{
 									_command_data.subtype = EFFECT_TYPE.TWITCH
 									
 									if (array_length(_command_arguments) > 1 and _command_arguments[1] != ""){
@@ -1632,8 +1636,8 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 									}else{
 										_command_data.value = 2
 									}
-								break
-								case "shake":
+								break}
+								case "shake":{
 									_command_data.subtype = EFFECT_TYPE.SHAKE
 									
 									if (array_length(_command_arguments) > 1 and _command_arguments[1] != ""){
@@ -1641,8 +1645,8 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 									}else{
 										_command_data.value = 1
 									}
-								break
-								case "oscillate":
+								break}
+								case "oscillate":{
 									_command_data.subtype = EFFECT_TYPE.OSCILLATE
 									
 									if (array_length(_command_arguments) > 1 and _command_arguments[1] != ""){
@@ -1650,8 +1654,8 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 									}else{
 										_command_data.value = 2
 									}
-								break
-								case "rainbow":
+								break}
+								case "rainbow":{
 									_command_data.subtype = EFFECT_TYPE.RAINBOW
 									
 									if (array_length(_command_arguments) > 1 and _command_arguments[1] != ""){
@@ -1659,8 +1663,8 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 									}else{
 										_command_data.value = 0
 									}
-								break
-								case "shadow":
+								break}
+								case "shadow":{
 									_length = array_length(_command_arguments)
 									_command_data.subtype = EFFECT_TYPE.SHADOW
 									
@@ -1682,8 +1686,8 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 									}
 									
 									array_push(_array_action, _command_data) //This is the only command variant that goes in both the visual and action commands, insert in visual only and the action gets inserted below.
-								break
-								case "malfunction":
+								break}
+								case "malfunction":{
 									_length = array_length(_command_arguments)
 									_command_data.subtype = EFFECT_TYPE.MALFUNCTION
 									
@@ -1700,53 +1704,54 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 									}else{
 										_command_data.any_letter = false
 									}
-								break
-								default:
+								break}
+								default:{
 									_command_data.subtype = EFFECT_TYPE.NONE
-								break
+								break}
 							}
 							
 							_command_action = false //Flag command as visual
-						break
-						case "no_effect":
+						break}
+						case "no_effect":{
 							_command_data.type = COMMAND_TYPE.DISABLE_TEXT_EFFECT
-							_command_arguments = string_split(_command_content[1], ",")
+							var _command_arguments = string_split(_command_content[1], ",")
 							
 							switch (_command_arguments[0]){
-								case "zoom":
+								case "zoom":{
 									_command_data.subtype = EFFECT_TYPE.ZOOM
-								break
-								case "slide":
+								break}
+								case "slide":{
 									_command_data.subtype = EFFECT_TYPE.SLIDE
-								break
-								case "twitch":
+								break}
+								case "twitch":{
 									_command_data.subtype = EFFECT_TYPE.TWITCH
-								break
-								case "shake":
+								break}
+								case "shake":{
 									_command_data.subtype = EFFECT_TYPE.SHAKE
-								break
-								case "oscillate":
+								break}
+								case "oscillate":{
 									_command_data.subtype = EFFECT_TYPE.OSCILLATE
-								break
-								case "rainbow":
+								break}
+								case "rainbow":{
 									_command_data.subtype = EFFECT_TYPE.RAINBOW
-								break
-								case "shadow":
+								break}
+								case "shadow":{
 									_command_data.subtype = EFFECT_TYPE.SHADOW
-								break
-								case "malfunction":
+								break}
+								case "malfunction":{
 									_command_data.subtype = EFFECT_TYPE.MALFUNCTION
-								break
-								default: //If none is specified or valid, just ignore the command
+								break}
+								default:{ //If none is specified or valid, just ignore the command
 									continue
+								}
 							}
 							
 							_command_action = false //Flag command as visual
-						break
-						case "next": case "continue": case "finish":
+						break}
+						case "next": case "continue": case "finish":{
 							_command_data.type = COMMAND_TYPE.NEXT_DIALOG
-						break
-						case "skip":
+						break}
+						case "skip":{
 							_command_data.type = COMMAND_TYPE.SKIP_DIALOG
 							
 							if (array_length(_command_content) > 1){
@@ -1754,17 +1759,17 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 							}else{
 								_command_data.value = true
 							}
-						break
-						case "stop_skip":
+						break}
+						case "stop_skip":{
 							_command_data.type = COMMAND_TYPE.STOP_SKIP
-						break
-						case "wait_key_press": case "wait_key":
+						break}
+						case "wait_key_press": case "wait_key":{
 							_command_data.type = COMMAND_TYPE.WAIT_KEY_PRESS
 							_command_data.value = _command_content[1]
-						break
-						case "wait_for": case "wait_function": case "wait_func":
+						break}
+						case "wait_for": case "wait_function": case "wait_func":{
 							_command_data.type = COMMAND_TYPE.WAIT_FOR
-							_arguments = string_split(_command_content[1], ",", false, 1)
+							var _arguments = string_split(_command_content[1], ",", false, 1)
 							
 							//If no function is given, do nothing.
 							if (_arguments[0] == ""){
@@ -1777,9 +1782,9 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 								var _first = true
 								var _new_arguments = []
 								var _start_argument = 1
-								_argument_length = string_length(_arguments[1])
-								_index = 0
-								_escape_sequence_offset = string_length(_command_content[0]) + string_length(_arguments[0]) + 2
+								var _argument_length = string_length(_arguments[1])
+								var _index = 0
+								var _escape_sequence_offset = string_length(_command_content[0]) + string_length(_arguments[0]) + 2
 								
 								//This for cycle along side the _escape_sequence_offset and _index variables check if the "," character must be counted as an end of argument or not inside the arguments via escape sequences.
 								for (var _k = 1; _k <= _argument_length; _k++){
@@ -1833,19 +1838,25 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 								}
 							}
 							
-							_command_data.value = handle_parse(_arguments[0])
-							array_delete(_arguments, 0, 1)
+							var _parsed = handle_parse(_arguments[0])
+							if (string_pos("instance", _arguments[0]) == 5){
+								_command_data.value = variable_instance_get(_parsed, _arguments[1])
+								array_delete(_arguments, 0, 2)
+							}else{
+								_command_data.value = _parsed
+								array_delete(_arguments, 0, 1)
+							}
 							_command_data.arguments = _arguments
-						break
-						case "skipless": case "no_skip":
+						break}
+						case "skipless": case "no_skip":{
 							_command_data.type = COMMAND_TYPE.SKIP_ENABLING
 							_command_data.value = false
-						break
-						case "skipeable": case "skippable":
+						break}
+						case "skipeable": case "skippable":{
 							_command_data.type = COMMAND_TYPE.SKIP_ENABLING
 							_command_data.value = true
-						break
-						case "progress_mode":
+						break}
+						case "progress_mode":{
 							_command_data.type = COMMAND_TYPE.PROGRESS_MODE
 						
 							if (_command_content[1] == "input"){
@@ -1853,13 +1864,13 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 							}else{
 								_command_data.value = false
 							}
-						break
-						case "display_text":
+						break}
+						case "display_text":{
 							_command_data.type = COMMAND_TYPE.DISPLAY_TEXT
-							_command_arguments = string_split(_command_content[1], ",")
+							var _command_arguments = string_split(_command_content[1], ",")
 							
 							switch (_command_arguments[0]){
-								case "letters":
+								case "letters":{
 									_command_data.subtype = DISPLAY_TEXT.LETTERS
 								
 									if (array_length(_command_arguments) > 1){
@@ -1867,8 +1878,8 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 									}else{
 										_command_data.value = 1
 									}
-								break
-								case "words":
+								break}
+								case "words":{
 									_command_data.subtype = DISPLAY_TEXT.WORDS
 								
 									if (array_length(_command_arguments) > 1){
@@ -1876,12 +1887,13 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 									}else{
 										_command_data.value = 1
 									}
-								break
-								default: //If none match, do not insert the command.
+								break}
+								default:{ //If none match, do not insert the command.
 									continue
+								}
 							}
-						break
-						case "apply_to_asterisk": //Only save this command if it's in the beginning of the dialog.
+						break}
+						case "apply_to_asterisk":{ //Only save this command if it's in the beginning of the dialog.
 							if (_command_data.index == 1){
 								_command_data.type = COMMAND_TYPE.APPLY_TO_ASTERISK
 							
@@ -1889,10 +1901,10 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 							}else{
 								continue
 							}
-						break
-						case "func": case "function": case "method":
+						break}
+						case "func": case "function": case "method":{
 							_command_data.type = COMMAND_TYPE.FUNCTION
-							_arguments = string_split(_command_content[1], ",", false, 1)
+							var _arguments = string_split(_command_content[1], ",", false, 1)
 							
 							//If no function is given, do nothing.
 							if (_arguments[0] == ""){
@@ -1905,9 +1917,9 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 								var _first = true
 								var _new_arguments = []
 								var _start_argument = 1
-								_argument_length = string_length(_arguments[1])
-								_index = 0
-								_escape_sequence_offset = string_length(_command_content[0]) + string_length(_arguments[0]) + 2
+								var _argument_length = string_length(_arguments[1])
+								var _index = 0
+								var _escape_sequence_offset = string_length(_command_content[0]) + string_length(_arguments[0]) + 2
 								
 								//This for cycle along side the _escape_sequence_offset and _index variables check if the "," character must be counted as an end of argument or not inside the arguments via escape sequences.
 								for (var _k = 1; _k <= _argument_length; _k++){
@@ -1961,11 +1973,17 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 								}
 							}
 							
-							_command_data.value = handle_parse(_arguments[0])
-							array_delete(_arguments, 0, 1)
+							var _parsed = handle_parse(_arguments[0])
+							if (string_pos("instance", _arguments[0]) == 5){
+								_command_data.value = variable_instance_get(_parsed, _arguments[1])
+								array_delete(_arguments, 0, 2)
+							}else{
+								_command_data.value = _parsed
+								array_delete(_arguments, 0, 1)
+							}
 							_command_data.arguments = _arguments
-						break
-						case "asterisk":
+						break}
+						case "asterisk":{
 							var _command_value = bool(_command_content[1])
 						
 							if (_j == 1 and _command_value != final_asterisk){
@@ -1978,10 +1996,15 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 							}else{
 								continue
 							}
-						break
-						case "font":
-							_command_arguments = string_split(_command_content[1], ",")
-							_command_arguments[0] = int64(_command_arguments[0])
+						break}
+						case "font":{
+							var _command_arguments = string_split(_command_content[1], ",")
+							var _fnt = asset_get_index(_command_arguments[0])
+							if (_fnt != -1){
+								_command_arguments[0] = _fnt
+							}else{
+								_command_arguments[0] = int64(_command_arguments[0])
+							}
 						
 							if (_j == 1 and _command_arguments[0] != final_font){
 								final_font = _command_arguments[0]
@@ -1999,8 +2022,8 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 							}else{
 								continue
 							}
-						break
-						case "spacing_width": case "width_spacing":
+						break}
+						case "spacing_width": case "width_spacing":{
 							if (_j == 1){
 								final_spacing_width = real(_command_content[1])
 							
@@ -2009,8 +2032,8 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 							}else{
 								continue
 							}
-						break
-						case "spacing_height": case "height_spacing":
+						break}
+						case "spacing_height": case "height_spacing":{
 							if (_j == 1){
 								final_spacing_height = real(_command_content[1])
 							
@@ -2019,21 +2042,21 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 							}else{
 								continue
 							}
-						break
-						case "sprite_y_offset": case "sprite_height_offset":
+						break}
+						case "sprite_y_offset": case "sprite_height_offset":{
 							_command_data.type = COMMAND_TYPE.SET_SPRITE_Y_OFFSET
 							_command_data.value = real(_command_content[1])
 						
 							if (_j == 1 and sprite_exists(final_face_sprite)){
 								final_face_y_offset = _command_data.value
 							}
-						break
-						case "container":
+						break}
+						case "container":{
 							_command_data.type = COMMAND_TYPE.SET_CONTAINER
 							_command_data.value = int64(_command_content[1])
-						break
-						case "tail":
-							_arguments = string_split(_command_content[1], ",")
+						break}
+						case "tail":{
+							var _arguments = string_split(_command_content[1], ",")
 							_length = array_length(_arguments)
 						
 							_arguments[0] = int64(_arguments[0])
@@ -2043,24 +2066,25 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 							for (var _k = 1; _k < _length; _k++){
 								_arguments[_k] = real(_arguments[_k])
 							}
-						break
-						case "tail_mask":
+						break}
+						case "tail_mask":{
 							_command_data.type = COMMAND_TYPE.SET_CONTAINER_TAIL_MASK
 							_command_data.value = int64(_command_content[1])
-						break
-						case "tail_draw_mode":
+						break}
+						case "tail_draw_mode":{
 							_command_data.type = COMMAND_TYPE.SET_CONTAINER_TAIL_DRAW_MODE
 							_command_data.value = int64(_command_content[1])
-						break
-						case "tail_position":
+						break}
+						case "tail_position":{
 							_command_data.type = COMMAND_TYPE.SET_CONTAINER_TAIL_POSITION
 							_command_data.value = string_split(_command_content[1], ",")
 						
 							_command_data.value[0] = int64(_command_data.value[0])
 							_command_data.value[1] = int64(_command_data.value[1])
-						break
-						default:
+						break}
+						default:{
 							continue
+						}
 					}
 					
 					//Puts the command in the proper array according to its type which has been flaged by the variable _command_action.
@@ -2211,6 +2235,7 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 		//Since the dialog_height is recalculated, maybe it's different size, so the container sprite's size must be updated and the tail sprite too alongside its position too.
 		update_container_sprite()
 		update_container_tail_sprite()
+		update_container_tail_mask_sprite()
 		set_container_tail_position(container_x_origin, container_y_origin)
 		
 		if (_execute_initial_configuration){
@@ -2424,7 +2449,7 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 	This function returns the number of line jumps that the current dialog has in it.
 	This includes line jumps that have been performed manually and that the dialog system has automatically placed in the dialog.
 	
-	BOOLEAN _currently_displaying -> If set to true, it will return the current height of the text being displayed with the dialog portrait height included, by default is false, which returns the height of the whole text even if it hasn't shown all of it yet with the dialog portrait height included.
+	BOOLEAN _currently_displaying -> If set to true, it will return the current number of line jumps of the text being displayed, by default is false, which returns the number of line jumps of the whole text even if it hasn't shown all of it yet.
 	
 	RETURN -> INTEGER -- Number of line jumps the current dialog has either by the amount currently displaying or all of it even if it's not displayed yet fully.
 	*/
@@ -3258,13 +3283,13 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 		var _y_origin_scale = container_tail_y_origin/container_tail_height_pixels //The tail variables hold the pixels and absolute positions of the origin and height, the proportion of these is needed instead.
 		
 		while (true){
-			var _f = dcos(_xn - _angle_offset)*dcos(_xn - _angle_offset) - dsin(_angle - _xn) * _d / container_tail_height_pixels - _y_origin_scale
+			var _f = power(dcos(_xn - _angle_offset), 2) - dsin(_angle - _xn)*_d/(container_tail_height_pixels*container_tail_height) - _y_origin_scale
 			
 			if (abs(_f) <= 0.01){ //99% preccise solutions are accepted only.
 				break
 			}
 			
-			_xn = _xn - _f/(_const * dcos(_xn) * dsin(_xn) + _d / container_tail_height_pixels * dcos(_angle - _xn))
+			_xn -= _f/(_const*dcos(_xn)*dsin(_xn) + _d*dcos(_angle - _xn)/(container_tail_height_pixels*container_tail_height))
 		}
 		
 		//At this point the correct angle must have been achieved if done correctly.
@@ -3281,6 +3306,20 @@ function DisplayDialog(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale
 		
 		container_width = (dialog_x_offset + dialog_width + container_sprite_width - container_right_collision)/container_sprite_width
 		container_height = (dialog_y_offset + dialog_height + container_sprite_height - container_bottom_collision)/container_sprite_height
+		
+		container_x_offset = sprite_get_xoffset(container_sprite)*container_width
+		container_y_offset = sprite_get_yoffset(container_sprite)*container_height
+		
+		//In case the container has been scaled, to keep the relation of the origin set originally in the sprite, a multiplication is done.
+		//This does not affect the container in any way, as this variable is not used to display it, only to position the tail if it has any.
+		if (container_original_origins){
+			if (container_x_origin > 0){
+				container_x_origin *= container_width
+			}
+			if (container_y_origin > 0){
+				container_y_origin *= container_height
+			}
+		}
 		
 		//In case the mask exists with a tail, update the data of it since the width and height are being changed.
 		update_container_tail_mask_sprite()

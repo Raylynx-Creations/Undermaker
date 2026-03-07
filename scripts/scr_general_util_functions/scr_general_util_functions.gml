@@ -1,4 +1,4 @@
-function save_game_settings(){
+	function save_game_settings(){
 	var _file = file_text_open_write(working_directory + "/settings.save")
 	file_text_write_string(_file, json_stringify(global.game_settings))
 	file_text_close(_file)
@@ -141,4 +141,31 @@ function trigger_game_over(_music=mus_game_over, _dialog=undefined){ //This func
 			}
 		}
 	}
+}
+
+function add_instance_reference(_id, _name){
+	struct_set(global.instance_references, _name, _id)
+}
+
+function remove_instance_reference(_id, _name=undefined){
+	var _instances = global.instance_references
+	
+	if (is_undefined(_name)){
+		var _names = struct_get_names(_instances)
+		var _length = array_length(_names)
+		
+		for (var _i = 0; _i < _length; _i++){
+			_name = _names[_i]
+			
+			if (struct_get(_instances, _name) == _id){
+				struct_remove(_instances, _name)
+			}
+		}
+	}else{
+		struct_remove(_instances, _name)
+	}
+}
+
+function get_instance_reference(_name){
+	return struct_get(global.instance_references, _name)
 }

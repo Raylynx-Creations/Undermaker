@@ -51,14 +51,15 @@ function battle_kill_enemy(_index){
 	global.battle_enemies[_index] = undefined
 }
 
-function battle_resize_box(_x, _y, _instant=false){
-	with (obj_battle_box){
+function battle_resize_box(_x, _y, _instant=false, _box=obj_battle_box){
+	with (_box){
 		box_size.x = _x
 		box_size.y = _y
 		
 		if (_instant){
 			width = box_size.x
 			height = box_size.y
+			battle_box_update_points_by_resize(_box)
 		}
 	}
 }
@@ -69,26 +70,122 @@ function battle_move_box_to(_x, _y, _instant=false, _box=obj_battle_box){
 		box_position.y = _y
 		
 		if (_instant){
-			x = box_position.x
-			y = box_position.y
+			var _diff_x = _x - x
+			var _diff_y = _y - y
+			
+			x = _x
+			y = _y
+			
+			battle_box_update_points_by_position(_diff_x, _diff_y, _box)
 		}
 	}	
 }
 
-function battle_reset_box_polygon_points(_box=obj_battle_box){
+function battle_move_box(_x, _y, _instant=false, _box=obj_battle_box){
 	with (_box){
-		var _defined_points = array_length(box_polygon_points.defined)
-		var _length = array_length(_defined_points)
+		box_position.x += _x
+		box_position.y += _y
+		
+		if (_instant){
+			var _diff_x = box_position.x - x
+			var _diff_y = box_position.y - y
+			
+			x = box_position.x
+			y = box_position.y
+			
+			battle_box_update_points_by_position(_diff_x, _diff_y, _box)
+		}
+	}	
+}
+
+function battle_reset_box_origin(_box=obj_battle_box){
+	with (_box.box_origin){
+		var _diff_x = -x
+		var _diff_y = y
+		
+		defined = false
+		x = 0
+		if (polygon_defined){
+			y = 0
+		}else{
+			y = -5 - round(height)/2
+		}
+		_diff_y = y - _diff_y
+		
+		battle_box_update_points_by_origin(_diff_x, _diff_y, _box)
+	}
+}
+
+function battle_reset_box_polygon_points(_box=obj_battle_box){
+	with (_box.box_polygon_points){
+		with (_box.box_origin){
+			polygon_defined = false
+			if (!defined){
+				x = 0
+				y = -5 - round(height)/2
+			}
+		}
+		
+		update = true
+		var _length = array_length(defined)
 		
 		if (_length > 0){
-			array_delete(_defined_points, 0, _length)
+			array_delete(defined, 0, _length)
 		}
 	}
 }
 
-function battle_set_box_polygon_points(_points, _box=obj_battle_box){
+function battle_set_box_origin(_x, _y, _relative=true, _box=obj_battle_box){
+	with (_box.box_origin){
+		var _diff_x = x
+		var _diff_y = y
+		
+		defined = true
+		x = _x - (_relative ? _box.x : 0)
+		y = _y - (_relative ? _box.y : 0)
+		
+		_diff_x = x - _diff_x
+		_diff_y = y - _diff_y
+		
+		battle_box_update_points_by_origin(_diff_x, _diff_y, _box)
+	}
+}
+
+function battle_set_box_polygon_points(_points, _relative=true, _box=obj_battle_box){
+	if (array_length(_points) < 4){
+		show_message("The box must have at least 2 points to be shown.")
+		
+		return
+	}
+	
+	with (_box.box_polygon_points){
+		with (_box.box_origin){
+			polygon_defined = true
+			if (!defined){
+				x = 0
+				y = 0
+			}
+		}
+		
+		if (_relative){
+			var _length = array_length(_points)
+			for (var _i = 0; _i < _length; _i += 2){
+				_points[_i] += _box.x
+				_points[_i+1] += _box.y
+			}
+		}
+		
+		update = true
+		defined = _points
+	}
+}
+
+function battle_set_box_alpha(_alpha, _with_fill=true, _box=obj_battle_box){
 	with (_box){
-		box_polygon_points.defined = _points
+		image_alpha = _alpha
+		if (_with_fill){
+			box_fill_alpha = _alpha
+		}
 	}
 }
 
@@ -97,7 +194,11 @@ function battle_set_box_rotation(_angle, _instant=false, _box=obj_battle_box){
 		box_rotation = _angle
 		
 		if (_instant){
+			var _diff_angle = angle_difference(_angle, image_angle)
+			
 			image_angle = box_rotation
+			
+			battle_box_update_points_by_rotation(_diff_angle, _box)
 		}
 	}
 }
@@ -711,6 +812,34 @@ function battle_go_to_state(_state, _enemy=undefined){
 			break}
 		}
 	}
+}
+
+function get_battle_box_width(_expected=false, _box=obj_battle_box){
+	return (_expected ? _box.boxsize.x : _box.width)
+}
+
+function get_battle_box_height(_expected=false, _box=obj_battle_box){
+	return (_expected ? _box.boxsize.y : _box.height)
+}
+
+function get_battle_box_rotation(_expected=false, _box=obj_battle_box){
+	return (_expected ? _box.box_rotation : _box.image_angle)
+}
+
+function get_battle_box_x_position(_expected=false, _box=obj_battle_box){
+	return (_expected ? _box.box_position.x : _box.x)
+}
+
+function get_battle_box_y_position(_expected=false, _box=obj_battle_box){
+	return (_expected ? _box.box_position.y : _box.y)
+}
+
+function get_battle_box_x_origin(_relative=true, _expected=false, _box=obj_battle_box){
+	return (_relative ? 0 : get_battle_box_x_position(_expected, _box)) + _box.box_origin.x
+}
+
+function get_battle_box_y_origin(_relative=true, _expected=false, _box=obj_battle_box){
+	return (_relative ? 0 : get_battle_box_y_position(_expected, _box)) + _box.box_origin.y
 }
 
 function get_battle_state(){

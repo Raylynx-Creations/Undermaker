@@ -1,3 +1,5 @@
+global.instance_references = {}
+
 global.game_settings = {
 	language: "english",
 	resolution_active: 0,

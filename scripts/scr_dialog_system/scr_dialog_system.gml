@@ -28,6 +28,7 @@ enum COMMAND_TYPE{
 	SET_FONT,
 	SET_WIDTH_SPACING,
 	SET_HEIGHT_SPACING,
+	SET_SPRITE_X_OFFSET,
 	SET_SPRITE_Y_OFFSET,
 	SET_CONTAINER,
 	SET_CONTAINER_TAIL,
@@ -171,6 +172,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 	//Variables that handle the portrait sprite in the dialog.
 	face_sprite = _face_sprite
 	face_timer = 0
+	face_x_offset = 0
 	face_y_offset = 0
 	face_subimages_cycle = _face_subimages
 	face_subimages_length = 0
@@ -280,6 +282,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 	final_spacing_width = spacing_width
 	final_spacing_height = spacing_height
 	final_face_sprite = face_sprite
+	final_face_x_offset = face_x_offset
 	final_face_y_offset = face_y_offset
 	final_text_align_x = text_align_x
 	
@@ -584,7 +587,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 		
 		var _initial_x = x + dialog_x_offset*xscale //Calculate the X and Y position where the text with/without portrait origin is located.
 		var _initial_y = y + dialog_y_offset*yscale
-		var _reset_point_x = _initial_x + text_align_x*xscale //Set the X point where it resets the X position for every line jump with text_aling_x to make extra space for the portrait and asterisk.
+		var _reset_point_x = _initial_x + max(text_align_x + face_x_offset, ASTERISK_SPACING*asterisk)*xscale //Set the X point where it resets the X position for every line jump with text_aling_x to make extra space for the portrait and asterisk.
 		var _letter_x = _reset_point_x //Start the variables to position each letter.
 		var _letter_y = _initial_y
 		
@@ -704,10 +707,10 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 			var _face_y = _letter_y
 			var _subimage_index = face_index
 			
-			//If the face Y offset given is positive, it moves that amount downwards the text from the top part of the sprite.
+			//If the face Y offset given is positive, it moves that amount downwards from the top part of the first line of text.
 			if (face_y_offset > 0){
-				_face_y += face_y_offset*xscale
-			}else{ //Otherwise the portrait sprite downwards the amount downwards.
+				_face_y += face_y_offset*yscale
+			}else{ //Otherwise the text moves that amount downwards.
 				_letter_y -= face_y_offset*yscale
 			}
 			
@@ -717,7 +720,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 			}
 			
 			//Draw the portrait sprite.
-			draw_sprite_ext(face_sprite, _subimage_index, _initial_x + _offset_x, _face_y + _offset_y, xscale, yscale, 0, c_white, 1)
+			draw_sprite_ext(face_sprite, _subimage_index, _initial_x + _offset_x + face_x_offset*xscale, _face_y + _offset_y, xscale, yscale, 0, c_white, 1)
 		}
 		
 		//----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1414,32 +1417,45 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 						case "sprite":{
 							var _arguments = string_split(_command_content[1], ",")
 							
-							if (_arguments[0] == "" or (_j > 1 and (!sprite_exists(final_face_sprite) or sprite_exists(int64(_arguments[0]))))){
+							if (_arguments[0] == "none" or _arguments[0] == "undefined"){
+								_arguments[0] = -1
+							}else{
+								var _spr = asset_get_index(_arguments[0])
+								if (_spr != -1){
+									_arguments[0] = _spr
+								}else{
+									_arguments[0] = int64(_arguments[0])
+								}
+							}
+							
+							if (_j > 1 and (!sprite_exists(final_face_sprite) or sprite_exists(_arguments[0]))){
 								continue
 							}
 							
 							_command_data.type = COMMAND_TYPE.SET_SPRITE
 							_command_data.value = _arguments
+							
 							var _command_arguments_length = array_length(_arguments)
-							
-							var _spr = asset_get_index(_arguments[0])
-							if (_spr != -1){
-								_arguments[0] = _spr
-							}else{
-								_arguments[0] = int64(_arguments[0])
-							}
-							
 							for (var _k = 1; _k < _command_arguments_length; _k++){
 								_arguments[_k] = int64(_arguments[_k])
 							}
 							
 							if (_j == 1){
-								final_face_sprite = _arguments[0]
-								final_text_align_x = ASTERISK_SPACING*final_asterisk
+								final_face_x_offset = 0
+								final_face_y_offset = 0
+								final_face_height = 0
 								
-								if (sprite_exists(final_face_sprite)){
-									final_face_height = sprite_get_height(final_face_sprite)
-									final_text_align_x += sprite_get_width(final_face_sprite) + 10
+								if (sprite_exists(_arguments[0])){
+									final_face_sprite = _arguments[0]
+									final_text_align_x = ASTERISK_SPACING*final_asterisk
+								
+									if (sprite_exists(final_face_sprite)){
+										final_face_height = sprite_get_height(final_face_sprite)
+										final_text_align_x += sprite_get_width(final_face_sprite) + 10
+									}
+								}else{
+									final_face_sprite = undefined
+									final_text_align_x = ASTERISK_SPACING*final_asterisk
 								}
 							}
 						break}
@@ -1452,10 +1468,20 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 								_command_data.value[_k] = int64(_command_data.value[_k])
 							}
 						break}
-						case "bind_instance":{ //TODO: Find a way to use named instances as arguments
+						case "bind_instance":{
 							_command_data.type = COMMAND_TYPE.BIND_INSTANCE
 							_command_data.value = string_split(_command_content[1], ",")
-							_command_data.inst = int64(_command_data.value[0])
+							var _inst = get_instance_reference(_command_data.value[0])
+							if (is_undefined(_inst)){
+								_inst = handle_parse(_command_data.value[0])
+								if (!is_undefined(_inst) and _inst != -1 and _inst != noone){
+									_command_data.inst = _inst
+								}else{
+									_command_data.inst = int64(_command_data.value[0])
+								}
+							}else{
+								_command_data.inst = _inst
+							}
 							
 							array_delete(_command_data.value, 0, 1)
 							var _command_arguments_length = array_length(_command_data.value)
@@ -1838,14 +1864,21 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 								}
 							}
 							
-							var _parsed = handle_parse(_arguments[0])
-							if (string_pos("instance", _arguments[0]) == 5){
-								_command_data.value = variable_instance_get(_parsed, _arguments[1])
-								array_delete(_arguments, 0, 2)
+							var _inst = get_instance_reference(_arguments[0])
+							if (is_undefined(_inst)){
+								var _parsed = handle_parse(_arguments[0])
+								if (!is_undefined(_parsed) and _parsed != -1 and _parsed != noone and string_pos("instance", _arguments[0]) == 5){
+									_command_data.value = variable_instance_get(_parsed, _arguments[1])
+									array_delete(_arguments, 0, 2)
+								}else{
+									_command_data.value = _parsed
+									array_delete(_arguments, 0, 1)
+								}
 							}else{
-								_command_data.value = _parsed
-								array_delete(_arguments, 0, 1)
+								_command_data.value = variable_instance_get(_inst, _arguments[1])
+								array_delete(_arguments, 0, 2)
 							}
+							
 							_command_data.arguments = _arguments
 						break}
 						case "skipless": case "no_skip":{
@@ -1973,14 +2006,21 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 								}
 							}
 							
-							var _parsed = handle_parse(_arguments[0])
-							if (string_pos("instance", _arguments[0]) == 5){
-								_command_data.value = variable_instance_get(_parsed, _arguments[1])
-								array_delete(_arguments, 0, 2)
+							var _inst = get_instance_reference(_arguments[0])
+							if (is_undefined(_inst)){
+								var _parsed = handle_parse(_arguments[0])
+								if (!is_undefined(_parsed) and _parsed != -1 and _parsed != -4 and string_pos("instance", _arguments[0]) == 5){
+									_command_data.value = variable_instance_get(_parsed, _arguments[1])
+									array_delete(_arguments, 0, 2)
+								}else{
+									_command_data.value = _parsed
+									array_delete(_arguments, 0, 1)
+								}
 							}else{
-								_command_data.value = _parsed
-								array_delete(_arguments, 0, 1)
+								_command_data.value = variable_instance_get(_inst, _arguments[1])
+								array_delete(_arguments, 0, 2)
 							}
+							
 							_command_data.arguments = _arguments
 						break}
 						case "asterisk":{
@@ -2043,12 +2083,24 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 								continue
 							}
 						break}
-						case "sprite_y_offset": case "sprite_height_offset":{
-							_command_data.type = COMMAND_TYPE.SET_SPRITE_Y_OFFSET
-							_command_data.value = real(_command_content[1])
-						
+						case "sprite_x_offset": case "sprite_width_offset":{
 							if (_j == 1 and sprite_exists(final_face_sprite)){
+								_command_data.type = COMMAND_TYPE.SET_SPRITE_X_OFFSET
+								_command_data.value = real(_command_content[1])
+								
+								final_face_x_offset = _command_data.value
+							}else{
+								continue
+							}
+						break}
+						case "sprite_y_offset": case "sprite_height_offset":{
+							if (_j == 1 and sprite_exists(final_face_sprite)){
+								_command_data.type = COMMAND_TYPE.SET_SPRITE_Y_OFFSET
+								_command_data.value = real(_command_content[1])
+							
 								final_face_y_offset = _command_data.value
+							}else{
+								continue
 							}
 						break}
 						case "container":{
@@ -2172,7 +2224,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 						}
 						
 						var _string = string_replace_all(string_copy(_dialog, _last_newline_index, _char_amount), " ", "O") //Get the string that represents the current line.
-						if (dialog_width - final_text_align_x < string_width(_string) + final_spacing_width*(string_length(_string) - 1)){ //For each character in the string - 1, add the width spacing of all of them that was given as _spacing_width between the letters besides the width size of the whole line for the calculation of width limit.
+						if (dialog_width - max(final_text_align_x + final_face_x_offset, ASTERISK_SPACING*final_asterisk) < string_width(_string) + final_spacing_width*(string_length(_string) - 1)){ //For each character in the string - 1, add the width spacing of all of them that was given as _spacing_width between the letters besides the width size of the whole line for the calculation of width limit.
 							//This section is only entered when a line jump is needed to be performed.
 							var _insert_index = _last_check_index + 1 //This index is 1 ahead of the index where a line jump would be placed if it's a space, and it's where it would be placed if it wasn't a space instead, take it as an auxiliar to same a simple addition calculation.
 							
@@ -2306,6 +2358,8 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 		face_sprite = _face_sprite
 		face_subimages_cycle = _face_subimages
 		face_subimages_length = 0
+		face_x_offset = 0
+		face_y_offset = 0
 		
 		//Set the info of the new face sprite properly.
 		if (sprite_exists(face_sprite)){
@@ -2331,6 +2385,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 		final_spacing_width = spacing_width
 		final_spacing_height = spacing_height
 		final_face_sprite = face_sprite
+		final_face_x_offset = face_x_offset
 		final_face_y_offset = face_y_offset
 		final_text_align_x = text_align_x
 		
@@ -2403,7 +2458,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 		var _space_width = ((use_font_space) ? string_width(" ") : string_width("O"))
 		
 		for (var _i = 0; _i < _dialogues_amount; _i++){
-			var _dialog_width = -_space_width + text_align_x
+			var _dialog_width = -_space_width + max(text_align_x + face_x_offset, ASTERISK_SPACING*asterisk)
 			var _dialog_without_spaces = string_split(_dialog_array[_i], " ")
 			var _dialog_without_spaces_amount = array_length(_dialog_without_spaces)
 			
@@ -2699,7 +2754,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 				//Depeding of the type of command which has been set by the parser of commands, do different stuff.
 				
 				switch (_command_data.type){
-					case COMMAND_TYPE.WAIT:
+					case COMMAND_TYPE.WAIT:{
 						//When the text is skipping, it ignores specific commands, such as wait.
 						if (_is_skipping){
 							break
@@ -2709,8 +2764,8 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 						
 						text_timer = _command_data.value
 						face_animation = false
-					break
-					case COMMAND_TYPE.WAIT_KEY_PRESS:
+					break}
+					case COMMAND_TYPE.WAIT_KEY_PRESS:{
 						//Some commands, may stop the skipping, like wait press key or stop skip.
 						string_index = min(_command_data.index - 1, string_index)
 						
@@ -2722,8 +2777,8 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 						
 						wait_for_key = _command_data.value
 						face_animation = false
-					break
-					case COMMAND_TYPE.WAIT_FOR:
+					break}
+					case COMMAND_TYPE.WAIT_FOR:{
 						string_index = min(_command_data.index - 1, string_index)
 						
 						if (_is_skipping){
@@ -2735,8 +2790,8 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 						wait_for_function = _command_data.value
 						function_arguments = _command_data.arguments
 						face_animation = false
-					break
-					case COMMAND_TYPE.SKIP_ENABLING:
+					break}
+					case COMMAND_TYPE.SKIP_ENABLING:{
 						skipeable = _command_data.value
 						
 						if (_is_skipping and !skipeable){
@@ -2745,8 +2800,8 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 							
 							_is_skipping = false
 						}
-					break
-					case COMMAND_TYPE.SKIP_DIALOG:
+					break}
+					case COMMAND_TYPE.SKIP_DIALOG:{
 						//No need to skip when it is already skipping.
 						if (_is_skipping){
 							break
@@ -2755,8 +2810,10 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 						//Since a skip is comming, and it returns, it is needed to remove the command from here.
 						command_length--
 						array_delete(_current_commands, 0, 1)
-					return skip_dialog(_command_data.value) //When skipping dialog it will call this function again with _is_skipping being true, so just do a return with any value the skip_dialog() returns.
-					case COMMAND_TYPE.STOP_SKIP:
+						
+						return skip_dialog(_command_data.value) //When skipping dialog it will call this function again with _is_skipping being true, so just do a return with any value the skip_dialog() returns.
+					}
+					case COMMAND_TYPE.STOP_SKIP:{
 						//Yeah, this prevents the skip to continue.
 						if (_is_skipping){
 							string_index = min(_command_data.index - 1, string_index)
@@ -2764,8 +2821,8 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 							
 							_is_skipping = false
 						}
-					break
-					case COMMAND_TYPE.DISPLAY_TEXT:
+					break}
+					case COMMAND_TYPE.DISPLAY_TEXT:{
 						//Set the string_index if the dialog is not skipping.
 						if (!_is_skipping){
 							string_index = min(_command_data.index - 1, string_index)
@@ -2774,25 +2831,27 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 						
 						display_mode = _command_data.subtype
 						display_amount = _command_data.value
-					break
-					case COMMAND_TYPE.PROGRESS_MODE:
+					break}
+					case COMMAND_TYPE.PROGRESS_MODE:{
 						can_progress = _command_data.value
-					break
-					case COMMAND_TYPE.NEXT_DIALOG:
+					break}
+					case COMMAND_TYPE.NEXT_DIALOG:{
 						next_dialog(false)
-					return undefined //When next dialog, stop executing commands.
-					case COMMAND_TYPE.FUNCTION:
+						
+						return undefined //When next dialog, stop executing commands.
+					}
+					case COMMAND_TYPE.FUNCTION:{
 						method_call(_command_data.value, _command_data.arguments)
-					break
-					case COMMAND_TYPE.TEXT_EFFECT: //The only visual command that is here, activates the flag to start the surface to make shadows.
+					break}
+					case COMMAND_TYPE.TEXT_EFFECT:{ //The only visual command that is here, activates the flag to start the surface to make shadows.
 						if (_command_data.subtype == EFFECT_TYPE.SHADOW){
 							shadow_effect = true
 						}
-					break
-					case COMMAND_TYPE.SET_TEXT_SPEED:
+					break}
+					case COMMAND_TYPE.SET_TEXT_SPEED:{
 						text_speed = _command_data.value
-					break
-					case COMMAND_TYPE.SET_SPRITE:
+					break}
+					case COMMAND_TYPE.SET_SPRITE:{
 						var _sprite = _command_data.value[0]
 						var _sprite_exists = sprite_exists(_sprite)
 						
@@ -2805,6 +2864,8 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 						}
 						
 						face_sprite = _sprite
+						face_x_offset = 0
+						face_y_offset = 0
 						
 						if (!_sprite_exists){
 							_has_set_face_timer = false
@@ -2813,7 +2874,8 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 						}
 						
 						array_delete(_command_data.value, 0, 1)
-					case COMMAND_TYPE.SET_SUBIMAGES: //Yeah, what this does, the set_sprite command also uses.
+					} //No break
+					case COMMAND_TYPE.SET_SUBIMAGES:{ //Yeah, what this does, the set_sprite command also uses.
 						face_index = 0
 						var _subimages = _command_data.value
 						var _subimages_length = array_length(_subimages)
@@ -2837,8 +2899,8 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 						}else{
 							_has_set_face_timer = false
 						}
-					break
-					case COMMAND_TYPE.SET_SPRITE_SPEED:
+					break}
+					case COMMAND_TYPE.SET_SPRITE_SPEED:{
 						face_speed = _command_data.value
 						
 						if (_has_set_face_timer){
@@ -2848,19 +2910,19 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 						if (_has_set_instance_timer){
 							instance_timer = face_speed - 1
 						}
-					break
-					case COMMAND_TYPE.PLAY_SOUND:
+					break}
+					case COMMAND_TYPE.PLAY_SOUND:{
 						audio_play_sound(_command_data.value, 100, false)
-					break
-					case COMMAND_TYPE.SET_VOICE:
+					break}
+					case COMMAND_TYPE.SET_VOICE:{
 						reproduce_voice = true
 						voices = _command_data.value
 						voices_length = array_length(voices)
-					break
-					case COMMAND_TYPE.VOICE_MUTING:
+					break}
+					case COMMAND_TYPE.VOICE_MUTING:{
 						reproduce_voice = _command_data.value
-					break
-					case COMMAND_TYPE.SET_ASTERISK:
+					break}
+					case COMMAND_TYPE.SET_ASTERISK:{
 						var _asterisk = _command_data.value
 						
 						if (asterisk == _asterisk){
@@ -2873,47 +2935,50 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 						if (!_is_skipping){
 							string_index = -asterisk
 						}
-					break
-					case COMMAND_TYPE.SET_FONT:
+					break}
+					case COMMAND_TYPE.SET_FONT:{
 						font = _command_data.value
 						use_font_space = _command_data.bool
 						draw_set_font(font)
 						
 						line_jump_height = string_height("Ag'") + spacing_height
-					break
-					case COMMAND_TYPE.SET_WIDTH_SPACING:
+					break}
+					case COMMAND_TYPE.SET_WIDTH_SPACING:{
 						spacing_width = _command_data.value
-					break
-					case COMMAND_TYPE.SET_HEIGHT_SPACING:
+					break}
+					case COMMAND_TYPE.SET_HEIGHT_SPACING:{
 						line_jump_height -= spacing_height
 						spacing_height = _command_data.value
 						line_jump_height += spacing_height
-					break
-					case COMMAND_TYPE.SET_SPRITE_Y_OFFSET:
+					break}
+					case COMMAND_TYPE.SET_SPRITE_X_OFFSET:{
+						face_x_offset = _command_data.value
+					break}
+					case COMMAND_TYPE.SET_SPRITE_Y_OFFSET:{
 						face_y_offset = _command_data.value
-					break
-					case COMMAND_TYPE.SET_CONTAINER:
+					break}
+					case COMMAND_TYPE.SET_CONTAINER:{
 						set_container_sprite(_command_data.value)
-					break
-					case COMMAND_TYPE.SET_CONTAINER_TAIL:
+					break}
+					case COMMAND_TYPE.SET_CONTAINER_TAIL:{
 						set_container_tail_sprite(_command_data.value[0])
 						
 						if (array_length(_command_data.value) > 1){
 							set_container_tail_position(_command_data.value[1], _command_data.value[2])
 						}
-					break
-					case COMMAND_TYPE.SET_CONTAINER_TAIL_MASK:
+					break}
+					case COMMAND_TYPE.SET_CONTAINER_TAIL_MASK:{
 						set_container_tail_mask_sprite(_command_data.value)
-					break
-					case COMMAND_TYPE.SET_CONTAINER_TAIL_DRAW_MODE:
+					break}
+					case COMMAND_TYPE.SET_CONTAINER_TAIL_DRAW_MODE:{
 						set_container_tail_draw_mode(_command_data.value)
-					break
-					case COMMAND_TYPE.SET_CONTAINER_TAIL_POSITION:
+					break}
+					case COMMAND_TYPE.SET_CONTAINER_TAIL_POSITION:{
 						var _arguments = _command_data.value
 						set_container_tail_position(_arguments[0], _arguments[1])
-					break
-					case COMMAND_TYPE.SHOW_DIALOG_POP_UP:
-						_arguments = _command_data.value
+					break}
+					case COMMAND_TYPE.SHOW_DIALOG_POP_UP:{
+						var _arguments = _command_data.value
 						
 						var _mode = _arguments[0]
 						var _x = _arguments[1]
@@ -2941,8 +3006,8 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 						}
 						
 						make_tiny_dialog_pop_up(_mode, _x, _y, _dialog, _width, _face_sprite, _face_subimages)
-					break
-					case COMMAND_TYPE.BIND_INSTANCE:
+					break}
+					case COMMAND_TYPE.BIND_INSTANCE:{
 						bind_instance(_command_data.inst, _command_data.value)
 						
 						if (!is_undefined(instance_index)){
@@ -2955,7 +3020,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 						}else{
 							_has_set_instance_timer = false
 						}
-					break
+					break}
 				}
 				
 				//Remove the command from the list once it has been executed, it is no longer needed and free some memory.

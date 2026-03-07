@@ -245,6 +245,8 @@ function BattleSystem() constructor{
 					with (obj_battle_box){
 						width = box_size.x
 						height = box_size.y
+						
+						battle_box_update_points_by_resize(id)
 					}
 				}
 			break}

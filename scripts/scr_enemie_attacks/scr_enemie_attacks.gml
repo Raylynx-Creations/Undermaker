@@ -15,7 +15,7 @@ function EnemyAttack(_attack_name, _position, _damage) constructor{
 	
 	switch (_attack_name){
 		case ENEMY_ATTACK.PLATFORM_1: {
-			battle_resize_box(300, 300, true)
+			battle_resize_box(290, 290, true)
 			platforms = []
 			array_push(platforms,
 				spawn_platform(0, -110, 180,,,,, PLATFORM_TYPE.STICKY,, 0, 120),
@@ -27,7 +27,7 @@ function EnemyAttack(_attack_name, _position, _damage) constructor{
 				spawn_platform(0, 110, 0,,,,, PLATFORM_TYPE.STICKY,, 0, 120),
 				spawn_platform(40, 40, 45,,,,, PLATFORM_TYPE.STICKY,, 60, 120, false),
 				spawn_platform(100, 100, 20,,,,, PLATFORM_TYPE.STICKY,, 60, 120),
-				spawn_platform(110, 0, 90,,,,, PLATFORM_TYPE.STICKY,, 0, 120),
+				spawn_platform(110, 0, 90,,,,, PLATFORM_TYPE.STICKY,, 0, 120),	
 				spawn_platform(40, -40, 135,,,,, PLATFORM_TYPE.STICKY,, 60, 120, false),
 				spawn_platform(100, -100, 110,,,,, PLATFORM_TYPE.STICKY,, 60, 120)
 			)

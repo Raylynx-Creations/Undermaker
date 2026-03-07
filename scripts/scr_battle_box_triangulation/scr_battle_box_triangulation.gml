@@ -65,7 +65,7 @@ function triangulate_polygon(_points) {
         }
 		
         if (!_ear_found) {
-			show_error("Triangulation failed, the polygon given is not valid for triangulation, make sure the lines don't intersect with each other.", true)
+			show_message("Triangulation failed, the polygon given is not valid for triangulation, make sure the lines don't intersect with each other.")
 			
             break
         }

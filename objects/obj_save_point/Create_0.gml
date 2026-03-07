@@ -15,7 +15,9 @@ spawn_point_instance = undefined
 
 interaction = function(){
 	if (is_undefined(spawn_point_instance)){
-		show_error("There's no spawn point instance defined for this save point, please define one using the variable \"spawn_point_instance\".", true)
+		show_message("There's no spawn point instance defined for this save point, please define one using the variable \"spawn_point_instance\".")
+		
+		return
 	}
 	
 	start_save_menu(spawn_point_instance)

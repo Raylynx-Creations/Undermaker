@@ -29,21 +29,18 @@ global.player = {
 		color: make_color_rgb(232, 0, 255),
 		value: 0
 	}
-}
+} //Define its default values on scr_initial_save_file_data, it's here for reference and example.
 
 global.box = {
 	inventory: [[ITEM.CHOCOLATE, ITEM.BANDAGE, ITEM.STICK], []], //For multiple box inventories, like multi-dimensional box B or more.
 	inventory_size: [10, 10]
 }
 
+//SAVE VARIABLES
 global.minutes = 0
 global.seconds = 0
 
-global.save_data = {
-	wall_1_moved: false,
-	puzzle_1: false,
-	cutscene_1: false
-}
+global.save_data = {} //Define its contents on scr_initial_save_file_data
 
 //GAME VARIABLES
 global.instance_references = {}

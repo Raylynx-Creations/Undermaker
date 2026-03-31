@@ -103,7 +103,7 @@ function is_player_soul_moving(_player=obj_player_battle){
 }
 
 function is_player_battle_turn(){
-	return obj_game.state == GAME_STATE.BATTLE and (get_battle_state() == BATTLE_STATE.PLAYER_BUTTONS or get_battle_state() == BATTLE_STATE.PLAYER_ENEMY_SELECT or get_battle_state() == BATTLE_STATE.PLAYER_ACT or get_battle_state() == BATTLE_STATE.PLAYER_ITEM or get_battle_state() == BATTLE_STATE.PLAYER_MERCY)
+	return obj_game.state == GAME_STATE.BATTLE and (battle_get_state() == BATTLE_STATE.PLAYER_BUTTONS or battle_get_state() == BATTLE_STATE.PLAYER_ENEMY_SELECT or battle_get_state() == BATTLE_STATE.PLAYER_ACT or battle_get_state() == BATTLE_STATE.PLAYER_ITEM or battle_get_state() == BATTLE_STATE.PLAYER_MERCY)
 }
 
 function heal_player(_number){

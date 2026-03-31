@@ -1,5 +1,15 @@
+/*
+This is just an optional script where I simplify the creation of bullets in functions.
+Avoid repeating yourself and just fill this script with the bullet behaviours you want and call them in the proper attacks.
+Alternative you can just do inheritance on the obj_bullet and create your own behaviours too and just call the objects.
+Maybe you will still want to use functions but these is how I do it, you're free to choose your own method.
+*/
+
 //Normal bullets
 
+//This funciton spawns a platform from the obj_platform in the game, sets some properties and the player can interact with them.
+//The platforms come only with step and destroy events since they are very specific.
+//Platforms come with the engine included, you can modify and edit them if you need to, knowledge on the system is needed to do so, check the programmer manual for that.
 function spawn_platform(_x, _y, _direction=0, _length=60, _vel_x=0, _vel_y=0, _depth=0, _type=PLATFORM_TYPE.NORMAL, _conveyor_speed=1, _fragile=0, _respawn_time=1, _respawn=true){
 	var _platform = instance_create_depth(_x + obj_battle_box.x, _y + obj_battle_box.y - obj_battle_box.height/2 - 5, _depth, obj_battle_platform)
 	with (_platform){
@@ -16,11 +26,13 @@ function spawn_platform(_x, _y, _direction=0, _length=60, _vel_x=0, _vel_y=0, _d
 		fragile.respawn_time = _respawn_time
 	}
 	
-	array_push(get_battle_bullets_array(), _platform) //It's not really a bullet, but it does clear it from screen if added to this table
+	array_push(battle_get_bullets_array(), _platform) //It's not really a bullet, but it does clear it from screen if added to this table
 	
 	return _platform
 }
 
+//Set some default bullet behavior and some cool behavior on them, the obj_bullet comes with step, draw, destroy and clean_up event calls too.
+//In addition to the events it comes with begin_draw and end_draw too events if you need them, just set the variables with the proper name.
 function spawn_bullet(_sprite, _x, _y, _direction, _mask_to_box=false, _depth=0, _damage=3, _type=BULLET_TYPE.WHITE){
 	var _bullet = instance_create_depth(_x + obj_battle_box.x, _y + obj_battle_box.y - obj_battle_box.height/2 - 5, _depth, obj_battle_bullet)
 	with (_bullet){
@@ -100,13 +112,14 @@ function spawn_bullet(_sprite, _x, _y, _direction, _mask_to_box=false, _depth=0,
 		}
 	}
 	
-	array_push(get_battle_bullets_array(), _bullet)
+	array_push(battle_get_bullets_array(), _bullet)
 	
 	return _bullet
 }
 
 //Menu bullets
 
+//This single function is for doing an attack in the menu, uses the obj_bullet too, behavior is similar but adjusted for use case of the menu attack.
 function menu_spawn_bullet(_sprite, _x, _y, _direction, _ignore_movement=false, _depth=0, _damage=3, _type=BULLET_TYPE.WHITE){
 	var _bullet = instance_create_depth(_x, _y, _depth, obj_battle_bullet)
 	with (_bullet){
@@ -204,7 +217,7 @@ function menu_spawn_bullet(_sprite, _x, _y, _direction, _ignore_movement=false, 
 		}
 	}
 	
-	array_push(get_battle_menu_bullets_array(), _bullet)
+	array_push(battle_get_menu_bullets_array(), _bullet)
 	
 	return _bullet
 }

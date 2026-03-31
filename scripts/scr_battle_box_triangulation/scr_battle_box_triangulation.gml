@@ -10,7 +10,7 @@ function get_polygon_orientation(_points) {
         _sum += (_p2_x - _p1_x)*(_p2_y + _p1_y)
     }
 	
-    return ((_sum > 0) ? -1 : 1)
+    return ((_sum > 0) ? ROTATION_ORIENTATION.COUNTER_CLOCKWISE : ROTATION_ORIENTATION.CLOCKWISE)
 }
 
 function triangulate_polygon(_points) {

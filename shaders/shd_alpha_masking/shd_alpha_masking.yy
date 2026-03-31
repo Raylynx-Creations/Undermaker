@@ -1,7 +1,7 @@
 {
   "$GMShader":"",
-  "%Name":"sh_alpha_masking",
-  "name":"sh_alpha_masking",
+  "%Name":"shd_alpha_masking",
+  "name":"shd_alpha_masking",
   "parent":{
     "name":"Shaders",
     "path":"folders/Shaders.yy",

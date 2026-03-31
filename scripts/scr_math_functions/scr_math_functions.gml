@@ -4,7 +4,7 @@ function calculate_cross_product(_ax, _ay, _bx, _by, _cx, _cy) {
 
 function is_triangle_convex(_ax, _ay, _bx, _by, _cx, _cy, _orientation) {
     var _cross_value = calculate_cross_product(_ax, _ay, _bx, _by, _cx, _cy)
-    return ((_orientation > 0) ? _cross_value > 0 : _cross_value < 0)
+    return ((_orientation == ROTATION_ORIENTATION.CLOCKWISE) ? _cross_value > 0 : _cross_value < 0)
 }
 
 function intersection_of_lines(_x1, _y1, _direction_1, _x2, _y2, _direction_2){

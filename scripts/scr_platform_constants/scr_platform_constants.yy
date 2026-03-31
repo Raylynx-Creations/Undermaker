@@ -6,7 +6,7 @@
   "name":"scr_platform_constants",
   "parent":{
     "name":"Battle",
-    "path":"folders/Scripts/Custom Stuff/Battle.yy",
+    "path":"folders/Scripts/Engine/Battle.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

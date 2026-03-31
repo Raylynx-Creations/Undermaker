@@ -66,7 +66,7 @@ INTEGER _id ------------------> ID of the player (usually soul aka the obj_playe
 REAL _push_direction ---------> Direction in degrees in which the player is going to be pushed.
 BOOL _counter_clockwise_push -> (This argument is not used for this method, but it's used in obj_platform's method) Tells if the direction in which is being pushed was calculated doing a 90° counter-clockwise rotation, useful for determinating the normal angle of the line collision.
 
-RETURNS -> ARRAY[BOOL, REAL] --The BOOL tells if it should push out of the collision or not, the REAL indicates in what direction to push, overriding the _push_direction given (normally you return the same number as the _push_direction, but since there's a grip mechanic for the blue soul, it can be another direction).
+RETURNS -> ARRAY[BOOLEAN, REAL] --The BOOLEAN tells if it should push out of the collision or not, the REAL indicates in what direction to push, overriding the _push_direction given (normally you return the same number as the _push_direction, but since there's a grip mechanic for the blue soul, it can be another direction).
 */
 player_collision_function = function(_id, _push_direction, _counter_clockwise_push){
 	//If the box cannot collide with the player, we do nothing.

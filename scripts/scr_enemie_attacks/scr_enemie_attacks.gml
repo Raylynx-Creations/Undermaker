@@ -1,5 +1,11 @@
+/*
+Define the constant for your attack name.
+I am aware this list can become very very big an extensive on a full fangame, it's up to you to put the order in how you do the attacks and enums.
+You can create multiple enum lists for every area you want to cover, and as for the constructor function, you can subdivide into other functions to cover each section.
+Or you can just use {} to enclose chunks of code and minimize them, make sure to label them tho.
+*/
 enum ENEMY_ATTACK{
-	SPARE,
+	SPARE, //This one must always exist, do not remove by any change, you will have to keep ENEMY_ATTACK.SPARE enum, if you want to create other enums you can but do not delete this one.
 	MAD_DUMMY_1,
 	MAD_DUMMY_2,
 	PLATFORM_1,
@@ -9,12 +15,37 @@ enum ENEMY_ATTACK{
 	ATTACK_2
 }
 
+/*
+The constructor function that creates a struct containing the data of an attack to trigger step, draw and clean_up events, but it's not an object really.
+obj_game is in charge of creating and destroying these as needed, all you have to do is fill in the code, you don't have to call the constructor and handle your own attacks.
+Avoid deleting this function as it is necessary for the engine, just fill the data inside, that's it.
+The function comes with variables for you to use on your attacks as listed:
+
+INTEGER _attack_name ---> Constant ENEMY_ATTACK or equivalent that determinates what attack to use.
+INTEGER _position ------> Position on which the attack is placed, useful if you want to balance out the enemy attacks when using multiple and such.
+REAL _damage -----------> Usually integer, it's the damage that the attack inflicts to the player, usually this damage is calculated on the scr_enemies the function calculate_enemy_damage_amount().
+
+CONSTRUCTS -> STRUCT OF ATTACK DATA -- Usually used by the engine to perform and know when the attack is over, for the battle cycle, you don't have to call this function.
+*/
 function EnemyAttack(_attack_name, _position, _damage) constructor{
+	/*
+	IMPORTANT: For some attacks specially those of random enemies to balance well your bullets you probably need to know how many attacks are happening at the same time (since every enemie can have one attack).
+	For that use the function battle_get_current_attack_amount() and you will get the number of current attacks happening, I recommend storing it in a variable.
+	Not all attacks will require that, but in case they do you can use that function.
+	*/
+	//attack_amount = battle_get_current_attack_amount()
+	
 	timer = 0 //Every attack contains a timer for you to do stuff, if you don't need it ignore it, if you plan to design your attacks without a timer, might as well remove it, I do not recommend it tho.
 	attack_done = false //A variable to read when the attack is flagged as finished and therefor must end the enemy attack state.
+	
+	//These are some of functions you define but are not mandatory, commented out events are mandatory to define on the attack.
+	//step = undefined //You must define a step function in the constructor.
 	draw = undefined
 	cleanup = undefined
 	
+	//With this switch you can create your attacks, put the proper name calling and write the code to handle the attack.
+	//Just don't forget to set attack_done as true when you want the attack to be over, or you will softlock the player on the game.
+	//You use the battle_* functions and set_* functions corresponding to this section, consult the user manual in the documentation to know all the functions.
 	switch (_attack_name){
 		case ENEMY_ATTACK.PLATFORM_1: {
 			battle_resize_box(290, 290, true)
@@ -312,5 +343,9 @@ function EnemyAttack(_attack_name, _position, _damage) constructor{
 				}
 			}
 		break}
+	}
+	
+	if (is_undefined(step)){
+		show_error("You must define a step function in a variable of the same name in your attack, it is a rule.", true)
 	}
 }

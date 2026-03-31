@@ -15,6 +15,7 @@ function BattleSystem() constructor{
 	battle_cleared_enemies = [] //Cleared as if either killed or spared.
 	battle_enemies_dialogs = [] //Here all the enemy dialogs are created if they have any.
 	battle_enemies_attacks = []
+	battle_attack_count = 0
 	battle_enemies_parts = []
 	battle_selectable_enemies = []
 	battle_dust_clouds = []
@@ -71,10 +72,11 @@ function BattleSystem() constructor{
 						var _dust_pixels = _enemy.last_animation_timer
 						var _offset_x = sprite_get_xoffset(_enemy.sprite_killed)
 						var _offset_y = sprite_get_yoffset(_enemy.sprite_killed)
+						var _height = _enemy.dust_y_pixels_amount_per_frame
 						
-						array_push(battle_enemies_parts, {sprite: _enemy.sprite_killed, sprite_index: _enemy.sprite_killed_index, part: _enemy.last_animation_timer, x: _enemy.x - _offset_x, y: _enemy.y + (_dust_pixels - _offset_y)*_enemy.sprite_yscale, xscale: _enemy.sprite_xscale, yscale: _enemy.sprite_yscale, direction: irandom_range(60, 120), alpha: 1})
+						array_push(battle_enemies_parts, {sprite: _enemy.sprite_killed, sprite_index: _enemy.sprite_killed_index, part: _enemy.last_animation_timer, x: _enemy.x - _offset_x, y: _enemy.y + (_dust_pixels - _offset_y)*_enemy.sprite_yscale, height: _height, xscale: _enemy.sprite_xscale, yscale: _enemy.sprite_yscale, direction: irandom_range(60, 120), alpha: 1})
 				
-						_enemy.last_animation_timer += _enemy.dust_y_pixels_amount_per_frame
+						_enemy.last_animation_timer += _height
 					}
 				}
 		
@@ -160,7 +162,7 @@ function BattleSystem() constructor{
 			case BATTLE_STATE.START:{ //No break
 				battle_exp = 0
 				battle_gold = 0
-				battle_flee_event_type = FLEE_EVENT.IMPROVED
+				battle_flee_event_type = FLEE_EVENT.NORMAL
 				battle_fled = false
 				battle_button_order = [btn_fight, btn_act, btn_item, btn_mercy]
 				
@@ -168,8 +170,7 @@ function BattleSystem() constructor{
 				var _x = 640/(_length + 1)
 				
 				for (var _i=0; _i<_length; _i++){
-					var _enemy = new Enemy(global.battle_enemies[_i], _x*(_i + 1), 240)
-					_enemy.name = string_trim(_enemy.name)
+					var _enemy = new Enemy(global.battle_enemies[_i], _i, _x*(_i + 1), 240)
 				
 					global.battle_enemies[_i] = _enemy
 				}
@@ -469,6 +470,10 @@ function BattleSystem() constructor{
 				}
 				
 				battle_player_attack.step()
+				
+				if (battle_player_attack.player_attack_done){
+					battle_go_to_state(BATTLE_STATE.ENEMY_DIALOG)
+				}
 			break}
 			case BATTLE_STATE.PLAYER_WON:{
 				if (global.confirm_button and battle_dialog.is_done_displaying()){
@@ -488,8 +493,16 @@ function BattleSystem() constructor{
 					if (battle_flee_event.success){
 						battle_fled = true
 						
+						if (!battle_do_not_modify_flee_chance){
+							battle_flee_chance = max(battle_flee_chance - 30, 0)
+						}
+						
 						battle_go_to_state(BATTLE_STATE.END)
 					}else{
+						if (!battle_do_not_modify_flee_chance){
+							battle_flee_chance = min(battle_flee_chance + 10, 100)
+						}
+						
 						battle_go_to_state(BATTLE_STATE.ENEMY_DIALOG)
 					}
 				}
@@ -793,7 +806,7 @@ function BattleSystem() constructor{
 		for (var _i=0; _i<_length; _i++){
 			var _part = battle_enemies_parts[_i]
 			
-			draw_sprite_part_ext(_part.sprite, _part.sprite_index, 0, _part.part, sprite_get_width(_part.sprite), 1, _part.x, _part.y, _part.xscale, _part.yscale, c_white, _part.alpha)
+			draw_sprite_part_ext(_part.sprite, _part.sprite_index, 0, _part.part, sprite_get_width(_part.sprite), _part.height, _part.x, _part.y, _part.xscale, _part.yscale, c_white, _part.alpha)
 		}
 		
 		_length = array_length(battle_dust_clouds)
@@ -863,7 +876,7 @@ function BattleSystem() constructor{
 	
 	draw_in_box = function(){
 		switch (battle_state){
-			case BATTLE_STATE.PLAYER_ENEMY_SELECT:
+			case BATTLE_STATE.PLAYER_ENEMY_SELECT:{
 				if (battle_button_order[battle_selection[0]].button_type == BUTTON.FIGHT){
 					var _length = array_length(battle_selectable_enemies)
 					for (var _i=0; _i<_length; _i++){
@@ -874,10 +887,10 @@ function BattleSystem() constructor{
 						}
 					}
 				}
-			break
-			case BATTLE_STATE.PLAYER_ATTACK:
+			break}
+			case BATTLE_STATE.PLAYER_ATTACK:{
 				battle_player_attack.draw()
-			break
+			break}
 		}
 	}
 

@@ -1,15 +1,27 @@
+/*
+Available languages on your game.
+
+These are not texts that display in the game, but the name it has on the text files the game loads for language management.
+For example "UI texts spanish.json" is the name of the file in language of spanish, in actual spanish the word is different of course, but we don't care about that here.
+*/
 global.languages_available = ["english", "spanish"]
 
+/*
+Global variable that holds persistent data for configuration settings.
+
+You don't have to create or remove any variable in it tho, you just have to define the default settings the game starts with.
+Since player don't start with configuration settings file, so give them a default to start with.
+*/
 global.game_settings = {
-	language: 0,
-	resolution_active: 0,
-	resolution_last_active: -1,
-	fullscreen: false,
-	border_active: false,
-	border_id: 0,
-	border_last_id: 0,
-	sound_volume: 50,
-	music_volume: 50
+	language: 0, //This is the index of the available languages list, the one that is selected
+	resolution_active: 0, //This is the resolution index of all the possible resolutions the game can have in the user's PC, recommended to leave it at 0, you don't know what resource the user can have depending of their PC.
+	resolution_last_active: -1, //Auxiliar to the previous variable, keeps the last active resolution index when toggling between fullscreen and back
+	fullscreen: false, //If the game is in fullscreen or not, when starting the game you don't want them fullscreen probably, recommended to be false, but up to you if you want true.
+	border_active: false, //If the borders are active on the game, even if your game doesn't use any, or have any, this setting must exist, just don't set any functions to change it, leave it however you want, true or false.
+	border_id: 0, //Id of the border to use if active, use -1 for dynamic borders, saveable configuration.
+	border_last_id: 0, //Auxiliar to the border ID in case you enter battles with dynamic borders, gets overwritten so don't touch.
+	sound_volume: 50, //Volumes of audio sounds.
+	music_volume: 50 //And musics.
 }
 
 /*

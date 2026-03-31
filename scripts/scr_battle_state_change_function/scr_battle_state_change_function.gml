@@ -272,6 +272,7 @@ function battle_go_to_state(_state, _enemy=undefined){
 				//By default a dialog is given to you and if the flee was successful as well, you can do whatever you want with it on the flee event if you desire a different dialog and outcome.
 				var _success = (irandom(99) <= battle_flee_chance)
 				var _enemies_allow_flee = true
+				battle_do_not_modify_flee_chance = false
 				
 				var _length = array_length(global.battle_enemies)
 				for (var _i=0; _i<_length; _i++){
@@ -281,13 +282,18 @@ function battle_go_to_state(_state, _enemy=undefined){
 						continue
 					}
 					
-					if (!_enemy.can_flee){
+					if (!is_undefined(_enemy.flee)){
+						_enemy.flee()
+					}
+					
+					if (!_enemy.can_player_flee){
 						_enemies_allow_flee = false
 					}
 				}
 				
 				if (_enemies_allow_flee){
 					_success = true
+					battle_do_not_modify_flee_chance = true
 				}
 				
 				var _flee_dialog = global.UI_texts[$"battle flee dialogs"]
@@ -303,26 +309,9 @@ function battle_go_to_state(_state, _enemy=undefined){
 						
 						battle_apply_rewards()
 					}
-					
-					battle_flee_chance = max(battle_flee_chance - 30, 0)
-				}else{
-					battle_flee_chance = min(battle_flee_chance + 10, 100)
 				}
 				
 				battle_set_box_dialog("[skip:false]" + _flee_dialog)
-				
-				_length = array_length(global.battle_enemies)
-				for (var _i=0; _i<_length; _i++){
-					_enemy = global.battle_enemies[_i]
-					
-					if (is_undefined(_enemy)){
-						continue
-					}
-					
-					if (!is_undefined(_enemy.flee)){
-						_enemy.flee()
-					}
-				}
 				
 				battle_flee_event = new FleeEvent(battle_flee_event_type, _success)
 				
@@ -450,6 +439,8 @@ function battle_go_to_state(_state, _enemy=undefined){
 				}
 			break}
 			case BATTLE_STATE.ENEMY_ATTACK:{
+				battle_attack_count = 0
+				
 				var _length = array_length(battle_enemies_dialogs)
 				if (_length > 0){
 					array_delete(battle_enemies_dialogs, 0, _length)
@@ -491,21 +482,25 @@ function battle_go_to_state(_state, _enemy=undefined){
 				var _position = 0
 				for (var _i=0; _i<_enemies_count; _i++){
 					_enemy = global.battle_enemies[_i]
-				
+					
 					if (is_undefined(_enemy)){
 						continue
 					}
-				
+					
 					if (!is_undefined(_enemy.attack_starts)){
 						_enemy.attack_starts()
 					}
-				
+					
 					if (!is_undefined(_enemy.next_attack)){
 						_enemies_still_available = true
 						_enemy_attack = true
 						var _damage = max(calculate_enemy_damage_amount(_enemy), 1)
 					
 						array_push(battle_enemies_attacks, new EnemyAttack(_enemy.next_attack, _position, _damage))
+						
+						if (_enemy.next_attack != ENEMY_ATTACK.SPARE){
+							battle_attack_count++
+						}
 						
 						_enemy.next_attack = undefined
 						_position++

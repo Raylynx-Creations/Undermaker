@@ -1,6 +1,11 @@
-//This just sets the variables for the game to work as if it was a new game, the player can save to override the previous save file or not save at all.
+/*
+This just sets the variables for the game to work as if it was a new game.
+The player can save to override the previous save file or not save at all.
+Note that this does not clear any save file saved in the game, so if you don't save you can recover still your previous progress.
+*/
 function set_initial_game_data(){
-	//This is the player's initial state, all these variables are needed since the engine uses them, make sure to define them all always with the values you want them to have when a player creates a new save game.
+	//This is the player's initial state, all these variables are needed since the engine uses them.
+	//Make sure to define them all always with the values you want them to have when a player creates a new save game.
 	global.player = {
 		max_hp: 20,
 		hp: 20,
@@ -43,7 +48,7 @@ function set_initial_game_data(){
 	global.minutes = 0
 	global.seconds = 0
 
-	//Reset flags of specific events
+	//Reset flags of specific events that you define and use in your game, they are saved
 	global.save_data = {
 		wall_1_moved: false,
 		puzzle_1: false,

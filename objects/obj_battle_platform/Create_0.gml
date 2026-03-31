@@ -2,7 +2,7 @@
 
 //Functions for the platform
 step = undefined
-on_destroy = undefined
+destroy = undefined
 
 surface = -1
 

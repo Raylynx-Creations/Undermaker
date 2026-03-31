@@ -627,7 +627,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 				gpu_set_colorwriteenable(true, true, true, true)
 				gpu_set_alphatestenable(true)
 				
-				shader_set(sh_alpha_masking)
+				shader_set(shd_alpha_masking)
 				draw_sprite_ext(container_tail_mask_sprite, 0, _offset_x2, _offset_y2, container_tail_mask_width*xscale, container_tail_mask_height*yscale, 0, c_white, 1)
 				shader_reset()
 				
@@ -639,7 +639,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 				
 				draw_surface(surface, x + min(-_offset_x, 0), y + min(-_offset_y, 0))
 				
-				gpu_set_blendmode(bm_normal)
+				gpu_set_default_blendmode()
 			}else{
 				if (container_tail_draw_mode == CONTAINER_TAIL_DRAW_MODE.SPRITE_MASK){
 					gpu_set_blendenable(false)
@@ -647,7 +647,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 					gpu_set_alphatestenable(true)
 					
 					//This shader allows for masks with alpha to be used for effects you may want, if by any chance you or your end users cannot run this shader, you will have to use masks with full alpha only, no transparency allowed.
-					shader_set(sh_alpha_masking)
+					shader_set(shd_alpha_masking)
 					draw_sprite_ext(container_tail_mask_sprite, 0, x, y, container_tail_mask_width*xscale, container_tail_mask_height*yscale, 0, c_white, 1)
 					shader_reset()
 					
@@ -668,7 +668,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 					
 					gpu_set_blendenable(true)
 					gpu_set_colorwriteenable(true, true, true, true)
-					gpu_set_blendmode(bm_normal)
+					gpu_set_default_blendmode()
 					gpu_set_alphatestenable(false)
 				}
 			}
@@ -993,7 +993,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 	
 	BOOLEAN _reproduce_sound -> Option to make a voice sound when it skips to the end of the dialog, it is true by default to reproduce the sound.
 	
-	RETURNS -> INTEGER/UNDEFINED. --The integer is the text_timer used by the system to know if the skip was stopped by some command and has set a text_timer to delay the text (like a combination of [stop_skip][wait]), it only returns UNDEFINED if it has executed the command [next] in the process, which is used by the system to know nothing else needs to be done as the dialog has advanced and the current info is outdated.
+	RETURNS -> INTEGER/UNDEFINED --The integer is the text_timer used by the system to know if the skip was stopped by some command and has set a text_timer to delay the text (like a combination of [stop_skip][wait]), it only returns UNDEFINED if it has executed the command [next] in the process, which is used by the system to know nothing else needs to be done as the dialog has advanced and the current info is outdated.
 	*/
 	skip_dialog = function(_reproduce_sound=true){
 		//----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1378,7 +1378,9 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 							_command_end_index = _k
 							
 							break
-						}else if (_letter == "\\"){
+						//The escape sequence character is a / instead of \ because to get that on strings is \\.
+						//This is mostly because if you want to put a \ in your commands you would have to double escape it \\\\ once for the actual string that contains it and another for the system here, so instead we use /, so that way you just do // to put the actual / in the command.
+						}else if (_letter == "/"){
 							_dialog = string_delete(_dialog, _k, 1)
 							_dialog_length--
 							
@@ -1395,17 +1397,11 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 					var _command_action = true //Flag for command being an action.
 					var _command_data = {index: _j}
 					
-					//Convert to lowercase the commands
-					var _length = array_length(_command_content)
-					for (var _k=0; _k<_length; _k++){
-						_command_content[_k] = string_lower(_command_content[_k])
-					}
-					
 					//Delete the command from the dialog itself, as it won't be displayed on the game.
 					_dialog = string_delete(_dialog, _j, _command_length)
 					
 					//Sort the type of command, fill the data of it and flag it properly as visual or action.
-					switch (_command_content[0]){
+					switch (string_lower(_command_content[0])){
 						case "wait": case "w":{
 							_command_data.type = COMMAND_TYPE.WAIT
 							_command_data.value = real(_command_content[1])
@@ -1459,7 +1455,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 								}
 							}
 						break}
-						case "subimages":{
+						case "sprite_subimages": case "subimages":{
 							_command_data.type = COMMAND_TYPE.SET_SUBIMAGES
 							_command_data.value = string_split(_command_content[1], ",")
 							var _command_arguments_length = array_length(_command_data.value)
@@ -1496,44 +1492,67 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 						break}
 						case "pop_up":{ //The format is _mode, _x, _y, _dialog, _width, _face_sprite, _face_subimages
 							var _arguments = string_split(_command_content[1], ",", false, 3)
-							var _argument_length = string_length(_arguments[3])
-							var _escape_sequence_offset = string_length(_command_content[0]) + string_length(_arguments[0]) + string_length(_arguments[1]) + string_length(_arguments[2]) + 4
+							
+							var _start_pos = 0
+							var _end_pos = 0
 							var _index = 0
 							
-							//This for cycle along side the _escape_sequence_offset and _index variables check if the "," character must be counted as an end of argument or not inside the arguments via escape sequences.
-							for (var _k = 1; _k <= _argument_length; _k++){
-								//Moves the index in case the character being checked is now ahead of it.
-								if (_index < _escape_sequence_amount and _escape_sequence_indexes[_index] < _k + _escape_sequence_offset){
-									_index++
+							var _found_start = false
+							var _found_end = false
+							do{
+								_start_pos = string_pos_ext("\"", _arguments[3], _index)
+								if (_start_pos >= 2 and string_char_at(_arguments[3], _start_pos - 2) == "/"){
+									_index = _start_pos + 1
+								}else if (_start_pos == 0){
+									break
+								}else{
+									_found_start = true
+								}
+							}until (_found_start)
+							
+							if (_found_start){
+								_index = _start_pos + 1
+								do{
+									_end_pos = string_pos_ext("\"", _arguments[3], _index)
+									if (_end_pos >= 2 and string_char_at(_arguments[3], _end_pos - 2) == "/"){
+										_index = _end_pos + 1
+									}else if (_end_pos == 0){
+										break
+									}else{
+										_found_end = true
+									}
+								}until (_found_end)
+							}
+							
+							if (!_found_end or !_found_start){
+								show_error("There's an error in the following dialog:\n\"" + dialogues[_i] + "\"\n\nA [pop_up:mode,x,y,dialog,width,face_sprite,face_subimages] command has a syntax error.\nThe dialog parameter is not properly enclosed between \", check your syntax properly, it must be between \".\n\nExample:\n[pop_up:left,0,0,\"Dialog here\",160] (Extra parameters omitted)\n[pop_up:left,0,0,\"Dialog here\",160,spr_face,0,1]", true)
+							}
+							
+							var _length = string_length(_arguments[3])
+							var _arguments_copy = string_delete(_arguments[3], 1, _end_pos)
+							_arguments[3] = string_copy(_arguments[3], _start_pos + 1, _end_pos - 2)
+							
+							var _cut_arguments = string_split(_arguments_copy, ",")
+							array_delete(_cut_arguments, 0, 1)
+							_length = array_length(_cut_arguments)
+							
+							for (var _k = 0; _k < _length; _k++){
+								if (_k == 1){
+									var _spr = asset_get_index(_cut_arguments[_k])
+									if (_spr != -1){
+										_cut_arguments[_k] = _spr
+									}
 								}
 								
-								if (string_char_at(_arguments[3], _k) == ","){
-									//Checks if it is a escape sequence character (if it had a \ behind it before).
-									if (_index < _escape_sequence_amount and _escape_sequence_indexes[_index] == _k + _escape_sequence_offset){
-										continue
-									}
-									
-									//Cuts the dialog part and then parses the rests as the others should be only numbers.
-									var _temp_argument_3 = string_copy(_arguments[3], 1, _k - 1)
-									_arguments[3] = string_delete(_arguments[3], 1, _k)
-									var _cut_arguments = string_split(_arguments[3], ",")
-									_length = array_length(_cut_arguments)
-									_arguments[3] = _temp_argument_3
-									
-									for (var _l = 0; _l < _length; _l++){
-										array_push(_arguments, _cut_arguments[_l])
-									}
-									
-									break
-								}
+								array_push(_arguments, _cut_arguments[_k])
 							}
 							
 							//After all _arguments are parsed correctly, it is time to get the constant for the mode.
-							switch (_arguments[0]){
+							switch (string_lower(_arguments[0])){
 								case "fade":{
 									_arguments[0] = POP_UP_MODE.FADE
 								break}
-								case "instant":{
+								case "fade_instant": case "fade instant":{
 									_arguments[0] = POP_UP_MODE.INSTANT
 								break}
 								case "left":{
@@ -1635,7 +1654,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 							_command_data.type = COMMAND_TYPE.TEXT_EFFECT
 							var _command_arguments = string_split(_command_content[1], ",")
 							
-							switch (_command_arguments[0]){
+							switch (string_lower(_command_arguments[0])){
 								case "zoom":{
 									_command_data.subtype = EFFECT_TYPE.ZOOM
 								break}
@@ -1691,7 +1710,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 									}
 								break}
 								case "shadow":{
-									_length = array_length(_command_arguments)
+									var _length = array_length(_command_arguments)
 									_command_data.subtype = EFFECT_TYPE.SHADOW
 									
 									_command_data.x = real(_command_arguments[1])
@@ -1714,7 +1733,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 									array_push(_array_action, _command_data) //This is the only command variant that goes in both the visual and action commands, insert in visual only and the action gets inserted below.
 								break}
 								case "malfunction":{
-									_length = array_length(_command_arguments)
+									var _length = array_length(_command_arguments)
 									_command_data.subtype = EFFECT_TYPE.MALFUNCTION
 									
 									//Probability where 10000 is 100%, 100 is 1 %, 1 is 0.01%
@@ -1742,7 +1761,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 							_command_data.type = COMMAND_TYPE.DISABLE_TEXT_EFFECT
 							var _command_arguments = string_split(_command_content[1], ",")
 							
-							switch (_command_arguments[0]){
+							switch (string_lower(_command_arguments[0])){
 								case "zoom":{
 									_command_data.subtype = EFFECT_TYPE.ZOOM
 								break}
@@ -1820,7 +1839,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 									}
 									
 									if (string_char_at(_arguments[1], _k) == ","){
-										//Checks if it is a escape sequence character (if it had a \ behind it before).
+										//Checks if it is a escape sequence character (if it had a / behind it before).
 										if (_index < _escape_sequence_amount and _escape_sequence_indexes[_index] == _k + _escape_sequence_offset){
 											continue
 										}
@@ -1902,7 +1921,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 							_command_data.type = COMMAND_TYPE.DISPLAY_TEXT
 							var _command_arguments = string_split(_command_content[1], ",")
 							
-							switch (_command_arguments[0]){
+							switch (string_lower(_command_arguments[0])){
 								case "letters":{
 									_command_data.subtype = DISPLAY_TEXT.LETTERS
 								
@@ -1962,7 +1981,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 									}
 									
 									if (string_char_at(_arguments[1], _k) == ","){
-										//Checks if it is a escape sequence character (if it had a \ behind it before).
+										//Checks if it is a escape sequence character (if it had a / behind it before).
 										if (_index < _escape_sequence_amount and _escape_sequence_indexes[_index] == _k + _escape_sequence_offset){
 											continue
 										}
@@ -2109,7 +2128,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 						break}
 						case "tail":{
 							var _arguments = string_split(_command_content[1], ",")
-							_length = array_length(_arguments)
+							var _length = array_length(_arguments)
 						
 							_arguments[0] = int64(_arguments[0])
 							_command_data.type = COMMAND_TYPE.SET_CONTAINER_TAIL
@@ -2148,8 +2167,8 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 				}
 				
 				//Once all commands have been cleared out in an index, it checks the character that left.
-				//Looks for any \ in the string and deletes it, ignoring the character that is next to it, useful for marking "[" as not a command so it prints it.
-				if (string_char_at(_dialog, _j) == "\\"){
+				//Looks for any / in the string and deletes it, ignoring the character that is next to it, useful for marking "[" as not a command so it prints it.
+				if (string_char_at(_dialog, _j) == "/"){
 					_dialog = string_delete(_dialog, _j, 1)
 					_dialog_length--
 				}
@@ -2351,8 +2370,12 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 			dialog_minimum_height = 0
 		}
 		
-		//Reset the text_align_x and the final_face_height to recalculate them again with the new assigned face_sprite from this function, which gets reset of course.
+		//Reset the text_align_x and the final_face_height to recalculate them again with the new assigned face_sprite from this function, which gets reset of course and reset other stuff too.
 		asterisk = true
+		font = fnt_determination_mono
+		use_font_space = true
+		spacing_width = 0
+		spacing_height = 2
 		text_align_x = ASTERISK_SPACING
 		final_face_height = 0
 		face_sprite = _face_sprite
@@ -2600,7 +2623,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 	/*
 	As the name implies, is a check for the user to know if the dialog has finished.
 	
-	RETURNS -> BOOLEAN. --True if no more dialogues are loaded, false otherwise, the dialog system doesn't destroy itself once the dialog is done, you can reuse it to load more dialogs into it.
+	RETURNS -> BOOLEAN --True if no more dialogues are loaded, false otherwise, the dialog system doesn't destroy itself once the dialog is done, you can reuse it to load more dialogs into it.
 	*/
 	is_finished = function(){
 		return (dialogues_amount == 0)
@@ -2611,7 +2634,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 	The posibilities are endless, it's up to you if you want to use it, there's already a way to bind just 1 single sprite and make it talk as the dialog progresses until it's done printing more letters using the [bind_instance], doesn't work for layer_sprites sadly.
 	It's affected by the wait commands, will return false when a [w] has run and is waiting for its time to run out to continue "talking".
 	
-	RETURNS -> BOOLEAN. --True if the text is advacing normally, which means it is talking, false if a stop is made, either by any of the [wait] commands and its variants or other commands that can do that.
+	RETURNS -> BOOLEAN --True if the text is advacing normally, which means it is talking, false if a stop is made, either by any of the [wait] commands and its variants or other commands that can do that.
 	*/
 	is_talking = function(){
 		return (face_animation and !is_done_displaying())
@@ -2620,7 +2643,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 	/*
 	This function can be used for checking if the dialog is done displaying the current text.
 	
-	RETURNS -> BOOLEAN. --True if the text has been displayed fully, which means there's no more text to display on the current dialog, false if the current dialog has not been displayed fully yet.
+	RETURNS -> BOOLEAN --True if the text has been displayed fully, which means there's no more text to display on the current dialog, false if the current dialog has not been displayed fully yet.
 	*/
 	is_done_displaying = function(){
 		return (string_index >= dialog_length)
@@ -2725,7 +2748,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 	/*
 	This function is in charge of executing all the action commands of the dialog, this function is being called in several parts of the step function and on initialization.
 	
-	RETURNS -> INTEGER/UNDEFINED. --It returns the current text_timer everytime it's called, except when it executes the command [next] where it returns undefined, there's only one point in the step function where that matters.
+	RETURNS -> INTEGER/UNDEFINED --It returns the current text_timer everytime it's called, except when it executes the command [next] where it returns undefined, there's only one point in the step function where that matters.
 	*/
 	execute_action_commands = function(_is_skipping=false){
 		//If no dialogs then just do nothing.
@@ -3045,7 +3068,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 	/*
 	This function is in charge of executing all the visual commands of the dialog, this function only gets called 2 times in the draw function.
 	
-	RETURNS -> BOOLEAN. --It returns wheter if the command [apply_to_asterisk] has been executed, which can only happen at the very start of displaying the dialog, so if the first call in the draw step doesn't return true, it will always return false.
+	RETURNS -> BOOLEAN --It returns wheter if the command [apply_to_asterisk] has been executed, which can only happen at the very start of displaying the dialog, so if the first call in the draw step doesn't return true, it will always return false.
 	*/
 	execute_visual_commands = function(_i, _current_commands){
 		//----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -3339,7 +3362,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 	REAL _angle -> Angle between the position the tail must be and the closest corner of the bounding box of the dialog itself.
 	REAL _xn ----> Initial angle to iterate as the newthon raphson method needs it, depending on the corner, it could be 45 (for the corner top right as the tail can only be in angle 0°-90°), 135, 225 and 315, follow this set with the corresponding corner with its corresponding _angle, settings other initial angle values may result in infinite loops or incorrect angle results that not even newthon raphson with bisection variant can get right, reasons are unknown as it has not been studied yet.
 	
-	RETURNS -> INTEGER. --Angle the tail must be rotated to make sure its base is within the dialog bounding box itself.
+	RETURNS -> INTEGER --Angle the tail must be rotated to make sure its base is within the dialog bounding box itself.
 	*/
 	get_container_tail_angle = function(_d, _angle, _xn){
 		var _mult = (1 - (_xn div 90)%2) //Two formulas are being used for the angle aproximation, this "switch" here toggles between each other, as one formula works only between 0°-90° and 180°-270°, the other formula works on the rest of the angles, check programmer documentation for more information on that.

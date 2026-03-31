@@ -27,6 +27,8 @@
     {"name":"inst_spawn_point_hall_1","path":"rooms/rm_overworld_3_hallway/rm_overworld_3_hallway.yy",},
     {"name":"inst_712A0DED","path":"rooms/rm_overworld_3_hallway/rm_overworld_3_hallway.yy",},
     {"name":"inst_4A81DBAD","path":"rooms/rm_overworld_3_hallway/rm_overworld_3_hallway.yy",},
+    {"name":"inst_4BDDCE41","path":"rooms/rm_overworld_3_hallway/rm_overworld_3_hallway.yy",},
+    {"name":"inst_4C81D4E","path":"rooms/rm_overworld_3_hallway/rm_overworld_3_hallway.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -52,6 +54,8 @@
         {"$GMRInstance":"v4","%Name":"inst_spawn_point_hall_1","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":1,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_spawn_point_hall_1","objectId":{"name":"obj_spawn_point","path":"objects/obj_spawn_point/obj_spawn_point.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":180.0,"scaleX":-1.0,"scaleY":18.0,"x":40.0,"y":420.0,},
         {"$GMRInstance":"v4","%Name":"inst_712A0DED","colour":4294967295,"frozen":false,"hasCreationCode":true,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_712A0DED","objectId":{"name":"obj_save_point","path":"objects/obj_save_point/obj_save_point.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":2.0,"scaleY":2.0,"x":1360.0,"y":100.0,},
         {"$GMRInstance":"v4","%Name":"inst_4A81DBAD","colour":4294967295,"frozen":false,"hasCreationCode":false,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_4A81DBAD","objectId":{"name":"obj_item_box","path":"objects/obj_item_box/obj_item_box.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":2.0,"scaleY":2.0,"x":1420.0,"y":100.0,},
+        {"$GMRInstance":"v4","%Name":"inst_4BDDCE41","colour":4294967295,"frozen":false,"hasCreationCode":true,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_4BDDCE41","objectId":{"name":"obj_kris_dog_group","path":"objects/obj_kris_dog_group/obj_kris_dog_group.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":2.0,"scaleY":2.0,"x":180.0,"y":140.0,},
+        {"$GMRInstance":"v4","%Name":"inst_4C81D4E","colour":4294967295,"frozen":false,"hasCreationCode":true,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_4C81D4E","objectId":{"name":"obj_entity","path":"objects/obj_entity/obj_entity.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":2.0,"scaleY":2.0,"x":180.0,"y":380.0,},
       ],"layers":[],"name":"Collisions","properties":[
         {"name":"g_Distort1Speed","type":0,"value":"0.01",},
         {"name":"g_Distort2Speed","type":0,"value":"0.025",},

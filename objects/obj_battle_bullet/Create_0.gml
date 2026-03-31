@@ -6,7 +6,8 @@ step = undefined
 draw_begin = undefined
 draw = draw_self
 draw_end = undefined
-on_destroy = undefined
+destroy = undefined
+clean_up = undefined
 
 //Bullet specific data.
 type = BULLET_TYPE.WHITE

@@ -1,7 +1,7 @@
 /// @description Bullet handling
 
 //If the player collides with a bullet that can_damage and it's visible by greater than 0.5 alpha and it's on the appropiate battle state to damage, then follow along for damaging
-if (other.can_damage and image_alpha >= 0.5 and invulnerability_frames <= 0 and (get_battle_state() == BATTLE_STATE.ENEMY_ATTACK or get_battle_state() == BATTLE_STATE.END_DODGE_ATTACK or is_player_battle_turn())){
+if (other.can_damage and image_alpha >= 0.5 and invulnerability_frames <= 0 and (battle_get_state() == BATTLE_STATE.ENEMY_ATTACK or battle_get_state() == BATTLE_STATE.END_DODGE_ATTACK or is_player_battle_turn())){
 	switch (mode){
 		//Gravity soul behaves in a unique way with blue and orange bullets
 		//They cannot be damage by orange if they are in the air, but they can be hurt by blue if they are in the air, regardless of if you are pressing or not a movement key

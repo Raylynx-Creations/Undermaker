@@ -160,6 +160,22 @@
         ]
     },
     "hot_room": {
+        "berry": [
+            "[voice:snd_berry_voice_1,snd_berry_voice_2,snd_berry_voice_3,snd_berry_voice_4,snd_berry_voice_5,snd_berry_voice_6,snd_berry_voice_7][effect:oscillate]This is a very boring place...",
+            "It's so hot here too[w:20], I don't like it.",
+            "At this rate I'm gonna literally melt!",
+            "Uuuuuggggghhhh!!",
+            "I have random voices by the way[w:20], you better like them."
+        ],
+        "papyrus": [
+            "[bind_instance:inst_papyrus][font:fnt_papyrus,false][voice:snd_papyrus_voice][asterisk:false]I AM THE GREAT PAPYRUS![w:30]\nNYEHEHEHE!",
+            "[subimages:6,7]I HAVE THE FONT AND EVERYTHING!",
+            "[subimages:8,9]ALTHOUGH WHAT AM I DOING HERE?[w:20][pop_up:left instant,160,48,\"[font:fnt_papyrus,false/][asterisk:false/]AND WHERE IS SANS?!\",140,spr_papyrus,10,11]",
+            "[subimages:4,5]I WAS SUPPOSED TO BE IN THE SNOWY AREA!",
+            "[subimages:10,11]THIS IS NOT WHAT I SIGNED UP FOR!",
+            "[subimages:16,17]ALSO WHY AM I A WEIRD DOG SHAPED MONSTER?[w:20][pop_up:right,160,48,\"[font:fnt_papyrus,false/][asterisk:false/][no_voice/]IT FEELS AWKWARDLY ODD!\",140,spr_papyrus,2,3]",
+            "ANYWAYS[w:30][subimages:0,1], I GUESS I'LL JUST CHILL HERE THEN!"
+        ],
         "outlander": {
             "interaction": "[bind_instance:inst_outlander][effect:malfunction,100,true][apply_to_asterisk]NOOOOO!!![w:20]\nI'M A ROCK NOW!!!![w:20]\nHOW AM I GONNA WALK NOW?!",
             "dialog_1": "[bind_instance:inst_outlander][effect:oscillate][apply_to_asterisk]It's so fricking hot...[w:20]\nI can't bear it anymore...",
@@ -257,6 +273,10 @@
         "flowey_4": {
             "dialog": "[progress_mode:none][bind_instance:inst_flowey_4]Do you want to test out the platform attacks?[w:30][func:ref script start_plus_choice, 320, 430]",
             "options": ["Yes", "No"]
+        },
+        "flowey_5": {
+            "dialog": "[progress_mode:none][bind_instance:inst_flowey_5]Do you want to test out some special enemies?[w:30][func:ref script start_plus_choice, 320, 430]",
+            "options": ["Yes", "No"]
         }
     },
     "cell": {
@@ -267,6 +287,7 @@
             "default_dialog": "A battle has started!",
             "two_mad_dummies_drawn": "Two Mad Dummies join battle to persuade you to use drawing functions.",
             "two_mad_dummies_sprited": "Two Mad Dummies attempt to sell you sprited functions through battle.",
+            "two_monsters": "Two monsters engage with you.[w:30]\nTaking turns?",
             "mad_dummy_drawn_1": "Mad Dummy draws into battle.",
             "mad_dummy_sprited_1": "Mad Dummy sprites into battle.",
             "monster_1": "A Monster engages with you.[w:30]\nNot in a romantic way.",
@@ -315,6 +336,22 @@
                     ],
                     "annoy": "You annoy the monster...[w:30]\nIt gets angrier.[w:30]\nATK and DEF increased!",
                     "fluster": "You fluster the monster...[w:30]\nIt calms down a little.[w:30]\nATK and DEF decreased!"
+                }
+            },
+            "turn_monster": {
+                "box_dialogues": [
+                    "Why is this monster taking turns?",
+                    "The monster is pretending to play like the human...[w:30] sort of?"
+                ],
+                "dialogues": {
+                    "can_be_targeted": "Surprise attack!",
+                    "cant_be_targeted": "Now I hide in the shadows..."
+                },
+                "act_dialogues": {
+                    "check": [
+                        "Turn Monster - [ATK] ATK [DEF] DEF[w:20]\nThis monster takes turns to attack.",
+                        "Alternating between being able to be targeted or not."
+                    ]
                 }
             },
             "angy_monster": {

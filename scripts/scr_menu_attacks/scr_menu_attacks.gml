@@ -1,3 +1,6 @@
+/*
+Constants for the different menu attacks
+*/
 enum MENU_ATTACK{
 	MENU_ATTACK, //Very redundant heheh
 	BUTTON_ATTACK,
@@ -5,13 +8,14 @@ enum MENU_ATTACK{
 }
 
 function MenuAttack(_attack_name, _position, _damage) constructor{
-	timer = 0
-	menu_attack_done = false
+	timer = 0 //Timer for attacks, how else will you tick them.
+	menu_attack_done = false //Flag that determinates when the attack is over, needed for the engine.
 	
-	step = undefined
+	//All these functions are optional
+	step = undefined //Step function for iterating the attack.
 	force_end = undefined //Use this function to force clean the bullets on screen and clear resources in case the player goes too fast, and these may intervene on the dodging of the enemy attack actually.
 	//By default you must make sure the bullets on their own can clean themselves if the player doesn't rush it, you can just never set menu_attack_done if you want to use it as your safe cleaning function.
-	//The system by default deletes all bullets that are in the obj_game.menu_bullets, so if you don't require further action after that, you can just the need of force_end function at all.
+	//The system by default deletes all bullets that are in the obj_game.menu_bullets, so if you don't require further action after that, you can just remove the need of force_end function at all.
 	
 	switch (_attack_name){
 		case MENU_ATTACK.MENU_ATTACK:{ //This is how you would do it the manual way, this is just for one single bullet, more complex behaviors will have more code, you can simply a lot like in the next menu attack.
@@ -31,11 +35,12 @@ function MenuAttack(_attack_name, _position, _damage) constructor{
 						timer = 0
 					}else{
 						instance_destroy(bullet)
-						menu_attack_done = true //If it reaches this point it will not execute the force_end function
+						menu_attack_done = true //If it reaches this point it will not execute the force_end function.
 					}
 				}
 			}
 			
+			//If the animation doesn't get to end and you're already on the enemy attacking you, this functions will trigger.
 			force_end = function(){
 				instance_destroy(bullet)
 			}

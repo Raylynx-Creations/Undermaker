@@ -123,7 +123,8 @@
     "enemie_names": {
         "mad_dummy": "Mad Dummy",
         "monster": "Monster",
-        "angy_monster": "Angy Monster"
+        "angy_monster": "Angy Monster",
+        "turn_monster": "Turn Monster"
     },
     "rooms": {
         "rm_overworld_1_grass_land": "The Grass Land",

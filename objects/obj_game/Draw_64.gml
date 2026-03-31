@@ -4,7 +4,7 @@
 var _screen_height = resolutions_height[global.game_settings.resolution_active]
 var _game_width = _screen_height*(4/3)
 //Detrminate if the UI should draw or not
-var _show_ui = (quit_timer > 0 or input_system.can_draw() or state == GAME_STATE.MENU_CONTROL or state == GAME_STATE.PLAYER_MENU_CONTROL or state == GAME_STATE.BATTLE_END or (state == GAME_STATE.BATTLE and (battle_system.battle_black_alpha > 0 or get_battle_state() == BATTLE_STATE.END_DODGE_ATTACK)) or state == GAME_STATE.GAME_OVER or state == GAME_STATE.ROOM_CHANGE or state == GAME_STATE.BATTLE_START_ANIMATION or !battle_system.battle_dialog.is_finished() or !dialog.is_finished())
+var _show_ui = (quit_timer > 0 or input_system.can_draw() or state == GAME_STATE.MENU_CONTROL or state == GAME_STATE.PLAYER_MENU_CONTROL or state == GAME_STATE.BATTLE_END or (state == GAME_STATE.BATTLE and (battle_system.battle_black_alpha > 0 or battle_get_state() == BATTLE_STATE.END_DODGE_ATTACK)) or state == GAME_STATE.GAME_OVER or state == GAME_STATE.ROOM_CHANGE or state == GAME_STATE.BATTLE_START_ANIMATION or !battle_system.battle_dialog.is_finished() or !dialog.is_finished())
 
 if (_show_ui){
 	if (!surface_exists(ui_surface)){

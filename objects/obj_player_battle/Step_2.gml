@@ -17,7 +17,7 @@ if (mode == SOUL_MODE.NORMAL){
 }
 
 //Movement only applies when dodging an attack, this is where the collision is checked by the movement
-if (get_battle_state() == BATTLE_STATE.ENEMY_ATTACK or get_battle_state() == BATTLE_STATE.END_DODGE_ATTACK){
+if (battle_get_state() == BATTLE_STATE.ENEMY_ATTACK or battle_get_state() == BATTLE_STATE.END_DODGE_ATTACK){
 	//If there's a movement we have to check if the movement is valid and if it results in a collision, move it out of the collision by the conditions given by it
 	if (move_x != 0 or move_y != 0){
 		var _finish = false //Flag to finish early in case of loop in movement

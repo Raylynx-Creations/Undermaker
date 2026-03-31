@@ -1,3 +1,10 @@
+//-------------ROTATION ORIENTATIONS---------------
+
+enum ROTATION_ORIENTATION{
+	CLOCKWISE,
+	COUNTER_CLOCKWISE
+}
+
 //-----------------BULLET TYPES--------------------
 
 enum BULLET_TYPE{

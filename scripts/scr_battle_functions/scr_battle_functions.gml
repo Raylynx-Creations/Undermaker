@@ -93,8 +93,8 @@ function battle_box_update_points_by_rotation(_angle_offset, _box){
 	}
 	
 	with (_box.box_polygon_points){
-		var _origin_x = get_battle_box_x_origin(false,, _box)
-		var _origin_y = get_battle_box_y_origin(false,, _box)
+		var _origin_x = battle_get_box_x_origin(false,, _box)
+		var _origin_y = battle_get_box_y_origin(false,, _box)
 		
 		var _length = array_length(inside)
 		for (var _i = 0; _i < _length; _i += 2){
@@ -171,7 +171,7 @@ function battle_set_enemy_dialog(_enemy){
 function damage_player_bullet_instance(_bullet, _player){
 	with (_player){
 		var _prev_hp = global.player.hp
-		global.player.hp = clamp(global.player.hp + ((_bullet.type == BULLET_TYPE.GREEN) ? _bullet.damage : -_bullet.damage), (get_battle_state() != BATTLE_STATE.ENEMY_ATTACK), global.player.max_hp)
+		global.player.hp = clamp(global.player.hp + ((_bullet.type == BULLET_TYPE.GREEN) ? _bullet.damage : -_bullet.damage), (battle_get_state() != BATTLE_STATE.ENEMY_ATTACK), global.player.max_hp)
 		
 		if (_prev_hp != global.player.hp){
 			if (global.player.status_effect.type == PLAYER_STATUS_EFFECT.KARMIC_RETRIBUTION){

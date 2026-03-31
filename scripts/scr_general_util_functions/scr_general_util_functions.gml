@@ -294,3 +294,7 @@ function set_event_update(_function){
 function set_event_end_condition(_function){
 	obj_game.event_end_condition = _function
 }
+
+function gpu_set_default_blendmode(){
+	gpu_set_blendmode_ext_sepalpha(bm_src_alpha, bm_inv_src_alpha, bm_inv_dest_alpha, bm_one);
+}

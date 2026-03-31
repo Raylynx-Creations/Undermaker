@@ -76,3 +76,5 @@ game_menu_system = undefined
 game_ready = function(){
 	go_to_game_menu() //Loads the menu, the function can be used in any place of the game and will lead you to the menu.
 }
+
+gpu_set_default_blendmode()

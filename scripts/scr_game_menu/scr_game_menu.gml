@@ -1,3 +1,6 @@
+/*
+Constants used to represent the states of the game's menu.
+*/
 enum GAME_MENU{
 	ENTERING_MAIN_MENU,
 	MAIN_MENU,
@@ -6,26 +9,34 @@ enum GAME_MENU{
 	GO_TO_GAME
 }
 
+/*
+Helper functions used to get back to the game's menu after holding ESC for a period of time.
+It's meant to stop all musics, reset any variables in game that need to be reset so on loading the game or new game, the game works just fine.
+It removes the overworld player since it is not needed in this room.
+And creates a new menu instance from the constructor function.
+IT DOESN'T CLEAR PERSISTENT OBJECTS, MAKE SURE YOU KNOW WHEN YOU CALL THIS FUNCTION AND REMOVE ANY STUFF NOT TAKEN INTO ACCOUNT MANUALLY OR INCLUDE IT HERE TOO.
+IT'S ALSO IMPORTANT THAT YOU DEFINE IT, THE OBJ_GAME USES IT.
+*/
 function go_to_game_menu(){
-	audio_stop_all()
+	audio_stop_all() //Stop all sounds
 	
 	with (obj_game){
-		previous_room = -1
-		overworld_music_system.ignore = false
+		previous_room = -1 //No previous room data saved
+		overworld_music_system.ignore = false //Reset variable of ignore
 		
 		while (!dialog.is_finished()){
-			dialog.next_dialog()
+			dialog.next_dialog() //Skip any dialog currently playing
 		}
 		
 		if (room == rm_battle){
-			battle_system.clear_battle()
+			battle_system.clear_battle() //Clear battle stuff like arrays and persistent stuff
 		}
 		
 		state = GAME_STATE.MENU_CONTROL
-		game_menu_system = new GameMenu()
+		game_menu_system = new GameMenu() //Game menu instance
 		
 		if (room == rm_menu){
-			room_restart() //Restart the room, in case something new happens
+			room_restart() //Restart the room so activations on room end and start happen again
 		}else{
 			start_room_function = function(){
 				instance_destroy(obj_player_overworld) //If a player exists, make sure it doesn't exist, in the menu there shouldn't be any players yet.
@@ -36,15 +47,23 @@ function go_to_game_menu(){
 	}
 }
 
+/*
+This function creates the overworld player for the game.
+A game is not a game without the player, although not essential, like obj_game to do stuff, without a player what will our users control and have fun with?
+A player must be created only when you want to start the game so its logic and inputs don't interfere with whatever you are doin in this menu.
+*/
 function create_initial_player_overworld(){
 	instance_create_depth(0, 0, 0, obj_player_overworld, {image_xscale: 2, image_yscale: 2}) //Just create it, set the scale as well, doesn't matter the other data
 }
 
+/*
+This function loads the game's initial save state, the first room the player spawns on, the first area they will start on.
+*/
 function load_initial_room(){
-	set_initial_game_data()
-	room_goto(rm_overworld_1_grass_land)
+	set_initial_game_data() //Load the initial save state data which you can define on scr_initial_save_file_data script.
+	room_goto(rm_overworld_1_grass_land) //Go to the room the player will start on.
 	
-	obj_player_overworld.spawn_point_reference = inst_spawn_point_grass_land //Set a reference spawn point for the player to position when the room loads
+	obj_player_overworld.spawn_point_reference = inst_spawn_point_grass_land //Set a reference spawn point for the player to position when the room loads, it must exist in the room of course.
 }
 
 /*
@@ -56,6 +75,8 @@ I made a sample function too to define the Game Menu, it has no states tho, you 
 function so you can start in different submenus when coming back from specific stuff, use global variables to gestion unlockable
 content and let the creation flow.
 Even made some enums for it.
+
+RETURNS -> STRUCT OF GAME MENU DATA --The game menu and it's representation is given here, use it on go_to_game_menu() function.
 */
 function GameMenu() constructor{
 	timer = 0
@@ -66,6 +87,13 @@ function GameMenu() constructor{
 	borders_amount = get_borders_amount()
 	languages_amount = get_languages_amount()
 	
+	/*
+	The Game Menu constrcutor must have an step and draw functions, that's pretty much all the engine asks for.
+	Of course it's you who has to define the whole behavior of the menu, there's a room dedicated to the menu that the engine uses.
+	Use that room as you desire to make the menu happen but never change to a room of the overworld without a player.
+	*/
+	
+	//Logic of the game
 	step = function(){
 		switch (state){
 			case GAME_MENU.ENTERING_MAIN_MENU:{
@@ -256,6 +284,7 @@ function GameMenu() constructor{
 		}
 	}
 	
+	//Drawing of the menu
 	draw = function(){
 		if ((state == GAME_MENU.GO_TO_GAME and timer < 150) or state != GAME_MENU.GO_TO_GAME){
 			draw_sprite_ext(spr_undermaker_logo, 0, 320, 150, 0.5, 0.5, 0, c_white, 1)

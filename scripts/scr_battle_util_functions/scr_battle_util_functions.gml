@@ -151,7 +151,7 @@ function battle_set_box_origin(_x, _y, _relative=true, _box=obj_battle_box){
 	}
 }
 
-function battle_set_box_polygon_points(_points, _relative=true, _box=obj_battle_box){
+function battle_set_box_polygon_points(_points, _relative=true, _invert=false, _box=obj_battle_box){
 	if (array_length(_points) < 4){
 		show_message("The box must have at least 2 points to be shown.")
 		
@@ -162,6 +162,16 @@ function battle_set_box_polygon_points(_points, _relative=true, _box=obj_battle_
 	var _points_copy = []
 	array_copy(_points_copy, 0, _points, 0, _length)
 	_points = _points_copy
+	
+	if (_invert){
+		_points_copy = []
+		for (var _i=0; _i<_length; _i += 2){
+			var _value = array_pop(_points) //array_pops -> Y
+			array_push(_points_copy, array_pop(_points), _value) //array_pops -> X
+		}
+		
+		_points = _points_copy
+	}
 	
 	with (_box.box_polygon_points){
 		with (_box.box_origin){
@@ -238,68 +248,119 @@ function battle_set_box_rotation(_angle, _instant=false, _box=obj_battle_box){
 	}
 }
 
-function battle_set_background(_background=BATTLE_BACKGROUND.NO_BG){
+function battle_set_background(_background=BATTLE_BACKGROUND.NO_BG, _depth=500){
 	with (obj_game.battle_system){
 		if (!is_undefined(battle_background)){
 			instance_destroy(battle_background)
 		}
 		
-		battle_background = BattleBackground(_background)
+		battle_background = BattleBackground(_background, _depth)
 	}
 }
 
-function get_battle_box_width(_expected=false, _box=obj_battle_box){
+function battle_toggle_flee(_state){
+	obj_game.battle_system.battle_can_flee = _state
+}
+
+function battle_set_flee_event(_flee_event){
+	obj_game.battle_system.battle_flee_event_type = _flee_event
+}
+
+function battle_set_flee_chance(_amount){
+	obj_game.battle_system.battle_flee_chance = clamp(_amount, 0, 100)
+}
+
+function battle_add_flee_chance(_amount){
+	with (obj_game.battle_system){
+		battle_flee_chance = clamp(battle_flee_chance + _amount, 0, 100)
+	}
+}
+
+function battle_add_enemie(_monster, _x, _y){
+	if (room != rm_battle){
+		show_error("You can't add enemies or spawn enemies if you're not on battle, you must be in room rm_battle to do so aka the battle room.", true)
+	}
+	
+	var _position = array_length(global.battle_enemies) + array_length(obj_game.battle_system.battle_cleared_enemies)
+	var _enemy = new Enemy(_monster, _position, _x, _y)
+	
+	array_push(global.battle_enemies, _enemy)
+}
+
+function battle_get_flee_state(){
+	return obj_game.battle_system.battle_can_flee
+}
+
+function battle_get_flee_chance(){
+	return obj_game.battle_system.battle_flee_chance
+}
+
+function battle_get_current_attack_amount(){
+	return obj_game.battle_system.battle_attack_count
+}
+
+function battle_get_current_enemies_amount(_only_active_enemies=true){
+	var _length = array_length(global.battle_enemies)
+	if (_only_active_enemies){
+		return _length
+	}else{
+		return _length + array_length(obj_game.battle_system.battle_cleared_enemies)
+	}
+}
+
+function battle_get_current_enemies(_only_active_enemies=true){
+	var _list = []
+	var _length = array_length(global.battle_enemies)
+	
+	array_copy(_list, 0, global.battle_enemies, 0, _length)
+	
+	if (!_only_active_enemies){
+		array_copy(_list, _length, obj_game.battle_system.battle_cleared_enemies, 0, array_length(obj_game.battle_system.battle_cleared_enemies))
+	}
+	
+	return _list
+}
+
+function battle_get_box_width(_expected=false, _box=obj_battle_box){
 	return (_expected ? _box.boxsize.x : _box.width)
 }
 
-function get_battle_box_height(_expected=false, _box=obj_battle_box){
+function battle_get_box_height(_expected=false, _box=obj_battle_box){
 	return (_expected ? _box.boxsize.y : _box.height)
 }
 
-function get_battle_box_rotation(_expected=false, _box=obj_battle_box){
+function battle_get_box_rotation(_expected=false, _box=obj_battle_box){
 	return (_expected ? _box.box_rotation : _box.image_angle)
 }
 
-function get_battle_box_x_position(_expected=false, _box=obj_battle_box){
+function battle_get_box_x_position(_expected=false, _box=obj_battle_box){
 	return (_expected ? _box.box_position.x : _box.x)
 }
 
-function get_battle_box_y_position(_expected=false, _box=obj_battle_box){
+function battle_get_box_y_position(_expected=false, _box=obj_battle_box){
 	return (_expected ? _box.box_position.y : _box.y)
 }
 
-function get_battle_box_x_origin(_relative=true, _expected=false, _box=obj_battle_box){
-	return (_relative ? 0 : get_battle_box_x_position(_expected, _box)) + _box.box_origin.x
+function battle_get_box_x_origin(_relative=true, _expected=false, _box=obj_battle_box){
+	return (_relative ? 0 : battle_get_box_x_position(_expected, _box)) + _box.box_origin.x
 }
 
-function get_battle_box_y_origin(_relative=true, _expected=false, _box=obj_battle_box){
-	return (_relative ? 0 : get_battle_box_y_position(_expected, _box)) + _box.box_origin.y
+function battle_get_box_y_origin(_relative=true, _expected=false, _box=obj_battle_box){
+	return (_relative ? 0 : battle_get_box_y_position(_expected, _box)) + _box.box_origin.y
 }
 
-function get_battle_state(){
+function battle_get_state(){
 	return obj_game.battle_system.battle_state
 }
 
-function get_battle_bullets_array(){
+function battle_get_bullets_array(){
 	return obj_game.battle_system.battle_bullets
 }
 
-function get_battle_menu_bullets_array(){
+function battle_get_menu_bullets_array(){
 	return obj_game.battle_system.menu_bullets
 }
 
-function get_battle_damage_text_array(){
+function battle_get_damage_text_array(){
 	return obj_game.battle_system.battle_damage_text
-}
-
-function get_enemie_name(_name){
-	return struct_get(global.UI_texts.enemie_names, _name)
-}
-
-function get_battle_ui_damage_text(_name){
-	return struct_get(global.UI_texts[$"battle damage texts"], _name)
-}
-
-function get_enemie_dialogues(_enemy){
-	return struct_get(global.dialogues.battle.enemies, _enemy)
 }

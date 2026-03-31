@@ -5,12 +5,12 @@ if (invulnerability_frames > 0){
 	invulnerability_frames--
 	
 	//As long as the state of the battle is showing the player it will blink, if not, it won't, but still will count down the invulnerability time
-	if (get_battle_state() != BATTLE_STATE.TURN_END and get_battle_state() != BATTLE_STATE.PLAYER_ATTACK and get_battle_state() != BATTLE_STATE.PLAYER_DIALOG_RESULT and get_battle_state() != BATTLE_STATE.PLAYER_FLEE and get_battle_state() != BATTLE_STATE.PLAYER_WON){
+	if (battle_get_state() != BATTLE_STATE.TURN_END and battle_get_state() != BATTLE_STATE.PLAYER_ATTACK and battle_get_state() != BATTLE_STATE.PLAYER_DIALOG_RESULT and battle_get_state() != BATTLE_STATE.PLAYER_FLEE and battle_get_state() != BATTLE_STATE.PLAYER_WON){
 		image_alpha = 1 - floor((invulnerability_frames%10)/5)
 	}
 }
 
-switch (get_battle_state()){
+switch (battle_get_state()){
 	//Player movement when dodging attacks
 	case BATTLE_STATE.END_DODGE_ATTACK:
 	case BATTLE_STATE.ENEMY_ATTACK:{

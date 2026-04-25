@@ -242,3 +242,9 @@ function toggle_random_encounters(_active=true, _reset_steps=false){
 function set_random_encounters(_enemie_pool, _steps_to_trigger, _minimum_enemies=1, _maximum_enemies=3, _selection_type=ENCOUNTER_ENEMIE_SELECTION.COMBINE, _exclude_enemie_combinations=undefined){
 	obj_game.random_encounter_system.set_encounters(_enemie_pool, _steps_to_trigger, _minimum_enemies, _maximum_enemies, _selection_type, _exclude_enemie_combinations)
 }
+
+function set_player_state(_state=PLAYER_STATE.MOVEMENT){
+	if (obj_game.state == GAME_STATE.PLAYER_CONTROL){
+		obj_player_overworld.state = _state
+	}
+}

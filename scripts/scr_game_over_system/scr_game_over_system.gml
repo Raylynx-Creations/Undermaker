@@ -69,6 +69,7 @@ function GameOverSystem() constructor{
 				game_over_music_system.stop_music()
 				
 				obj_game.state = GAME_STATE.PLAYER_CONTROL
+				obj_player_overworld.state = PLAYER_STATE.MOVEMENT
 			break}
 		}
 		
@@ -95,7 +96,7 @@ function GameOverSystem() constructor{
 		var _color = make_colour_rgb(_number, _number, _number)
 			
 		draw_clear_alpha(c_black, 1 - max(game_over_timer - 472, 0)/20)
-		draw_sprite_ext(spr_game_over, 0, 320, 160, 1, 1, 0, _color, 1 - clamp(game_over_timer - 472, 0, 1))
+		draw_sprite_ext(get_language_sprite("spr_game_over"), 0, 320, 160, 1, 1, 0, _color, 1 - clamp(game_over_timer - 472, 0, 1))
 			
 		if (game_over_timer < 75){
 			draw_sprite_ext(spr_player_heart, game_over_heart_index, game_over_heart_x, game_over_heart_y, game_over_heart_xscale, game_over_heart_yscale, game_over_heart_angle, game_over_heart_color, 1)

@@ -22,8 +22,8 @@ function general_line_collision_handler(_id, _line_points, _line_direction, _lin
 			}
 			
 			if (_collide){
-				_id.x += dcos(_direction)
-				_id.y -= dsin(_direction)
+				_id.x += dcos(_direction)/4
+				_id.y -= dsin(_direction)/4
 			}else{
 				array_delete(_colliding_instances, _id_index, 1)
 				array_delete(_instance_directions, _id_index, 1)
@@ -42,8 +42,8 @@ function general_line_collision_handler(_id, _line_points, _line_direction, _lin
 		}
 		
 		if (_collide){
-			_id.x += dcos(_direction)
-			_id.y -= dsin(_direction)
+			_id.x += dcos(_direction)/4
+			_id.y -= dsin(_direction)/4
 		
 			if (collision_line(_line_points[0], _line_points[1], _line_points[2], _line_points[3], _id, false, false)){
 				array_push(_colliding_instances, {object_id: id, line_id: _line_id, points: [_line_points[0], _line_points[1], _line_points[2], _line_points[3]]})
@@ -76,8 +76,8 @@ function general_object_collision_handler(_id, _colliding_instances, _instance_d
 		if (_id_index >= 0){
 			var _direction = _instance_directions[_id_index]
 			
-			_id.x += dcos(_direction)
-			_id.y -= dsin(_direction)
+			_id.x += dcos(_direction)/4
+			_id.y -= dsin(_direction)/4
 			
 			return _collision_amount
 		}
@@ -182,8 +182,8 @@ function push_entity(_pusher){
 		var _direction = point_direction(_pusher_collision_center_x, _pusher_collision_center_y, _collision_center_x, _collision_center_y)
 		
 		while (place_meeting(x, y, _pusher)){
-			x += dcos(_direction)
-			y -= dsin(_direction)
+			x += dcos(_direction)/4
+			y -= dsin(_direction)/4
 		}
 	}else{
 		var _pusher_moved_dist = max(abs(_pusher.xprevious - _pusher.x), abs(_pusher.yprevious - _pusher.y))
@@ -207,8 +207,8 @@ function push_entity(_pusher){
 				var _direction = point_direction(_pusher_collision_center_x, _pusher_collision_center_y, _collision_center_x, _collision_center_y)
 				
 				while (place_meeting(x, y, _pusher)){
-					x += dcos(_direction)
-					y -= dsin(_direction)
+					x += dcos(_direction)/4
+					y -= dsin(_direction)/4
 				}
 			}
 		}else{
@@ -258,16 +258,16 @@ function handle_collision_object_and_interaction_collision(_id){
 		
 		if (_left_distance == _min_distance){ //Right pushing
 			//_direction = 0 //It is already 0.
-			_id.x++
+			_id.x += 0.25
 		}else if (_right_distance == _min_distance){ //Left pushing
 			_direction = 180
-			_id.x--
+			_id.x -= 0.25
 		}else if (_down_distance == _min_distance){ //Down pushing
 			_direction = 90
-			_id.y--
+			_id.y -= 0.25
 		}else{ //Up pushing
 			_direction = 270
-			_id.y++
+			_id.y += 0.25
 		}
 	}else{
 		_angle = _angle%180
@@ -368,8 +368,8 @@ function handle_collision_object_and_interaction_collision(_id){
 			_direction += _angle%90
 		}
 		
-		_id.x += dcos(_direction)
-		_id.y -= dsin(_direction)
+		_id.x += dcos(_direction)/4
+		_id.y -= dsin(_direction)/4
 	}
 	
 	return _direction
@@ -390,8 +390,8 @@ function handle_entity_collision(_id){
 	
 	if (round_collision_behavior){
 		_direction = point_direction(_collision_center_x, _collision_center_y, _id_center_x, _id_center_y)
-		_id.x += dcos(_direction)
-		_id.y -= dsin(_direction)
+		_id.x += dcos(_direction)/4
+		_id.y -= dsin(_direction)/4
 	}else{
 		var _left_collision = _collision_center_x - _collision_width/2
 		var _top_collision = _collision_center_y - _collision_height/2
@@ -400,23 +400,23 @@ function handle_entity_collision(_id){
 			if (_id_center_x >= _left_collision and _id_center_x <= _left_collision + _collision_width){
 				if (_id_center_y <= _collision_center_y){ //Up pushing
 					_direction = 90
-					_id.y--
+					_id.y -= 0.25
 				}else{ //Down pushing
 					_direction = 270
-					_id.y++
+					_id.y += 0.25
 				}
 			}else if(_id_center_y >= _top_collision and _id_center_y <= _top_collision + _collision_height){
 				if (_id_center_x <= _collision_center_x){ //Left pushing
 					_direction = 180
-					_id.x--
+					_id.x -= 0.25
 				}else{ //Right pushing
 					//_direction = 0 //It is already 0.
-					_id.x++
+					_id.x += 0.25
 				}
 			}else{
 				_direction = point_direction(_collision_center_x, _collision_center_y, _id_center_x, _id_center_y)
-				_id.x += dcos(_direction)
-				_id.y -= dsin(_direction)
+				_id.x += dcos(_direction)/4
+				_id.y -= dsin(_direction)/4
 			}
 		}else{
 			//Checking the closest direction to push out.
@@ -429,16 +429,16 @@ function handle_entity_collision(_id){
 			
 			if (_left_distance == _min_distance){ //Right pushing
 				//_direction = 0 //It is already 0.
-				_id.x++
+				_id.x += 0.25
 			}else if (_right_distance == _min_distance){ //Left pushing
 				_direction = 180
-				_id.x--
+				_id.x -= 0.25
 			}else if (_down_distance == _min_distance){ //Down pushing
 				_direction = 90
-				_id.y--
+				_id.y -= 0.25
 			}else{ //Up pushing
 				_direction = 270
-				_id.y++
+				_id.y += 0.25
 			}
 		}
 	}

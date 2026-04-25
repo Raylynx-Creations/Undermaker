@@ -1,5 +1,5 @@
 /// @description Variable method runs if set
 
-if (!is_undefined(draw_begin)){
-	draw_begin()
+if (!is_undefined(before_draw)){
+	before_draw()
 }

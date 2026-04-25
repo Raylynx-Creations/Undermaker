@@ -21,10 +21,14 @@ function BattleSystem() constructor{
 	battle_dust_clouds = []
 	battle_damage_text = []
 	battle_bullets = [] //An array of all the bullets, that gets cleared after an attack.
+	battle_box_line_collisions = [] //Array to cache line structures
 	battle_exp = 0
 	battle_gold = 0
 	battle_fled = false
 	anim_timer = 0
+	
+	result_inside = []
+	result_outside = []
 	
 	update_border_alpha = false
 	
@@ -34,6 +38,11 @@ function BattleSystem() constructor{
 	
 	battle_init_function = undefined
 	battle_end_function = undefined
+	
+	battle_button_selecting_left = undefined
+	battle_button_selecting_right = undefined
+	battle_button_selecting_up = undefined
+	battle_button_selecting_down = undefined
 	
 	battle_only_attack = undefined
 	is_battle_only_attack_undefined = true //Auxiliar of the other variable
@@ -166,6 +175,27 @@ function BattleSystem() constructor{
 				battle_fled = false
 				battle_button_order = [btn_fight, btn_act, btn_item, btn_mercy]
 				
+				battle_button_selecting_left = function(_selection){
+					_selection--
+					while (_selection <= -1){
+						_selection += battle_options_amount
+					}
+					
+					return _selection
+				}
+				
+				battle_button_selecting_right = function(_selection){
+					_selection++
+					while (_selection >= battle_options_amount){
+						_selection -= battle_options_amount
+					}
+					
+					return _selection
+				}
+				
+				battle_button_selecting_up = undefined
+				battle_button_selecting_down = undefined
+				
 				var _length = array_length(global.battle_enemies)
 				var _x = 640/(_length + 1)
 				
@@ -221,11 +251,6 @@ function BattleSystem() constructor{
 						array_push(battle_enemies_attacks, new EnemyAttack(battle_only_attack, 0, undefined))
 					}
 					
-					with (obj_player_battle){
-						x = obj_battle_box.x
-						y = obj_battle_box.y - round(obj_battle_box.height)/2 - 5
-					}
-					
 					with (obj_battle_box){
 						width = box_size.x
 						height = box_size.y
@@ -235,29 +260,54 @@ function BattleSystem() constructor{
 				}
 			break}
 			case BATTLE_STATE.PLAYER_BUTTONS:{
+				var _prev = battle_selection[0]
 				var _length = array_length(battle_enemies_dialogs)
 				for (var _i=0; _i<_length; _i++){
 					var _dialog = battle_enemies_dialogs[_i]
 					_dialog.step()
 				}
 				
-				if (global.left_button){
-					audio_play_sound(snd_menu_selecting, 0, false)
+				if (!is_undefined(battle_button_selecting_left) and get_left_button(false)){
+					var _returned = battle_button_selecting_left(_prev)
 					
-					battle_selection[0]--
-					
-					if (battle_selection[0] <= -1){
-						battle_selection[0] += battle_options_amount
+					if (_prev != _returned){
+						battle_selection[0] = _returned
+						_prev = _returned
+						
+						audio_play_sound(snd_menu_selecting, 0, false)
 					}
 				}
 				
-				if (global.right_button){
-					audio_play_sound(snd_menu_selecting, 0, false)
+				if (!is_undefined(battle_button_selecting_right) and get_right_button(false)){
+					var _returned = battle_button_selecting_right(_prev)
 					
-					battle_selection[0]++
+					if (_prev != _returned){
+						battle_selection[0] = _returned
+						_prev = _returned
+						
+						audio_play_sound(snd_menu_selecting, 0, false)
+					}
+				}
+				
+				if (!is_undefined(battle_button_selecting_up) and get_up_button(false)){
+					var _returned = battle_button_selecting_up(_prev)
 					
-					if (battle_selection[0] >= battle_options_amount){
-						battle_selection[0] -= battle_options_amount
+					if (_prev != _returned){
+						battle_selection[0] = _returned
+						_prev = _returned
+						
+						audio_play_sound(snd_menu_selecting, 0, false)
+					}
+				}
+				
+				if (!is_undefined(battle_button_selecting_down) and get_down_button(false)){
+					var _returned = battle_button_selecting_down(_prev)
+					
+					if (_prev != _returned){
+						battle_selection[0] = _returned
+						_prev = _returned
+						
+						audio_play_sound(snd_menu_selecting, 0, false)
 					}
 				}
 				
@@ -739,7 +789,7 @@ function BattleSystem() constructor{
 		
 		draw_set_halign(fa_left)
 		draw_set_valign(fa_top)
-		draw_set_font(fnt_battle_status)
+		draw_set_font(get_language_font("fnt_battle_status"))
 		
 		draw_text(battle_player_stats.x + 214, battle_player_stats.y - 10, global.UI_texts.hp)
 		
@@ -756,7 +806,7 @@ function BattleSystem() constructor{
 				
 				draw_healthbar(battle_player_stats.x + 245, battle_player_stats.y + 6, battle_player_stats.x + 245 + global.player.hp_bar_width*global.player.hp/global.player.max_hp, battle_player_stats.y - 16, 100*_kr_amount/global.player.hp, c_red, _kr_color, _kr_color, 1, false, false)
 				
-				draw_text(battle_player_stats.x + 255 + battle_player_stats.health_size, battle_player_stats.y - 10, global.UI_texts[$"status effects"][$"karmic retribution"])
+				draw_text(battle_player_stats.x + 255 + global.player.hp_bar_width, battle_player_stats.y - 10, global.UI_texts[$"status effects"][$"karmic retribution"])
 				
 				if (_kr_amount > 0){
 					draw_set_color(_kr_color)
@@ -764,7 +814,7 @@ function BattleSystem() constructor{
 			break}
 		}
 		
-		draw_set_font(fnt_mars_needs_cunnilingus)
+		draw_set_font(get_language_font("fnt_mars_needs_cunnilingus"))
 		
 		draw_text(battle_player_stats.x + 260 + _x_offset + global.player.hp_bar_width, battle_player_stats.y - 14, string_concat(global.player.hp, " / ", global.player.max_hp))
 		

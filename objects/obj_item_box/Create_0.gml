@@ -19,9 +19,9 @@ interaction = function(){
 	start_box_menu(box_inventory_id)
 }
 
-before_update = undefined
+before_step = undefined
 step = undefined
-after_update = undefined
+after_step = undefined
 before_draw = undefined
 draw = undefined
 after_draw = undefined

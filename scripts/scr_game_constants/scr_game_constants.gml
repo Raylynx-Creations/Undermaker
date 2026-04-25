@@ -22,9 +22,11 @@ Constant that determinates custom created fonts, following the same name syntax 
 DO NOT UNDER ANY CIRCUMSTANCE PUT THE FUNCTION TO ADD FONTS DIRECTLY IN THE MACRO, USE A GLOBAL VARIABLE TO PASS THE INDEX.
 Otherwise it will create the font everytime you call the macro, potentially causing memory leak or massive usage of memory.
 */
-global.custom_fnt_hachiko = font_add_sprite(spr_fnt_hachiko, 32, true, 4)
+global.custom_fnt_hachiko_en = font_add_sprite(spr_fnt_hachiko_en, 32, true, 4)
 
-#macro fnt_hachiko global.custom_fnt_hachiko
+#macro fnt_hachiko_en global.custom_fnt_hachiko_en
+
+//---------------Programmer Area---------------------
 
 /*
 Player states for the overworld, used in the Player Overworld object, and changed with the Trigger events to do various stuff with the player, such as disabling it and moving it for cutscenes, or wait a certain amount of time to move.
@@ -42,4 +44,14 @@ enum GAME_STATE{
 	DIALOG_PLUS_CHOICE,
 	DIALOG_GRID_CHOICE,
 	GAME_OVER
+}
+
+/*
+Button constants to represent the different type of buttons.
+*/
+enum BUTTON{
+	FIGHT,
+	ACT,
+	ITEM,
+	MERCY
 }

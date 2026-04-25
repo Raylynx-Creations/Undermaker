@@ -59,6 +59,7 @@ function PlayerMenuSystem() constructor{
 				}else if (get_cancel_button(false) or get_menu_button(false)){
 					ignore_first_frame_menu = true
 					obj_game.state = GAME_STATE.PLAYER_CONTROL
+					obj_player_overworld.state = PLAYER_STATE.MOVEMENT
 				}
 			break}
 			case PLAYER_MENU_STATE.STATS:{
@@ -234,6 +235,7 @@ function PlayerMenuSystem() constructor{
 						player_menu_state = PLAYER_MENU_STATE.CELL
 					}else{
 						obj_game.state = GAME_STATE.PLAYER_CONTROL
+						obj_player_overworld.state = PLAYER_STATE.MOVEMENT
 					}
 					
 					audio_play_sound(snd_menu_selecting, 0, false)
@@ -255,32 +257,7 @@ function PlayerMenuSystem() constructor{
 						if (player_menu_prev_state == PLAYER_MENU_STATE.CELL){
 							perform_game_save(room, obj_player_overworld.x, obj_player_overworld.y, 0)
 						}else{
-							var _inst = player_save_spawn_point_inst
-							var _angle = _inst.image_angle
-							var _size_x = 10*_inst.image_xscale
-							var _size_y = 10*_inst.image_yscale
-							var _x = _inst.x + _size_x*dcos(_angle) + _size_y*dsin(_angle)
-							var _y = _inst.y + _size_y*dcos(_angle) - _size_x*dsin(_angle)
-							
-							if (_angle < 0){
-								_angle = 359 - (abs(_angle) - 1)%360
-							}else if (_angle >= 360){
-								_angle %= 360
-							}
-							
-							var _direction = 0
-							var _x_direction = sign(_inst.image_xscale)
-							if (_angle <= 45 or _angle > 315){
-								_direction = 2 - _x_direction
-							}else if (_angle <= 135){
-								_direction = 1 + _x_direction
-							}else if (_angle <= 225){
-								_direction = 2 + _x_direction
-							}else{
-								_direction = 1 - _x_direction
-							}
-							
-							perform_game_save(room, _x, _y, _direction)
+							perform_game_save_with_spawn_point(player_save_spawn_point_inst)
 						}
 						
 						audio_play_sound(snd_game_saved, 100, false)
@@ -293,6 +270,7 @@ function PlayerMenuSystem() constructor{
 							audio_play_sound(snd_menu_selecting, 100, false)
 						}else{
 							obj_game.state = GAME_STATE.PLAYER_CONTROL
+							obj_player_overworld.state = PLAYER_STATE.MOVEMENT
 							player_menu_prev_state = -2 //Necessary so it doesn't trigger again.
 						}
 					}
@@ -303,6 +281,7 @@ function PlayerMenuSystem() constructor{
 						audio_play_sound(snd_menu_selecting, 0, false)
 					}else{
 						obj_game.state = GAME_STATE.PLAYER_CONTROL
+						obj_player_overworld.state = PLAYER_STATE.MOVEMENT
 					}
 				}
 			break}
@@ -329,7 +308,7 @@ function PlayerMenuSystem() constructor{
 	draw = function(){
 		draw_set_halign(fa_left)
 		draw_set_valign(fa_top)
-		draw_set_font(fnt_determination_sans)
+		draw_set_font(get_language_font("fnt_determination_sans"))
 		
 		var _heart_x = 0
 		var _heart_y = 0
@@ -461,7 +440,7 @@ function PlayerMenuSystem() constructor{
 								var _weapon = global.item_pool[global.player.weapon]
 								_player_weapon = _weapon[$"inventory name"]
 							}
-								
+							
 							if (!is_undefined(global.player.armor) and global.player.armor >= 0){
 								var _armor = global.item_pool[global.player.armor]
 								_player_armor = _armor[$"inventory name"]
@@ -512,7 +491,7 @@ function PlayerMenuSystem() constructor{
 					draw_text_transformed_color(83, 259, global.UI_texts[$"menu cell"], 2, 2, 0, _cell_color, _cell_color, _cell_color, _cell_color, 1)
 				}
 			
-				draw_set_font(fnt_crypt_of_tomorrow)
+				draw_set_font(get_language_font("fnt_crypt_of_tomorrow"))
 			
 				draw_text_ext_transformed(_stats_x + 13, _stats_y + 49, string_concat(global.UI_texts.lv, "\n", global.UI_texts.hp, "\n", global.UI_texts.gold), 9, 100, 2, 2, 0)
 				draw_text_ext_transformed(_stats_x + 49, _stats_y + 49, string_concat(global.player.lv, "\n", global.player.hp, "/", global.player.max_hp, "\n", global.player.gold), 9, 100, 2, 2, 0)

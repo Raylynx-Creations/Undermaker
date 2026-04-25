@@ -52,6 +52,8 @@ function battle_box_update_points_by_position(_x_offset, _y_offset, _box){
 		return
 	}
 	
+	battle_clear_box_line_collisions_cache()
+	
 	with (_box.box_polygon_points){
 		var _length = array_length(inside)
 		for (var _i = 0; _i < _length; _i += 2){
@@ -73,6 +75,8 @@ function battle_box_update_points_by_position(_x_offset, _y_offset, _box){
 }
 
 function battle_box_update_points_by_resize(_box){
+	battle_clear_box_line_collisions_cache()
+	
 	with (_box.box_polygon_points){
 		default_points[0] = _box.x - round(_box.width)/2
 		default_points[1] = _box.y - 5
@@ -92,34 +96,36 @@ function battle_box_update_points_by_rotation(_angle_offset, _box){
 		return
 	}
 	
+	battle_clear_box_line_collisions_cache()
+	
 	with (_box.box_polygon_points){
 		var _origin_x = battle_get_box_x_origin(false,, _box)
 		var _origin_y = battle_get_box_y_origin(false,, _box)
 		
 		var _length = array_length(inside)
 		for (var _i = 0; _i < _length; _i += 2){
-			var _direction = point_direction(_origin_x, _origin_y, inside[_i], inside[_i+1])
+			var _direction = point_direction(_origin_x, _origin_y, inside[_i], inside[_i+1]) + _angle_offset
 			var _distance = point_distance(_origin_x, _origin_y, inside[_i], inside[_i+1])
 			
 			inside[_i] = _origin_x + _distance*dcos(_direction)
 			inside[_i+1] = _origin_y - _distance*dsin(_direction)
 			
-			_direction = point_direction(_origin_x, _origin_y, outside[_i], outside[_i+1])
+			_direction = point_direction(_origin_x, _origin_y, outside[_i], outside[_i+1]) + _angle_offset
 			_distance = point_distance(_origin_x, _origin_y, outside[_i], outside[_i+1])
 			
-			outside[_i] += _origin_x + _distance*dcos(_direction)
-			outside[_i+1] += _origin_y - _distance*dsin(_direction)
+			outside[_i] = _origin_x + _distance*dcos(_direction)
+			outside[_i+1] = _origin_y - _distance*dsin(_direction)
 		}
 		
 		_length = array_length(triangles)
 		for (var _i = 0; _i < _length; _i++){
 			var _triangle = triangles[_i]
 			for (var _j = 0; _j < 6; _j += 2){
-				var _direction = point_direction(_origin_x, _origin_y, _triangle[_i], _triangle[_i+1])
-				var _distance = point_distance(_origin_x, _origin_y, _triangle[_i], _triangle[_i+1])
+				var _direction = point_direction(_origin_x, _origin_y, _triangle[_j], _triangle[_j+1]) + _angle_offset
+				var _distance = point_distance(_origin_x, _origin_y, _triangle[_j], _triangle[_j+1])
 				
-				_triangle[_j] += _x
-				_triangle[_j+1] += _y
+				_triangle[_j] = _origin_x + _distance*dcos(_direction)
+				_triangle[_j+1] = _origin_y - _distance*dsin(_direction)
 			}
 		}
 	}
@@ -129,6 +135,8 @@ function battle_box_update_points_by_origin(_x_offset, _y_offset, _box){
 	if (_x_offset == 0 and _y_offset == 0){
 		return
 	}
+	
+	battle_clear_box_line_collisions_cache()
 	
 	with (_box.box_polygon_points){
 		var _direction = _box.image_angle + 180
@@ -154,11 +162,20 @@ function battle_box_update_points_by_origin(_x_offset, _y_offset, _box){
 	}
 }
 
+function battle_clear_box_line_collisions_cache(){
+	with (obj_game.battle_system){
+		var _length = array_length(battle_box_line_collisions)
+		if (_length > 0){
+			array_delete(battle_box_line_collisions, 0, _length)
+		}
+	}
+}
+
 function battle_set_enemy_dialog(_enemy){
 	if (typeof(_enemy.next_dialog) == "array"){
-		_enemy.next_dialog[0] = "[font:" + string(int64(fnt_monster)) + "][color_rgb:0,0,0][asterisk:false]" + _enemy.next_dialog[0]
+		_enemy.next_dialog[0] = "[font:fnt_monster][color_rgb:0,0,0][asterisk:false]" + _enemy.next_dialog[0]
 	}else{
-		_enemy.next_dialog = "[font:" + string(int64(fnt_monster)) + "][color_rgb:0,0,0][asterisk:false]" + _enemy.next_dialog
+		_enemy.next_dialog = "[font:fnt_monster][color_rgb:0,0,0][asterisk:false]" + _enemy.next_dialog
 	}
 	
 	var _dialog = new DialogSystem(_enemy.x + _enemy.bubble_x, _enemy.y + _enemy.bubble_y, _enemy.next_dialog, _enemy.bubble_width, 0, 1, 1,,,, _enemy.bubble_sprite, _enemy.bubble_tail_sprite, _enemy.bubble_tail_mask_sprite)
@@ -173,19 +190,23 @@ function damage_player_bullet_instance(_bullet, _player){
 		var _prev_hp = global.player.hp
 		global.player.hp = clamp(global.player.hp + ((_bullet.type == BULLET_TYPE.GREEN) ? _bullet.damage : -_bullet.damage), (battle_get_state() != BATTLE_STATE.ENEMY_ATTACK), global.player.max_hp)
 		
+		if (_bullet.type == BULLET_TYPE.GREEN){
+			audio_play_sound(snd_player_heal, 0, false)
+		}
+		
 		if (_prev_hp != global.player.hp){
 			if (global.player.status_effect.type == PLAYER_STATUS_EFFECT.KARMIC_RETRIBUTION){
-				global.player.status_effect.value = min(global.player.status_effect.value + _bullet.karma, _bullet.player.hp - 1, 40)
-				_bullet.karma = min(_bullet.karma, 1) //There are more steps to karmic retribution but I'm doing it the simple way really.
+				global.player.status_effect.value = min(global.player.status_effect.value + _bullet.karma, global.player.hp - 1, 40)
+				_bullet.karma = min(_bullet.karma, 1)
 			}
 			
-			if (_bullet.type == BULLET_TYPE.GREEN){
-				audio_play_sound(snd_player_heal, 0, false)
-			}else{
+			if (_bullet.type != BULLET_TYPE.GREEN){
 				audio_play_sound(snd_player_hurt, 0, false)
 			}
 			
-			invulnerability_frames = global.player.invulnerability_frames
+			if (_prev_hp > global.player.hp){
+				invulnerability_frames = global.player.invulnerability_frames
+			}
 		}
 	}
 }

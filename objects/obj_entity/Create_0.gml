@@ -14,9 +14,9 @@ depth_ordering = true //You can deactivate the depth by the Y position
 interaction_key = "confirm"
 
 //Functions for the entity interaction
-before_update = undefined
+before_step = undefined
 step = undefined
-after_update = undefined
+after_step = undefined
 before_draw = undefined
 draw = undefined
 after_draw = undefined

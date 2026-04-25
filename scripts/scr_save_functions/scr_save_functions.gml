@@ -68,6 +68,34 @@ function perform_game_save(_rm, _x, _y, _direction){
 	global.last_save.seconds = global.seconds
 }
 
+function perform_game_save_with_spawn_point(_inst){
+	var _angle = _inst.image_angle
+	var _size_x = 10*_inst.image_xscale
+	var _size_y = 10*_inst.image_yscale
+	var _x = _inst.x + _size_x*dcos(_angle) + _size_y*dsin(_angle)
+	var _y = _inst.y + _size_y*dcos(_angle) - _size_x*dsin(_angle)
+							
+	if (_angle < 0){
+		_angle = 359 - (abs(_angle) - 1)%360
+	}else if (_angle >= 360){
+		_angle %= 360
+	}
+							
+	var _direction = 0
+	var _x_direction = sign(_inst.image_xscale)
+	if (_angle <= 45 or _angle > 315){
+		_direction = 2 - _x_direction
+	}else if (_angle <= 135){
+		_direction = 1 + _x_direction
+	}else if (_angle <= 225){
+		_direction = 2 + _x_direction
+	}else{
+		_direction = 1 - _x_direction
+	}
+							
+	perform_game_save(room, _x, _y, _direction)
+}
+
 function perform_game_load(){
 	audio_stop_all()
 	

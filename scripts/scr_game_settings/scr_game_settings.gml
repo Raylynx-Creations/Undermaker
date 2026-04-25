@@ -1,10 +1,42 @@
 /*
 Available languages on your game.
 
-These are not texts that display in the game, but the name it has on the text files the game loads for language management.
-For example "UI texts spanish.json" is the name of the file in language of spanish, in actual spanish the word is different of course, but we don't care about that here.
+These are global variables where all the text of the game is located, separated on different functions on "scr_language_texts" to represent each language you want to include in your game.
+
+The first variable just holds reference to the functions which contain all the text used in the game, UI, dialogs and items, they are contained in arrays which contain [ui_texts, dialogues, item_pool].
+Each array in the variable means a language, use comments to label them properly.
+
+The second variables serves a similar purpose, it's intended for sprite that contain text inside them and therefor you want to translate it depending on the selected language.
+It's a dictionary where the key name is the reference name in which you call it in game, using get_language_sprite(<_name>) function to fetch them, the array assigned to them must be the same size as the amount of language you have added in the first variable (each array in the first variable representing a language)
+
+The third variable is exactly the same as the second but intended for fonts.
+Fonts don't have sometimes the characters a language uses, for example tildes on spanish, so you can go and find new font resources you import in the game to use for that specific language, and in this variable you assign them to the specific languages so you can use the characters of that language!
 */
-global.languages_available = ["english", "spanish"]
+global.language_texts = [ //Since I don't possess the patience to actually translate my texts to spanish, I use the same as english and the first one is the only one different.
+	//[ui_texts_function, dialogues_function, item_pool_function]
+	[language_ui_texts_en, language_dialogues_en, language_item_pool_en], //english
+	[language_ui_texts_es, language_dialogues_en, language_item_pool_en] //spanish
+	//...more languages
+]
+global.language_sprites = {
+	//reference: [sprite_for_language_1, sprite_for_language_2, ...]
+	spr_player_buttons: [spr_player_buttons_en, spr_player_buttons_en],
+	spr_game_over: [spr_game_over_en, spr_game_over_en],
+	spr_undermaker_logo: [spr_undermaker_logo_en, spr_undermaker_logo_en]
+}
+global.language_fonts = {
+	//reference: [font_for_language_1, font_for_language_2, ...]
+	fnt_battle_status: [fnt_battle_status_en, fnt_battle_status_en],
+	fnt_big_determination_mono: [fnt_big_determination_mono_en, fnt_big_determination_mono_en],
+	fnt_crypt_of_tomorrow: [fnt_crypt_of_tomorrow_en, fnt_crypt_of_tomorrow_en],
+	fnt_determination_mono: [fnt_determination_mono_en, fnt_determination_mono_en],
+	fnt_determination_sans: [fnt_determination_sans_en, fnt_determination_sans_en],
+	fnt_mars_needs_cunnilingus: [fnt_mars_needs_cunnilingus_en, fnt_mars_needs_cunnilingus_en],
+	fnt_monster: [fnt_monster_en, fnt_monster_en],
+	fnt_papyrus: [fnt_papyrus_en, fnt_papyrus_en],
+	fnt_wingdings: [fnt_wingdings_en, fnt_wingdings_en],
+	fnt_hachiko: [fnt_hachiko_en, fnt_hachiko_en]
+}
 
 /*
 Global variable that holds persistent data for configuration settings.

@@ -33,8 +33,9 @@ function set_initial_game_data(){
 		inventory_size: 8,
 		status_effect: {
 			type: PLAYER_STATUS_EFFECT.NONE,
-			color: make_color_rgb(232, 0, 255),
-			value: 0
+			color: 0,
+			value: 0,
+			timer: 0
 		}
 	}
 	

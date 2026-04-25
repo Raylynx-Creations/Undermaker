@@ -2,6 +2,6 @@
 
 has_collided = false
 
-if (!is_undefined(before_update)){
-	before_update()
+if (!is_undefined(before_step)){
+	before_step()
 }

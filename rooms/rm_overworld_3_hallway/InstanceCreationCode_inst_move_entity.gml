@@ -15,7 +15,7 @@ interaction = function(_direction){
 	}
 }
 
-after_update = function(){ //Must use after_update (which run in the end_step event) function since paths update after the update event (which run on the step event)
+after_step = function(){ //Must use after_step (which run in the end_step event) function since paths update after the update event (which run on the step event)
 	if (path_position == 1 and path_positionprevious != 1){
 		image_xscale = -image_xscale
 	}

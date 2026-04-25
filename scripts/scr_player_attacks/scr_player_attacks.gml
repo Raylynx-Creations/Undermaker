@@ -86,7 +86,7 @@ function PlayerAttack(_weapon, _enemie) constructor{
 						
 						//This is the miss part by not interacting with anything on the attack, finish the attack.
 						if (x > 280 or x < -280){
-							enemy_attacked.hurt("MISS")
+							enemy_attacked.hurt("MISS") //This is for data management, it doesn't display it on screen, no need to use language functions, keep it consisten for your code with a string and do stuff as you need.
 							//This is how you show damage UI numbers.
 							array_push(battle_get_damage_text_array(), DamageUIAnimation(DAMAGE_UI_ANIMATION_TYPE.NO_ANIMATION, battle_get_ui_damage_text("miss"), c_gray, enemy_attacked.x + enemy_attacked.damage_ui_x, enemy_attacked.y + enemy_attacked.damage_ui_y))
 							
@@ -176,7 +176,7 @@ function PlayerAttack(_weapon, _enemie) constructor{
 					
 					//When no input.
 					if (x > 280){
-						enemy_attacked.hurt("MISS")
+						enemy_attacked.hurt("MISS") //This is for data management, it doesn't display it on screen, no need to use language functions, keep it consisten for your code with a string and do stuff as you need.
 						array_push(battle_get_damage_text_array(), DamageUIAnimation(DAMAGE_UI_ANIMATION_TYPE.NO_ANIMATION, battle_get_ui_damage_text("miss"), c_gray, enemy_attacked.x + enemy_attacked.damage_ui_x, enemy_attacked.y + enemy_attacked.damage_ui_y))
 						
 						player_attack_done = true

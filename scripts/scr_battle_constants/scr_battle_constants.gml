@@ -42,16 +42,15 @@ enum GRAVITY_SOUL{
 	LEFT
 }
 
-//-----------------UI--------------------
+//-----------------BATTLE BOX TYPES--------------------
 
 /*
-
+Battle box types for you to select and make attacks more engaging and interesting to play in.
 */
-enum BUTTON{
-	FIGHT,
-	ACT,
-	ITEM,
-	MERCY
+enum BATTLE_BOX_TYPE{
+	NORMAL,
+	HOLE,
+	MERGE
 }
 
 //-----------------STATES--------------------

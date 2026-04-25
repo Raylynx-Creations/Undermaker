@@ -4,28 +4,33 @@
 step = undefined
 destroy = undefined
 
-surface = -1
-
+type = PLATFORM_TYPE.NORMAL
 length = 100 //Size of platform
 conveyor_speed = 1 //Conveyor platform type speed
+trampoline_pushing_strength = 6080/1444 //Numbers came from using the formula to calculate the jump.speed on the player gravity soul jumping variables, specifically 2*gravity_data.jump.max_height/power(gravity_data.jump.duration, 2)*gravity_data.jump.duration, where jump.duration is 38 and jump.max_height is 80
+
+//Fragile platform data
+fragile = {duration_time: 0, respawn_time: 90, respawn: true}
+
+//-----------------Programmer area---------------------------
+
+fragile.state = 0
+fragile.timer = 0
+
+surface = -1
 
 //For movement of the platform, we don't use xprevious or x
 move_x = 0
 move_y = 0
 
-type = PLATFORM_TYPE.NORMAL
 anim_timer = 0 //For animation purposes
 //Strength of the trampoline
-trampoline_pushing_strength = 6080/1444 //Numbers came from using the formula to calculate the jump.speed on the player gravity soul jumping variables, specifically 2*gravity_data.jump.max_height/power(gravity_data.jump.duration, 2)*gravity_data.jump.duration, where jump.duration is 38 and jump.max_height is 80
 
 //Platform update flags to avoid repeating the updates
 platform_effects_updated = false
 platform_updated = false
 platform_sticky_updated = false
 is_player_on = false //Flag that tells if the player is on the platform
-
-//Fragile platform data
-fragile = {duration_time: 0, respawn_time: 90, state: 0, timer: 0, respawn: true}
 
 //Function to check if it's collidable
 is_collidable = function(){

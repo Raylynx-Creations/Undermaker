@@ -18,8 +18,8 @@ trigger_function = function(){
 		collided_with_player = true
 		image_blend = c_gray
 		
-		var _attacks = [ENEMY_ATTACK.ATTACK_2]
+		var _attacks = [ENEMY_ATTACK.BOX_ATTACK]
 	
-		start_attack(_attacks)
+		start_attack(_attacks,,,,,,, 240)
 	}
 }

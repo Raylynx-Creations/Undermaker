@@ -246,8 +246,9 @@ function battle_go_to_state(_state, _enemy=undefined){
 			case BATTLE_STATE.PLAYER_WON:{
 				battle_resize_box(565, 130)
 				battle_move_box_to(320, 390)
-				battle_set_box_rotation(0)
+				battle_rotate_box_to(0)
 				battle_reset_box_polygon_points()
+				battle_set_player_status_effect()
 				
 				if (obj_game.battle_pause_music){
 					obj_game.battle_music_system.stop_music()
@@ -389,6 +390,8 @@ function battle_go_to_state(_state, _enemy=undefined){
 				}
 			break}
 			case BATTLE_STATE.ENEMY_DIALOG:{
+				inst_battle_box.depth = 200
+				
 				var _length = array_length(battle_enemies_dialogs)
 				if (_length){
 					array_delete(battle_enemies_dialogs, 0, _length)
@@ -439,6 +442,9 @@ function battle_go_to_state(_state, _enemy=undefined){
 				}
 			break}
 			case BATTLE_STATE.ENEMY_ATTACK:{
+				obj_player_battle.box_depth = inst_battle_box.depth
+				inst_battle_box.type = BATTLE_BOX_TYPE.NORMAL
+				
 				battle_attack_count = 0
 				
 				var _length = array_length(battle_enemies_dialogs)
@@ -522,12 +528,15 @@ function battle_go_to_state(_state, _enemy=undefined){
 			case BATTLE_STATE.TURN_END:{
 				battle_resize_box(565, 130)
 				battle_move_box_to(320, 390)
-				battle_set_box_rotation(0)
+				battle_rotate_box_to(0)
 				battle_reset_box_polygon_points()
+				inst_battle_box.type = BATTLE_BOX_TYPE.NORMAL
 				
 				with (obj_battle_box){
 					if (inst_battle_box.id != id){
 						instance_destroy()
+					}else{
+						depth = 200
 					}
 				}
 				
@@ -537,7 +546,7 @@ function battle_go_to_state(_state, _enemy=undefined){
 				for (var _i=0; _i<_length; _i++){
 					var _bullet = battle_bullets[_i]
 					
-					if (instance_exists(_bullet)){
+					if (instance_exists(_bullet) and !_bullet.persistent){
 						instance_destroy(_bullet)
 					}
 					
@@ -625,7 +634,7 @@ function battle_go_to_state(_state, _enemy=undefined){
 							
 							array_pop(global.battle_enemies)
 						}
-			
+						
 						_length = array_length(battle_cleared_enemies)
 						for (var _i=0; _i<_length; _i++){
 							array_pop(battle_cleared_enemies)
@@ -634,6 +643,7 @@ function battle_go_to_state(_state, _enemy=undefined){
 				}
 				
 				anim_timer = 0
+				battle_set_player_status_effect()
 				battle_apply_rewards(false)
 				
 				if (obj_game.battle_pause_music){

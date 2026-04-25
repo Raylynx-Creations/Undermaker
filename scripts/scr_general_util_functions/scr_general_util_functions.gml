@@ -1,3 +1,12 @@
+function add_item_to_player_inventory(_item){
+	var _is_inventory_full = (array_length(global.player.inventory) >= global.player.inventory_size)
+	if (!_is_inventory_full){
+		array_push(global.player.inventory, _item)
+	}
+	
+	return !_is_inventory_full
+}
+
 function save_game_settings(){
 	var _file = file_text_open_write(working_directory + "/settings.save")
 	file_text_write_string(_file, json_stringify(global.game_settings))
@@ -5,35 +14,13 @@ function save_game_settings(){
 }
 
 function load_game_texts(_id){
+	var _texts = global.language_texts[_id]
 	global.game_settings.language = _id
-	var _language = get_language_by_id(_id)
 	
-	var _item_path = "Item pool " + _language + ".json"
-	var _ui_texts_path = "UI texts " + _language + ".json"
-	var _dialogues_path = "Dialogues " + _language + ".json"
-	
-	if (!file_exists(working_directory + "/" + _item_path)){
-		show_error("The Item pool file in the \"" + _language + "\" language doesn't exist, make sure you named it correct as \"Item pool " + _language + ".json\" or set the correct language name in the global.languages_available variable.", true)
-	}
-	if (!file_exists(working_directory + "/" + _item_path)){
-		show_error("The UI texts file in the \"" + _language + "\" language doesn't exist, make sure you named it correct as \"UI texts " + _language + ".json\" or set the correct language name in the global.languages_available variable.", true)
-	}
-	if (!file_exists(working_directory + "/" + _item_path)){
-		show_error("The Dialogues file in the \"" + _language + "\" language doesn't exist, make sure you named it correct as \"Dialogues " + _language + ".json\" or set the correct language name in the global.languages_available variable.", true)
-	}
-	
-	load_items_info(_item_path)
-	load_ui_texts(_ui_texts_path)
-	load_dialogues_file(_dialogues_path)
+	load_ui_texts(_texts[0])
+	load_dialogues_file(_texts[1])
+	load_items_info(_texts[2])
 	load_save_info()
-}
-
-function get_language_by_id(_id){
-	return global.languages_available[_id]
-}
-
-function get_current_language(){
-	return global.languages_available[get_current_language_id()]
 }
 
 function get_current_language_id(){
@@ -41,7 +28,7 @@ function get_current_language_id(){
 }
 
 function get_languages_amount(){
-	return array_length(global.languages_available)
+	return array_length(global.language_texts)
 }
 
 function set_resolution(_index){
@@ -297,4 +284,12 @@ function set_event_end_condition(_function){
 
 function gpu_set_default_blendmode(){
 	gpu_set_blendmode_ext_sepalpha(bm_src_alpha, bm_inv_src_alpha, bm_inv_dest_alpha, bm_one);
+}
+
+function get_language_sprite(_name){
+	return variable_struct_get(global.language_sprites, _name)[get_current_language_id()]
+}
+
+function get_language_font(_name){
+	return variable_struct_get(global.language_fonts, _name)[get_current_language_id()]
 }

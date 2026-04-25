@@ -5,7 +5,7 @@ alarm[1] = 60 //Temporary timer startup, this should be moved to the menu stuff 
 
 starting_up = true //Variable to do stuff on start up
 
-state =  -1 //Doesn't matter the initial state, the menu function at the very bottom replaces this value
+state = -1 //Doesn't matter the initial state, the menu function at the very bottom replaces this value
 battle_start_animation_type = BATTLE_START_ANIMATION.NORMAL
 
 //Position where the player heart will move at the battle starting animations

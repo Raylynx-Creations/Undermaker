@@ -1,17 +1,23 @@
 /// @description Variable declaration
 
+type = BATTLE_BOX_TYPE.NORMAL
+resize_speed = 20
+movement_speed = 5
+rotation_speed = 5
+
+box_fill_color = c_black
+box_fill_alpha = 1
+
+//image_blend = c_black
+
+//-------------------------------Programmer area-------------------------------------
+
 width = 565
 height = 130
 
 //(The origin of the box is in the middle bottom)
 x = 320
 y = 390
-
-resize_speed = 20
-movement_speed = 10
-rotation_speed = 5
-
-//-------------------------------Programmer area-------------------------------------
 
 box_size = {x: 565, y: 130}
 box_position = {x: 320, y: 390}
@@ -21,6 +27,8 @@ box_origin = {defined: false, polygon_defined: false, x: 0, y: -5 - round(height
 //Data for the collision of the box with player
 box_collision_updated = false //Flag to avoid repeating collision logic more than once
 can_collide = true //You can set the box to not collide at all if you want
+prev_depth = undefined
+prev_type = type
 
 /*
 Definition of the polygon points for the box
@@ -42,9 +50,16 @@ box_polygon_points = {
 	direction: [],
 	triangles: [] //Holds the triangles for the drawing of the polygon for the filling.
 }
-box_fill_color = c_black
-box_fill_alpha = 1
 box_fill_surface = -1 //Surface mask
+box_outline_surface = -1 //Outline surface
+hole_outline = -1
+hole_fill = -1
+merge_outline = -1
+normal_fill = -1
+normal_outline = -1
+merge_fill = -1
+result_boxes = -1
+can_draw = true
 
 var _default_points = box_polygon_points.default_points
 _default_points[0] = x - round(width)/2

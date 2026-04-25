@@ -30,7 +30,7 @@ function DamageUIAnimation(_type, _text, _text_color, _x, _y, _depth=0, _draw_ba
 			
 			draw_set_halign(fa_center)
 			draw_set_valign(fa_bottom)
-			draw_set_font(fnt_hachiko)
+			draw_set_font(get_language_font("fnt_hachiko"))
 			
 			draw_text_color(x, y - 10 - 20*dsin(180*_timer), text, text_color, text_color, text_color, text_color, 1)
 			if (draw_bar){

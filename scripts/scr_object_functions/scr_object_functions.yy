@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"scr_object_functions",
   "parent":{
-    "name":"Utils",
-    "path":"folders/Scripts/Engine/Utils.yy",
+    "name":"Utility",
+    "path":"folders/Scripts/Engine/Utility.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

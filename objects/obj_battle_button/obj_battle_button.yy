@@ -31,8 +31,8 @@
   "resourceVersion":"2.0",
   "solid":false,
   "spriteId":{
-    "name":"spr_player_buttons",
-    "path":"sprites/spr_player_buttons/spr_player_buttons.yy",
+    "name":"spr_player_buttons_en",
+    "path":"sprites/spr_player_buttons_en/spr_player_buttons_en.yy",
   },
   "spriteMaskId":null,
   "visible":true,

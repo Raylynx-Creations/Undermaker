@@ -40,10 +40,6 @@ function set_soul_mode(_mode, _args_struct=undefined, _obj=obj_player_battle){
 					if (is_undefined(_args_struct)){
 						other.image_blend = make_color_rgb(0,60,255)
 					}else{
-						if (variable_struct_exists(_args_struct, "box_bound") and !_args_struct.box_bound){
-							box_bound = false
-						}
-					
 						if (variable_struct_exists(_args_struct, "orange") and !_args_struct.orange){
 							other.image_blend = make_color_rgb(0,60,255)
 						}else{
@@ -90,13 +86,6 @@ function is_player_soul_moving(_player=obj_player_battle){
 		
 		_extra_x += platform_vel.x
 		_extra_y += platform_vel.y
-		
-		if (mode == SOUL_MODE.GRAVITY){
-			if (gravity_data.box_bound){
-				_extra_x += obj_battle_box.x - obj_battle_box.xprevious
-				_extra_y -= obj_battle_box.y - obj_battle_box.yprevious
-			}
-		}
 		
 		return x != xprevious + _extra_x or y != yprevious + _extra_y or move_x != _extra_x or move_y != _extra_y or (!is_undefined(move_to_x) and move_to_x != x + _extra_x) or (!is_undefined(move_to_y) and move_to_y != y + _extra_y)
 	}

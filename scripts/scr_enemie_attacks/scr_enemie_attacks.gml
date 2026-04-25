@@ -12,7 +12,8 @@ enum ENEMY_ATTACK{
 	PLATFORM_2,
 	PLATFORM_3,
 	ATTACK_1,
-	ATTACK_2
+	ATTACK_2,
+	BOX_ATTACK
 }
 
 /*
@@ -47,6 +48,96 @@ function EnemyAttack(_attack_name, _position, _damage) constructor{
 	//Just don't forget to set attack_done as true when you want the attack to be over, or you will softlock the player on the game.
 	//You use the battle_* functions and set_* functions corresponding to this section, consult the user manual in the documentation to know all the functions.
 	switch (_attack_name){
+		case ENEMY_ATTACK.BOX_ATTACK: {
+			damage = _damage
+			box_1 = battle_create_box(320, 295, 100, 100,,, BATTLE_BOX_TYPE.MERGE)
+			
+			battle_resize_box(100, 100, true)
+			battle_move_box_to(320, 295, true)
+			
+			step = function(){
+				timer++
+				
+				if (timer == 30){
+					battle_move_box(0, 50)
+					battle_move_box(0, -50,, box_1)
+				}else if (timer >= 60){
+					if (timer%60 < 15){
+						var _speed = ((timer < 75) ? 2 : 4)
+						battle_move_box(_speed, 0)
+						battle_move_box(-_speed, 0,, box_1)
+					}else if (timer%60 >= 30 and timer%60 < 45){
+						battle_move_box(-4, 0)
+						battle_move_box(4, 0,, box_1)
+					}
+				}
+				
+				if (timer%30 == 1){
+					var _direction = choose(-1, 1)
+					for (var _i = -100; _i <= 100; _i += 20){
+						with (spawn_bullet(spr_circle_bullet, 0, 0, 180 + 90*_direction, true, 300, damage)){
+							x = 320 + _i
+							y = 240 + 100*_direction
+							
+							if (_direction == -1){
+								box_for_mask = other.box_1
+							}
+							
+							step = function(){
+								timer++
+		
+								if (timer == 60){
+									depth = 0
+								}else if (timer >= 120 and ((y > 240 and direction == 90) or (y < 240 and direction == 270))){
+									image_alpha -= 0.05
+								}
+			
+								var _movement = 5*pi*dcos(1.5*min(timer, 120))/6
+					
+								if (_movement <= 0){
+									if ((obj_player_battle.y <= 245 and y <= 245 and direction == 90) or (obj_player_battle.y >= 235 and y >= 235 and direction == 270)){
+										can_damage = true
+									}else{
+										can_damage = false
+									}
+								}
+					
+								if (_movement < 1 and color_value < 255){
+									color_value = min(color_value + 5, 255)
+									var _number = color_value
+				
+									switch (type){
+										case BULLET_TYPE.WHITE:{
+											image_blend = make_colour_rgb(_number, _number, _number)
+										break}
+										case BULLET_TYPE.CYAN:{
+											image_blend = make_colour_rgb(_number*33/255, _number*195/255, _number)
+										break}
+										case BULLET_TYPE.ORANGE:{
+											image_blend = make_colour_rgb(_number, _number*150/255, 0)
+										break}
+										case BULLET_TYPE.GREEN:{
+											image_blend = make_colour_rgb(_number*18/255, _number*64/255, 0)
+										break}
+									}
+								}
+					
+								x += _movement*dcos(direction)
+								y -= _movement*dsin(direction)
+					
+								if (image_alpha <= 0){
+									instance_destroy()
+								}
+							}
+						}
+					}
+				}
+				
+				if (timer == 360){
+					attack_done = true
+				}
+			}
+		break}
 		case ENEMY_ATTACK.PLATFORM_1: {
 			battle_resize_box(290, 290, true)
 			platforms = []
@@ -117,8 +208,8 @@ function EnemyAttack(_attack_name, _position, _damage) constructor{
 			}
 			
 			draw = function(){
-				draw_set_font(fnt_crypt_of_tomorrow)
-				draw_text_transformed(2, 2, "Press 1 to change to Red Soul.\nPress 2 to change to Blue Soul.\nPress 3 to change to Orange Soul.\nUse IJKL to change direction with gravity soul.\n\nPress 4,5,6,7 to change platform types.\nPress H to finish attack.", 2, 2, 0)
+				draw_set_font(get_language_font("fnt_crypt_of_tomorrow"))
+				draw_text_transformed(2, 2, global.dialogues.platform_attack, 2, 2, 0)
 			}
 		break}
 		case ENEMY_ATTACK.PLATFORM_2: {

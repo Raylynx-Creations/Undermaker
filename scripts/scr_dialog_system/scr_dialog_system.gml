@@ -124,7 +124,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 	dialogues_amount = 0 //This is a variable that holds the lenght of the dialog array so there's no need to calculate it when needed.
 	dialog_pop_ups = []
 	dialog_pop_ups_amount = 0
-	font = fnt_determination_mono //Fonts can only be changed per dialog with a command in the dialog and only if it's at the very beginning of it.
+	font = get_language_font("fnt_determination_mono") //Fonts can only be changed per dialog with a command in the dialog and only if it's at the very beginning of it.
 	use_font_space = true //Flag to determinate if use the space width of the font or not so a constant space width is used, by default true.
 	spacing_width = 0 //This is the additional space between letters, the fonts themselves already have a space between each letter, this adds more between them, can be negative as well.
 	spacing_height = 2 //Same as spacing_width but for space between line jumps.
@@ -1420,7 +1420,11 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 								if (_spr != -1){
 									_arguments[0] = _spr
 								}else{
-									_arguments[0] = int64(_arguments[0])
+									try{
+										_arguments[0] = get_language_sprite(string_trim(_arguments[0]))
+									}catch (_exception){
+										_arguments[0] = int64(_arguments[0])
+									}
 								}
 							}
 							
@@ -1541,6 +1545,12 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 									var _spr = asset_get_index(_cut_arguments[_k])
 									if (_spr != -1){
 										_cut_arguments[_k] = _spr
+									}else{
+										try{
+											_cut_arguments[_k] = get_language_sprite(string_trim(_cut_arguments[_k]))
+										}catch (_exception){
+											//Nothing
+										}
 									}
 								}
 								
@@ -2062,7 +2072,11 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 							if (_fnt != -1){
 								_command_arguments[0] = _fnt
 							}else{
-								_command_arguments[0] = int64(_command_arguments[0])
+								try{
+									_command_arguments[0] = get_language_font(string_trim(_command_arguments[0]))
+								}catch (_exception){
+									_command_arguments[0] = int64(_command_arguments[0])
+								}
 							}
 						
 							if (_j == 1 and _command_arguments[0] != final_font){
@@ -2372,7 +2386,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 		
 		//Reset the text_align_x and the final_face_height to recalculate them again with the new assigned face_sprite from this function, which gets reset of course and reset other stuff too.
 		asterisk = true
-		font = fnt_determination_mono
+		font = get_language_font("fnt_determination_mono")
 		use_font_space = true
 		spacing_width = 0
 		spacing_height = 2

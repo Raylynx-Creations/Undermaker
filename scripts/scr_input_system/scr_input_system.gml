@@ -239,7 +239,7 @@ function InputSystem() constructor{
 		if (control_type == CONTROL_TYPE.MAPPING_CONTROLLER){
 			draw_set_halign(fa_center)
 			draw_set_valign(fa_top)
-			draw_set_font(fnt_determination_mono)
+			draw_set_font(get_language_font("fnt_determination_mono"))
 		
 			draw_sprite_ext(spr_pixel, 0, 0, 0, GAME_WIDTH, GAME_HEIGHT, 0, c_black, 0.75)
 	
@@ -290,7 +290,7 @@ function InputSystem() constructor{
 		}else{
 			draw_set_halign(fa_left)
 			draw_set_valign(fa_top)
-			draw_set_font(fnt_determination_sans)
+			draw_set_font(get_language_font("fnt_determination_sans"))
 		
 			draw_set_alpha(control_alpha)
 			draw_text_transformed(10, 6, control_message, 1.5, 1.5, 0)

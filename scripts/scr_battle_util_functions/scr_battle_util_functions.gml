@@ -51,7 +51,73 @@ function battle_kill_enemy(_index){
 	global.battle_enemies[_index] = undefined
 }
 
-function battle_resize_box(_x, _y, _instant=false, _box=obj_battle_box){
+function battle_set_player_status_effect(_type=PLAYER_STATUS_EFFECT.NONE, _apply_effects_immediatelly_on_change=false){
+	if (room != rm_battle or battle_get_state() == BATTLE_STATE.END or battle_get_state() == BATTLE_STATE.PLAYER_WON){
+		return
+	}
+	
+	with (global.player.status_effect){
+		switch (_type){
+			case PLAYER_STATUS_EFFECT.KARMIC_RETRIBUTION:{
+				type = _type
+				color = make_color_rgb(232, 0, 255)
+				value = 0
+				timer = 0
+			break}
+			default:{ //PLAYER_STATUS_EFFECT.NONE
+				if (_apply_effects_immediatelly_on_change){
+					switch (type){
+						case PLAYER_STATUS_EFFECT.KARMIC_RETRIBUTION:{
+							if (value > 0){
+								global.player.hp -= value
+							}
+						}
+					}
+				}
+				
+				type = PLAYER_STATUS_EFFECT.NONE
+				color = 0
+				value = 0
+				timer = 0
+			break}
+		}
+	}
+}
+
+function battle_create_box(_x, _y, _width, _height, _rotation=0, _depth=undefined, _type=BATTLE_BOX_TYPE.NORMAL){
+	if (is_undefined(_depth)){
+		_depth = 200
+	}
+	
+	battle_clear_box_line_collisions_cache()
+	
+	var _box = instance_create_depth(_x, _y, _depth, obj_battle_box)
+	_box.type = _type
+	_box.prev_depth = _depth
+	
+	battle_move_box_to(_x, _y, true, _box)
+	battle_resize_box(_width, _height, true, _box)
+	battle_rotate_box_to(_rotation, true, _box)
+	
+	return _box
+}
+
+function battle_destroy_box(_box){
+	instance_destroy(_box)
+	
+	battle_clear_box_line_collisions_cache()
+}
+
+function battle_set_box_depth(_depth, _box=inst_battle_box){
+	if (_box.depth != _depth){
+		_box.depth = _depth
+		_box.prev_depth = _depth
+		
+		battle_clear_box_line_collisions_cache()
+	}
+}
+
+function battle_resize_box(_x, _y, _instant=false, _box=inst_battle_box){
 	with (_box){
 		box_size.x = _x
 		box_size.y = _y
@@ -64,7 +130,7 @@ function battle_resize_box(_x, _y, _instant=false, _box=obj_battle_box){
 	}
 }
 
-function battle_move_box_to(_x, _y, _instant=false, _box=obj_battle_box){
+function battle_move_box_to(_x, _y, _instant=false, _box=inst_battle_box){
 	with (_box){
 		box_position.x = _x
 		box_position.y = _y
@@ -81,7 +147,7 @@ function battle_move_box_to(_x, _y, _instant=false, _box=obj_battle_box){
 	}	
 }
 
-function battle_move_box(_x, _y, _instant=false, _box=obj_battle_box){
+function battle_move_box(_x, _y, _instant=false, _box=inst_battle_box){
 	with (_box){
 		box_position.x += _x
 		box_position.y += _y
@@ -98,7 +164,7 @@ function battle_move_box(_x, _y, _instant=false, _box=obj_battle_box){
 	}	
 }
 
-function battle_reset_box_origin(_box=obj_battle_box){
+function battle_reset_box_origin(_box=inst_battle_box){
 	with (_box.box_origin){
 		var _diff_x = -x
 		var _diff_y = y
@@ -116,7 +182,7 @@ function battle_reset_box_origin(_box=obj_battle_box){
 	}
 }
 
-function battle_reset_box_polygon_points(_box=obj_battle_box){
+function battle_reset_box_polygon_points(_box=inst_battle_box){
 	with (_box.box_polygon_points){
 		with (_box.box_origin){
 			polygon_defined = false
@@ -135,7 +201,7 @@ function battle_reset_box_polygon_points(_box=obj_battle_box){
 	}
 }
 
-function battle_set_box_origin(_x, _y, _relative=true, _box=obj_battle_box){
+function battle_set_box_origin(_x, _y, _relative=true, _box=inst_battle_box){
 	with (_box.box_origin){
 		var _diff_x = x
 		var _diff_y = y
@@ -151,7 +217,7 @@ function battle_set_box_origin(_x, _y, _relative=true, _box=obj_battle_box){
 	}
 }
 
-function battle_set_box_polygon_points(_points, _relative=true, _invert=false, _box=obj_battle_box){
+function battle_set_box_polygon_points(_points, _relative=true, _invert=false, _box=inst_battle_box){ //TODO: Ensure CCW
 	if (array_length(_points) < 4){
 		show_message("The box must have at least 2 points to be shown.")
 		
@@ -225,7 +291,7 @@ function battle_set_box_polygon_points(_points, _relative=true, _invert=false, _
 	}
 }
 
-function battle_set_box_alpha(_alpha, _with_fill=true, _box=obj_battle_box){
+function battle_set_box_alpha(_alpha, _with_fill=true, _box=inst_battle_box){
 	with (_box){
 		image_alpha = _alpha
 		if (_with_fill){
@@ -234,9 +300,23 @@ function battle_set_box_alpha(_alpha, _with_fill=true, _box=obj_battle_box){
 	}
 }
 
-function battle_set_box_rotation(_angle, _instant=false, _box=obj_battle_box){
+function battle_rotate_box_to(_angle, _instant=false, _box=inst_battle_box){
 	with (_box){
 		box_rotation = _angle
+		
+		if (_instant){
+			var _diff_angle = angle_difference(_angle, image_angle)
+			
+			image_angle = box_rotation
+			
+			battle_box_update_points_by_rotation(_diff_angle, _box)
+		}
+	}
+}
+
+function battle_rotate_box(_angle, _instant=false, _box=inst_battle_box){
+	with (_box){
+		box_rotation += _angle
 		
 		if (_instant){
 			var _diff_angle = angle_difference(_angle, image_angle)
@@ -363,4 +443,32 @@ function battle_get_menu_bullets_array(){
 
 function battle_get_damage_text_array(){
 	return obj_game.battle_system.battle_damage_text
+}
+
+function battle_get_button_order_options_array(){
+	return obj_game.battle_system.battle_button_order
+}
+
+function battle_get_button_options_amount(){
+	return array_length(battle_get_button_order_options_array())
+}
+
+function battle_set_button_order_options(_array){
+	obj_game.battle_system.battle_button_order = _array
+}
+
+function battle_set_button_selecting_left_function(_func=undefined){
+	obj_game.battle_system.battle_button_selecting_left = _func
+}
+
+function battle_set_button_selecting_right_function(_func=undefined){
+	obj_game.battle_system.battle_button_selecting_right = _func
+}
+
+function battle_set_button_selecting_up_function(_func=undefined){
+	obj_game.battle_system.battle_button_selecting_up = _func
+}
+
+function battle_set_button_selecting_down_function(_func=undefined){
+	obj_game.battle_system.battle_button_selecting_down = _func
 }

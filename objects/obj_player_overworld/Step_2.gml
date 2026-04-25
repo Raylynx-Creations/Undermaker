@@ -72,7 +72,7 @@ move_to_y = undefined
 //y = round(y)
 
 //If the player has control of movement, we check for any interaction validations, this is to avoid opening the menu while an interaction is happening like dialog
-if (obj_game.state == GAME_STATE.PLAYER_CONTROL){
+if (obj_game.state == GAME_STATE.PLAYER_CONTROL and state == PLAYER_STATE.MOVEMENT){
 	//This is the part where the interaction check is being executed.
 	var _direction = 90*(image_index div 4) //It calculates the direction the player is looking, where 0 is down, 90 is right, 180 is up and 270 is left.
 	var _is_interacting = false

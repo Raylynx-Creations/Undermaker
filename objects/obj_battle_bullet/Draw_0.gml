@@ -3,7 +3,7 @@
 if (mask_to_box){
 	shader_set(shd_sprite_masking)
 	
-	var _mask_texture = surface_get_texture(inst_battle_box.box_fill_surface)
+	var _mask_texture = surface_get_texture(box_for_mask.box_fill_surface)
 	var sampler = shader_get_sampler_index(shd_sprite_masking, "mask_texture");
 	texture_set_stage(sampler, _mask_texture);
 

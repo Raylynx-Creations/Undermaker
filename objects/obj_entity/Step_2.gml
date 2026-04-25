@@ -1,7 +1,7 @@
 /// @description After update event
 
-if (!is_undefined(after_update)){
-	after_update()
+if (!is_undefined(after_step)){
+	after_step()
 }
 
 general_entity_update() //Update of the entity for colliding.

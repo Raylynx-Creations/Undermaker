@@ -6,7 +6,7 @@ trigger_function = function(){
 	if (!global.save_data.cutscene_1){
 		_start_room = function(){
 			with (inst_trigger_hall_right){
-				entity = instance_create_layer(1480, obj_player_overworld.y - 190, "Collisions", obj_kris_dog_group)
+				entity = instance_create_layer(1480, obj_player_overworld.y, "Collisions", obj_kris_dog_group)
 				entity.image_xscale = -2
 				entity.image_yscale = 2
 				add_instance_reference(entity.id, "inst_outlander")

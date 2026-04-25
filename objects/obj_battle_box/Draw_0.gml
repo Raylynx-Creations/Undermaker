@@ -1,58 +1,159 @@
-/// @description Arena draw
+/// @description Arena rendering
 
-//Variables to make accessing the data easier by shortening the name
-var _inside_points = box_polygon_points.inside
-var _outside_points = box_polygon_points.outside
+//1 - Merge outline
+//2 - Normal fill
+//3 - Normal outline
+//4 - Merge fill
 
-//Prepare surface for the box's inside
-if (!surface_exists(box_fill_surface)){
-	box_fill_surface = surface_create(GAME_WIDTH, GAME_HEIGHT)
-}
-surface_set_target(box_fill_surface)
-
-//Clear surface
-draw_clear_alpha(c_black, 0)
-
-//At least 3 points must exist to draw filing in the box.
-var _length = array_length(_inside_points)
-if (_length >= 6) {
-	//Using the triangles we fill in the box.
-	var _triangles = box_polygon_points.triangles
-	var _triangle_amount = array_length(_triangles)
+if (can_draw){
+	if (!surface_exists(hole_outline)){
+		hole_outline = surface_create(GAME_WIDTH, GAME_HEIGHT)
+	}
+	if (!surface_exists(hole_fill)){
+		hole_fill = surface_create(GAME_WIDTH, GAME_HEIGHT)
+	}
+	if (!surface_exists(merge_outline)){
+		merge_outline = surface_create(GAME_WIDTH, GAME_HEIGHT)
+	}
+	if (!surface_exists(normal_fill)){
+		normal_fill = surface_create(GAME_WIDTH, GAME_HEIGHT)
+	}
+	if (!surface_exists(normal_outline)){
+		normal_outline = surface_create(GAME_WIDTH, GAME_HEIGHT)
+	}
+	if (!surface_exists(merge_fill)){
+		merge_fill = surface_create(GAME_WIDTH, GAME_HEIGHT)
+	}
 	
-	//Loop through every triangle and draw it using the color to fill in.
-	draw_primitive_begin(pr_trianglelist)
-	for (var _i = 0; _i < _triangle_amount; _i++) {
-		var _triangle = _triangles[_i]
+	surface_set_target(hole_outline)
+	draw_clear_alpha(c_black, 0)
+	surface_reset_target()
+	
+	surface_set_target(hole_fill)
+	draw_clear_alpha(c_black, 0)
+	surface_reset_target()
+	
+	surface_set_target(merge_outline)
+	draw_clear_alpha(c_black, 0)
+	surface_reset_target()
+	
+	surface_set_target(normal_fill)
+	draw_clear_alpha(c_black, 0)
+	surface_reset_target()
+	
+	surface_set_target(normal_outline)
+	draw_clear_alpha(c_black, 0)
+	surface_reset_target()
+	
+	surface_set_target(merge_fill)
+	draw_clear_alpha(c_black, 0)
+	surface_reset_target()
+	
+	switch (type){
+		case BATTLE_BOX_TYPE.MERGE:{
+			surface_set_target(merge_fill)
+			draw_surface_ext(box_fill_surface, 0, 0, 1, 1, 0, box_fill_color, box_fill_alpha)
+			surface_reset_target()
+			
+			surface_set_target(merge_outline)
+			draw_surface(box_outline_surface, 0, 0)
+			surface_reset_target()
+		break}
+		case BATTLE_BOX_TYPE.HOLE:{
+			surface_set_target(hole_fill)
+			draw_surface_ext(box_fill_surface, 0, 0, 1, 1, 0, box_fill_color, box_fill_alpha)
+			surface_reset_target()
+			
+			surface_set_target(hole_outline)
+			draw_surface(box_outline_surface, 0, 0)
+			surface_reset_target()
+		break}
+		default:{ //BATTLE_BOX_TYPE.NORMAL
+			surface_set_target(normal_fill)
+			draw_surface_ext(box_fill_surface, 0, 0, 1, 1, 0, box_fill_color, box_fill_alpha)
+			surface_reset_target()
+			
+			surface_set_target(normal_outline)
+			draw_surface(box_outline_surface, 0, 0)
+			surface_reset_target()
+		}
+	}
+	
+	with (obj_battle_box){
+		if (id == other.id or depth != other.depth){
+			continue
+		}
 		
-		draw_vertex_colour(_triangle[0], _triangle[1], c_white, 1)
-		draw_vertex_colour(_triangle[2], _triangle[3], c_white, 1)
-		draw_vertex_colour(_triangle[4], _triangle[5], c_white, 1)
-	}
-	draw_primitive_end()
-}
-
-//Finish drawing
-surface_reset_target()
-
-draw_surface_ext(box_fill_surface, 0, 0, 1, 1, 0, box_fill_color, box_fill_alpha)
-
-//At least 2 points need to exist for lines to be drawn
-if (_length >= 4){
-	//Loop through every point connecting the inside point and then the outside point to shape the border, doing zigzag esentially.
-	draw_primitive_begin(pr_trianglestrip)
-	for (var _i = 0; _i < _length; _i += 2) {
-		draw_vertex_colour(_inside_points[_i], _inside_points[_i+1], image_blend, image_alpha)
-	    draw_vertex_colour(_outside_points[_i], _outside_points[_i+1], image_blend, image_alpha)
+		switch (type){
+			case BATTLE_BOX_TYPE.MERGE:{
+				surface_set_target(other.merge_fill)
+				draw_surface_ext(box_fill_surface, 0, 0, 1, 1, 0, box_fill_color, box_fill_alpha)
+				surface_reset_target()
+			
+				surface_set_target(other.merge_outline)
+				draw_surface(box_outline_surface, 0, 0)
+				surface_reset_target()
+			break}
+			case BATTLE_BOX_TYPE.HOLE:{ //TODO
+				surface_set_target(other.hole_fill)
+				draw_surface_ext(box_fill_surface, 0, 0, 1, 1, 0, box_fill_color, box_fill_alpha)
+				surface_reset_target()
+			
+				surface_set_target(other.hole_outline)
+				draw_surface(box_outline_surface, 0, 0)
+				surface_reset_target()
+			break}
+			default:{ //BATTLE_BOX_TYPE.NORMAL
+				surface_set_target(other.normal_fill)
+				draw_surface_ext(box_fill_surface, 0, 0, 1, 1, 0, box_fill_color, box_fill_alpha)
+				surface_reset_target()
+			
+				surface_set_target(other.normal_outline)
+				draw_surface(box_outline_surface, 0, 0)
+				surface_reset_target()
+			break}
+		}
+		
+		can_draw = false
 	}
 	
-	//The shape is closed if it has at least 3 points, if not, it's a line and we don't need to reconnect to the first point.
-	if (_length >= 6){
-		draw_vertex_colour(_inside_points[0], _inside_points[1], image_blend, image_alpha)
-		draw_vertex_colour(_outside_points[0], _outside_points[1], image_blend, image_alpha)
+	if (!surface_exists(result_boxes)){
+		result_boxes = surface_create(GAME_WIDTH, GAME_HEIGHT)
 	}
+	surface_set_target(result_boxes)
+	draw_clear_alpha(c_black, 0)
 	
-	draw_primitive_end()
+	shader_set(shd_sprite_masking)
+	
+	var _mask_texture = surface_get_texture(hole_fill)
+	var _sampler = shader_get_sampler_index(shd_sprite_masking, "mask_texture");
+	texture_set_stage(_sampler, _mask_texture);
+
+	var _resolution = shader_get_uniform(shd_sprite_masking, "resolution");
+	shader_set_uniform_f(_resolution, GAME_WIDTH, GAME_HEIGHT);
+	
+	var _inverse = shader_get_uniform(shd_sprite_masking, "inverse");
+	shader_set_uniform_i(_inverse, true);
+
+	draw_surface(merge_outline, 0, 0)
+	draw_surface(normal_fill, 0, 0)
+	draw_surface(normal_outline, 0, 0)
+	draw_surface(merge_fill, 0, 0)
+	
+	surface_reset_target()
+	
+	draw_surface(result_boxes, 0, 0)
+	
+	_mask_texture = surface_get_texture(result_boxes)
+	texture_set_stage(_sampler, _mask_texture);
+	
+	shader_set_uniform_i(_inverse, false);
+	
+	draw_surface(hole_outline, 0, 0)
+	
+	shader_reset()
+}else{
+	can_draw = true
 }
 
 //This method of the battle_system draws battle related stuff onto the box, like when the player attacks an enemie.

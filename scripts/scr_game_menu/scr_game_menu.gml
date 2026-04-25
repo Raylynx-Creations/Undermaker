@@ -63,6 +63,10 @@ function load_initial_room(){
 	set_initial_game_data() //Load the initial save state data which you can define on scr_initial_save_file_data script.
 	room_goto(rm_overworld_1_grass_land) //Go to the room the player will start on.
 	
+	obj_game.start_room_function = function(){ //Always make a new save file for the player, so if they die before they are able to save, they don't crash for not having a save file.
+		perform_game_save_with_spawn_point(inst_spawn_point_grass_land)
+	}
+	
 	obj_player_overworld.spawn_point_reference = inst_spawn_point_grass_land //Set a reference spawn point for the player to position when the room loads, it must exist in the room of course.
 }
 
@@ -93,7 +97,7 @@ function GameMenu() constructor{
 	Use that room as you desire to make the menu happen but never change to a room of the overworld without a player.
 	*/
 	
-	//Logic of the game
+	//Logic of the menu
 	step = function(){
 		switch (state){
 			case GAME_MENU.ENTERING_MAIN_MENU:{
@@ -132,9 +136,11 @@ function GameMenu() constructor{
 							timer = 0
 						break}
 						case 1:{
-							obj_game.state = GAME_STATE.PLAYER_CONTROL //When you set the state, the menu loses control, so be mindful of this, you can make fades last like that, an example is seen in the new game option.
 							create_initial_player_overworld() //This function creates the overworld player with the initial settings (in this case none, just creates the object, but if you need you can edit and add stuff)
 							perform_game_load()
+							
+							obj_game.state = GAME_STATE.PLAYER_CONTROL //When you set the state, the menu loses control, so be mindful of this, you can make fades last like that, an example is seen in the new game option.
+							obj_player_overworld.state = PLAYER_STATE.MOVEMENT
 						break}
 						case 2:{
 							state = GAME_MENU.VOLUME_MENU
@@ -287,10 +293,10 @@ function GameMenu() constructor{
 	//Drawing of the menu
 	draw = function(){
 		if ((state == GAME_MENU.GO_TO_GAME and timer < 150) or state != GAME_MENU.GO_TO_GAME){
-			draw_sprite_ext(spr_undermaker_logo, 0, 320, 150, 0.5, 0.5, 0, c_white, 1)
+			draw_sprite_ext(get_language_sprite("spr_undermaker_logo"), 0, 320, 150, 0.5, 0.5, 0, c_white, 1)
 		}
 		
-		draw_set_font(fnt_determination_sans)
+		draw_set_font(get_language_font("fnt_determination_sans"))
 		draw_set_halign(fa_center)
 		
 		switch (state){

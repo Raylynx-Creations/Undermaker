@@ -17,6 +17,7 @@ function RoomTransitionSystem() constructor{
 			room_goto(goto_room)
 		}else if (anim_timer == room_change_fade_out_time){
 			obj_game.state = GAME_STATE.PLAYER_CONTROL
+			obj_player_overworld.state = PLAYER_STATE.MOVEMENT
 			
 			if (!is_undefined(after_transition_function)){
 				after_transition_function()

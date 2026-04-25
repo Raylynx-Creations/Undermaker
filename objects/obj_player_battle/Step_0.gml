@@ -79,7 +79,7 @@ switch (battle_get_state()){
 								}
 								
 								//Update the movement horizontally for the orange soul as it's constantly moving
-								var _speed_delta = movement.direction*movement.direction_change.speed/movement.direction_change.time
+								var _speed_delta = movement.direction*other.movement_speed/movement.direction_change_time
 								var _new_speed = clamp(movement.speed + _speed_delta, -other.movement_speed, other.movement_speed)
 								var _time = (_new_speed - movement.speed)/_speed_delta
 								other.move_x += (movement.speed + _new_speed)*_time/2 + (1 - _time)*_new_speed
@@ -96,12 +96,6 @@ switch (battle_get_state()){
 							
 							//Update the vertical movement
 							other.move_y += (direction - 1)*(jump.speed - _gravity/2)
-							
-							//If the flag box_bound is set, if the box moves, move the player as well with it
-							if (box_bound){
-								other.move_x += obj_battle_box.x - obj_battle_box.xprevious
-								other.move_y += obj_battle_box.y - obj_battle_box.yprevious
-							}
 							
 							//Always apply gravity force to the player
 							jump.speed -= _gravity
@@ -141,7 +135,7 @@ switch (battle_get_state()){
 									movement.direction = -1
 								}
 								
-								var _speed_delta = movement.direction*movement.direction_change.speed/movement.direction_change.time
+								var _speed_delta = movement.direction*other.movement_speed/movement.direction_change_time
 								var _new_speed = clamp(movement.speed + _speed_delta, -other.movement_speed, other.movement_speed)
 								var _time = (_new_speed - movement.speed)/_speed_delta
 								other.move_y += (movement.speed + _new_speed)*_time/2 + (1 - _time)*_new_speed
@@ -155,11 +149,6 @@ switch (battle_get_state()){
 							}
 							
 							other.move_x += (direction - 2)*(jump.speed - _gravity/2)
-							
-							if (box_bound){
-								other.move_x += obj_battle_box.x - obj_battle_box.xprevious
-								other.move_y += obj_battle_box.y - obj_battle_box.yprevious
-							}
 							
 							jump.speed -= _gravity
 							

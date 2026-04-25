@@ -8,13 +8,13 @@ function handle_interaction_action(_direction, _movement_speed){
 		//Check for the key to interact being pressed.
 		switch (interaction_key){
 			case "confirm":
-				_is_interacting = global.confirm_button
+				_is_interacting = get_confirm_button(false)
 			break
 			case "cancel":
-				_is_interacting = global.cancel_button
+				_is_interacting = get_cancel_button(false)
 			break
 			case "menu":
-				_is_interacting = global.menu_button
+				_is_interacting = get_menu_button(false)
 			break
 			default: //Checks the key you have.
 				_is_interacting = keyboard_check_pressed(ord(interaction_key))

@@ -1,4 +1,5 @@
-function load_ui_texts(_path){
+function load_ui_texts(_script){
+	/*
 	var _file = file_text_open_read(working_directory + "/" + _path)
 	var _text = ""
 	
@@ -9,22 +10,12 @@ function load_ui_texts(_path){
 	file_text_close(_file)
 	
 	global.UI_texts = json_parse(_text)
+	*/
+	global.UI_texts = _script()
 }
 
-function load_items_info(_path){
-	var _file = file_text_open_read(working_directory + "/" + _path)
-	var _text = ""
-	
-	while (!file_text_eof(_file)){
-		_text += file_text_read_string(_file)
-		file_text_readln(_file)
-	}
-	file_text_close(_file)
-	
-	global.item_pool = json_parse(_text)
-}
-
-function load_dialogues_file(_path){
+function load_dialogues_file(_script){
+	/*
 	var _file = file_text_open_read(working_directory + "/" + _path)
 	var _text = ""
 	
@@ -35,6 +26,24 @@ function load_dialogues_file(_path){
 	file_text_close(_file)
 	
 	global.dialogues = json_parse(_text)
+	*/
+	global.dialogues = _script()
+}
+
+function load_items_info(_script){
+	/*
+	var _file = file_text_open_read(working_directory + "/" + _path)
+	var _text = ""
+	
+	while (!file_text_eof(_file)){
+		_text += file_text_read_string(_file)
+		file_text_readln(_file)
+	}
+	file_text_close(_file)
+	
+	global.item_pool = json_parse(_text)
+	*/
+	global.item_pool = _script()
 }
 
 function load_game_settings(){

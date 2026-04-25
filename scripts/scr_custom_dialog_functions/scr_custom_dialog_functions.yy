@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"scr_custom_dialog_functions",
   "parent":{
-    "name":"Util",
-    "path":"folders/Scripts/Custom Stuff/Util.yy",
+    "name":"Utility",
+    "path":"folders/Scripts/Custom Stuff/Utility.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

@@ -97,7 +97,7 @@ if (_show_ui){
 	input_system.draw() //Input drawing in case a controller/gamepad is connected
 	
 	if (quit_timer > 0){
-		draw_set_font(fnt_determination_sans)
+		draw_set_font(get_language_font("fnt_determination_sans"))
 		draw_set_halign(fa_left)
 		draw_set_valign(fa_top)
 		

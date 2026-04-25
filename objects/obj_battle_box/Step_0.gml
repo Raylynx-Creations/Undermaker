@@ -1,5 +1,12 @@
 /// @description Arena resizing step and polygon points calculation
 
+if (is_undefined(prev_depth) or prev_depth != depth or prev_type != type){
+	prev_depth = depth
+	prev_type = type
+	
+	battle_clear_box_line_collisions_cache()
+}
+
 //box_size is never a real number, only integer number, this is so we avoid precision problems with decimals.
 box_size.x = round(box_size.x)
 box_size.y = round(box_size.y)
@@ -87,6 +94,8 @@ if (box_polygon_points.update or _update_points){
 	_position_update = false
 	_angle_update = false
 	
+	battle_clear_box_line_collisions_cache()
+	
 	//Clear the points, since they are going to be recalculated.
 	var _length = array_length(_outside_points)
 	if (_length > 0){
@@ -135,13 +144,6 @@ if (box_polygon_points.update or _update_points){
 	
 	//If there are at least 3 point, then we can calculate each corner and its directions
 	if (_length >= 6){
-		//Clear the direction array.
-		var _direction_points = box_polygon_points.direction
-		var _length_2 = array_length(_direction_points)
-		if (_length_2 > 0){
-			array_delete(_direction_points, 0, _length_2)
-		}
-		
 		//For every single point its outside point which is the intersection of an offset of 5 to make a line which is the border of the box
 		//We also calculate for each point the direction it goes to connect to the next point in the sucession.
 		//We require the previous point's direction to make the intersection work.
@@ -172,17 +174,9 @@ if (box_polygon_points.update or _update_points){
 			
 			//Add point and direction to its corresponding arrays.
 		    array_push(_outside_points, _p_intersection_x, _p_intersection_y)
-			array_push(_direction_points, _direction)
 		}
 	//Otherwise if there's only 2 points defined, then we define the outside points to draw the line.
 	}else if (_length >= 4){
-		//Clear the direction array.
-		var _direction_points = box_polygon_points.direction
-		var _length_2 = array_length(_direction_points)
-		if (_length_2 > 0){
-			array_delete(_direction_points, 0, _length_2)
-		}
-		
 		var _p1_x = _inside_points[0]
 		var _p1_y = _inside_points[1]
 		var _p2_x = _inside_points[2]
@@ -196,7 +190,6 @@ if (box_polygon_points.update or _update_points){
 		var _p4_y = _p2_y - 5*dsin(_direction)
 		
 		array_push(_outside_points, _p3_x, _p3_y, _p4_x, _p4_y)
-		array_push(_direction_points, _direction + 90)
 	}
 }
 

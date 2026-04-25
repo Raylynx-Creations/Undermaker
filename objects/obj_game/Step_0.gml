@@ -27,17 +27,21 @@ if (global.player.prev_weapon != global.player.weapon or global.player.prev_armo
 	global.player.invulnerability_frames = PLAYER_BASE_INVULNERABILITY_FRAMES
 	
 	//Update stats accordingly to what piece of armor and weapon has
-	var _weapon = global.item_pool[global.player.weapon]
+	if (!is_undefined(global.player.weapon) and global.player.weapon >= 0){
+		var _weapon = global.item_pool[global.player.weapon]
 
-	global.player.equipped_atk += ((is_undefined(_weapon[$"atk"])) ? 0 : _weapon[$"atk"])
-	global.player.equipped_def += ((is_undefined(_weapon[$"def"])) ? 0 : _weapon[$"def"])
-	global.player.invulnerability_frames += ((is_undefined(_weapon[$"inv_frames"])) ? 0 : _weapon[$"inv_frames"])
+		global.player.equipped_atk += ((is_undefined(_weapon[$"atk"])) ? 0 : _weapon[$"atk"])
+		global.player.equipped_def += ((is_undefined(_weapon[$"def"])) ? 0 : _weapon[$"def"])
+		global.player.invulnerability_frames += ((is_undefined(_weapon[$"inv_frames"])) ? 0 : _weapon[$"inv_frames"])
+	}
 	
-	var _armor = global.item_pool[global.player.armor]
+	if (!is_undefined(global.player.armor) and global.player.armor >= 0){
+		var _armor = global.item_pool[global.player.armor]
 	
-	global.player.equipped_atk += ((is_undefined(_armor[$"atk"])) ? 0 : _armor[$"atk"])
-	global.player.equipped_def += ((is_undefined(_armor[$"def"])) ? 0 : _armor[$"def"])
-	global.player.invulnerability_frames += ((is_undefined(_armor[$"inv_frames"])) ? 0 : _armor[$"inv_frames"])
+		global.player.equipped_atk += ((is_undefined(_armor[$"atk"])) ? 0 : _armor[$"atk"])
+		global.player.equipped_def += ((is_undefined(_armor[$"def"])) ? 0 : _armor[$"def"])
+		global.player.invulnerability_frames += ((is_undefined(_armor[$"inv_frames"])) ? 0 : _armor[$"inv_frames"])
+	}
 }
 
 //In general if the player drops to 0 HP, we trigger the Game Over, no matter when, if it reaches 0 HP, it will Game Over (except if on game menu of course)
@@ -122,6 +126,7 @@ switch (state){
 			//If there's no event happening, give control back to the player, otherwise keep the event going
 			if (_is_undefined){
 				state = GAME_STATE.PLAYER_CONTROL
+				obj_player_overworld.state = PLAYER_STATE.MOVEMENT
 				
 				break
 			}else{
@@ -147,6 +152,7 @@ switch (state){
 		if (event_end_condition()){
 			if (state == GAME_STATE.EVENT){
 				state = GAME_STATE.PLAYER_CONTROL
+				obj_player_overworld.state = PLAYER_STATE.MOVEMENT
 			}
 			
 			event_update = undefined
@@ -171,6 +177,7 @@ switch (state){
 		if (get_confirm_button(false) and selection >= 0){
 			//Unless the function passed in the option variables set it otherwise, upon finishing a selection, the player regains control, a little fail safe in case you forget to place the event.
 			state = GAME_STATE.PLAYER_CONTROL
+			obj_player_overworld.state = PLAYER_STATE.MOVEMENT
 			
 			plus_options[selection][3]() //Execute the function of the selected one
 			
@@ -220,6 +227,7 @@ switch (state){
 		if (get_confirm_button(false)){
 			//Unless the function passed in the option variables set it otherwise, upon finishing a selection, the player regains control, a little fail safe in case you forget to place the event.
 			state = GAME_STATE.PLAYER_CONTROL
+			obj_player_overworld.state = PLAYER_STATE.MOVEMENT
 			
 			grid_options[selection][3]()
 			
@@ -259,6 +267,23 @@ switch (state){
 			grid_options[selection][4].set_dialogues("[skip:false][progress_mode:none][asterisk:false][color_rgb:255,255,0]" + grid_options[selection][2])
 		}
 	break}
+}
+
+var _status_effect = global.player.status_effect
+switch (_status_effect.type){
+	case PLAYER_STATUS_EFFECT.KARMIC_RETRIBUTION:{
+		if (_status_effect.value > 0){
+			_status_effect.timer++
+			
+			if ((_status_effect.value >= 40 and _status_effect.timer >= 2) or (_status_effect.value >= 30 and _status_effect.timer >= 4) or (_status_effect.value >= 20 and _status_effect.timer >= 10) or (_status_effect.value >= 10 and _status_effect.timer >= 30) or _status_effect.timer >= 60){
+				global.player.hp--
+				_status_effect.value--
+				_status_effect.timer = 0
+			}
+		}else if (_status_effect.timer > 0){
+			_status_effect.timer = 0
+		}
+	}
 }
 
 //Fullscreen toggle, always there like in Undertale

@@ -5,7 +5,13 @@ You can use them for something else as well in other variables and your own syst
 enum CONTROL_TYPE{
 	KEYBOARD,
 	CONTROLLER,
-	MAPPING_CONTROLLER
+	MAPPING_CONTROLLER,
+	MOBILE
+}
+
+enum MOBILE_CONTROL{
+	CROSS,
+	JOYSTICK
 }
 
 /*
@@ -22,7 +28,7 @@ enum CONTROLLER_MAPPING{
 }
 
 function InputSystem() constructor{
-	control_type = CONTROL_TYPE.KEYBOARD
+	control_type = (global.is_mobile ? CONTROL_TYPE.MOBILE : CONTROL_TYPE.KEYBOARD)
 	control_message = undefined
 	control_timer = -1
 	control_alpha = 0
@@ -36,6 +42,17 @@ function InputSystem() constructor{
 	temp_down_button = 0
 	temp_left_button = 0
 	temp_right_button = 0
+	temp_confirm_button = 0
+	temp_cancel_button = 0
+	temp_menu_button = 0
+	
+	mobile_movement = -1
+	mobile_confirm = -1
+	mobile_cancel = -1
+	mobile_menu = -1
+	
+	mobile_distance = 0
+	mobile_direction = 0
 	
 	step = function(){
 		switch (control_type){
@@ -209,6 +226,289 @@ function InputSystem() constructor{
 				global.cancel_hold_button = max(global.cancel_hold_button, keyboard_check(ord("X")) or keyboard_check(vk_shift))
 				global.menu_hold_button = max(global.menu_hold_button, keyboard_check(ord("C")) or keyboard_check(vk_control))
 			break}
+			case CONTROL_TYPE.MOBILE:{
+				var _mobile = global.game_settings.mobile_buttons
+				
+				for (var _i = 0; _i < 10; _i++){
+					if (device_mouse_check_button(_i, mb_left)){
+						var _x = device_mouse_x_to_gui(_i)
+						var _y = device_mouse_y_to_gui(_i)
+						var _width = display_get_width()
+						var _height = display_get_height()
+						var _button_size = 13*_mobile.button_size
+						
+						if (mobile_confirm == _i or mobile_confirm == -1){
+							if (point_distance(_mobile.confirm_button.x + 0.5, _mobile.confirm_button.y - 0.5, _width - _x, _height - _y) < _button_size){
+								if (temp_confirm_button == 1){
+									global.confirm_button = 0
+								}else{
+									temp_confirm_button = 1
+			
+									global.confirm_button = 1
+								}
+						
+								mobile_confirm = _i
+								global.confirm_hold_button = 1
+							}else{
+								mobile_confirm = -1
+								temp_confirm_button = 0
+						
+								global.confirm_button = 0
+								global.confirm_hold_button = 0
+							}
+						}
+						
+						if (mobile_cancel == _i or mobile_cancel == -1){
+							if (point_distance(_mobile.cancel_button.x + 0.5, _mobile.cancel_button.y - 0.5, _width - _x, _height - _y) < _button_size){
+								if (temp_cancel_button == 1){
+									global.cancel_button = 0
+								}else{
+									temp_cancel_button = 1
+			
+									global.cancel_button = 1
+								}
+						
+								mobile_cancel = _i
+								global.cancel_hold_button = 1
+							}else{
+								mobile_cancel = -1
+								temp_cancel_button = 0
+						
+								global.cancel_button = 0
+								global.cancel_hold_button = 0
+							}
+						}
+					
+						if (mobile_menu == _i or mobile_menu == -1){
+							if (point_distance(_mobile.menu_button.x + 0.5, _mobile.menu_button.y - 0.5, _width - _x, _height - _y) < _button_size){
+								if (temp_menu_button == 1){
+									global.menu_button = 0
+								}else{
+									temp_menu_button = 1
+			
+									global.menu_button = 1
+								}
+						
+								mobile_menu = _i
+								global.menu_hold_button = 1
+							}else{
+								mobile_menu = -1
+								temp_menu_button = 0
+						
+								global.menu_button = 0
+								global.menu_hold_button = 0
+							}
+						}
+						
+						if (mobile_movement == _i or mobile_movement == -1){
+							var _movement_size = 29*_mobile.button_size
+							
+							if (device_mouse_check_button_pressed(_i, mb_left) and ((!_mobile.movable_move_button and point_distance(_mobile.move_button.x, _mobile.move_button.y, _x, _height - _y) < _movement_size) or (_mobile.movable_move_button and ((!_mobile.left_handed and _x < _width/2 - _movement_size) or (_mobile.left_handed and _x > _width/2 + _movement_size))))){
+								mobile_movement = _i
+								
+								if (_mobile.movable_move_button){
+									_mobile.move_button.x = _x
+									_mobile.move_button.y = clamp(_height - _y, _movement_size, _height - _movement_size)
+								}
+							}
+							
+							if (mobile_movement == _i){
+								var _deadzone = (8 + 3*(_mobile.type == MOBILE_CONTROL.CROSS))*_mobile.button_size
+								mobile_distance = min(point_distance(_mobile.move_button.x, _mobile.move_button.y, _x, _height - _y), _movement_size)
+								mobile_direction = point_direction(_mobile.move_button.x, _mobile.move_button.y, _x, _height - _y)
+							
+								while (mobile_direction < 0){
+									mobile_direction += 360
+								}
+								while (mobile_direction >= 360){
+									mobile_direction -= 360
+								}
+							
+								switch (_mobile.type){
+									case MOBILE_CONTROL.CROSS:{
+										if (mobile_distance > _deadzone){
+											if (mobile_direction <= 67.5 or mobile_direction > 292.5){
+												if (temp_right_button == 1){
+													global.right_button = 0
+												}else{
+													temp_right_button = 1
+			
+													global.right_button = 1
+												}
+												
+												global.right_hold_button = 1
+											}else{
+												temp_right_button = 0
+												
+												global.right_button = 0
+												global.right_hold_button = 0
+											}
+											
+											if (mobile_direction > 22.5 and mobile_direction <= 157.5){
+												if (temp_down_button == 1){
+													global.down_button = 0
+												}else{
+													temp_down_button = 1
+			
+													global.down_button = 1
+												}
+												
+												global.down_hold_button = 1
+											}else{
+												temp_down_button = 0
+												
+												global.down_button = 0
+												global.down_hold_button = 0
+											}
+											
+											if (mobile_direction > 112.5 and mobile_direction <= 247.5){
+												if (temp_left_button == 1){
+													global.left_button = 0
+												}else{
+													temp_left_button = 1
+			
+													global.left_button = 1
+												}
+												
+												global.left_hold_button = 1
+											}else{
+												temp_left_button = 0
+												
+												global.left_button = 0
+												global.left_hold_button = 0
+											}
+											
+											if (mobile_direction > 202.5 and mobile_direction <= 337.5){
+												if (temp_up_button == 1){
+													global.up_button = 0
+												}else{
+													temp_up_button = 1
+			
+													global.up_button = 1
+												}
+												
+												global.up_hold_button = 1
+											}else{
+												temp_up_button = 0
+												
+												global.up_button = 0
+												global.up_hold_button = 0
+											}
+										}else{
+											temp_up_button = 0
+											temp_down_button = 0
+											temp_left_button = 0
+											temp_right_button = 0
+						
+											global.up_button = 0
+											global.left_button = 0
+											global.down_button = 0
+											global.right_button = 0
+											global.up_hold_button = 0
+											global.left_hold_button = 0
+											global.down_hold_button = 0
+											global.right_hold_button = 0
+										}
+									break}
+									case MOBILE_CONTROL.JOYSTICK:{
+										var _valid_zone = _movement_size - _deadzone
+										var _valid_distance = max(mobile_distance - _deadzone, 0)
+										var _axislv = _valid_distance*dsin(mobile_direction)/_valid_zone
+										var _axislh = _valid_distance*dcos(mobile_direction)/_valid_zone
+										var _axislv_round = round(_axislv)
+										var _axislh_round = round(_axislh)
+										var _up_button = max(-_axislv_round, 0)
+										var _left_button = max(-_axislh_round, 0)
+										var _down_button = max(_axislv_round, 0)
+										var _right_button = max(_axislh_round, 0)
+		
+										if (temp_up_button == _up_button){
+											global.up_button = 0
+										}else{
+											temp_up_button = _up_button
+			
+											global.up_button = _up_button
+										}
+		
+										if (temp_down_button == _down_button){
+											global.down_button = 0
+										}else{
+											temp_down_button = _down_button
+			
+											global.down_button = _down_button
+										}
+		
+										if (temp_left_button == _left_button){
+											global.left_button = 0
+										}else{
+											temp_left_button = _left_button
+			
+											global.left_button = _left_button
+										}
+		
+										if (temp_right_button == _right_button){
+											global.right_button = 0
+										}else{
+											temp_right_button = _right_button
+			
+											global.right_button = _right_button
+										}
+		
+										global.up_hold_button = max(-_axislv, 0)
+										global.left_hold_button = max(-_axislh, 0)
+										global.down_hold_button = max(_axislv, 0)
+										global.right_hold_button = max(_axislh, 0)
+									break}
+								}
+							}
+						}
+					}else{
+						if (mobile_confirm == _i){
+							mobile_confirm = -1
+							temp_confirm_button = 0
+						
+							global.confirm_button = 0
+							global.confirm_hold_button = 0
+						}
+						
+						if (mobile_cancel == _i){
+							mobile_cancel = -1
+							temp_cancel_button = 0
+						
+							global.cancel_button = 0
+							global.cancel_hold_button = 0
+						}
+						
+						if (mobile_menu == _i){
+							mobile_menu = -1
+							temp_menu_button = 0
+						
+							global.menu_button = 0
+							global.menu_hold_button = 0
+						}
+						
+						if (mobile_movement == _i){
+							mobile_movement = -1
+							mobile_distance = 0
+							mobile_direction = 0
+							
+							temp_up_button = 0
+							temp_down_button = 0
+							temp_left_button = 0
+							temp_right_button = 0
+						
+							global.up_button = 0
+							global.left_button = 0
+							global.down_button = 0
+							global.right_button = 0
+							global.up_hold_button = 0
+							global.left_hold_button = 0
+							global.down_hold_button = 0
+							global.right_hold_button = 0
+						}
+					}
+				}
+			break}
 			//If you want to add more type of controls or variantions of the previous ones add them as cases and define their macros in this script.
 			//After that set the control_type variable to the initial control type or handle its connection and disconnection in the corresponding place.
 		}
@@ -226,9 +526,14 @@ function InputSystem() constructor{
 				control_alpha = 0
 			}
 		}
-
-		global.escape_button = keyboard_check_pressed(vk_escape) //Exclusive to keyboard.
-		global.escape_hold_button = keyboard_check(vk_escape) //Exclusive to keyboard.
+		
+		if (global.is_mobile){
+			global.escape_button = keyboard_check_pressed(vk_backspace)
+			global.escape_hold_button = keyboard_check(vk_backspace)
+		}else{
+			global.escape_button = keyboard_check_pressed(vk_escape) //Exclusive to keyboard.
+			global.escape_hold_button = keyboard_check(vk_escape) //Exclusive to keyboard.
+		}
 	}
 	
 	can_draw = function(){
@@ -300,7 +605,7 @@ function InputSystem() constructor{
 	
 	async_event = function(_event){
 		switch (ds_map_find_value(_event, "event_type")){
-			case "gamepad discovered":
+			case "gamepad discovered":{
 				if (controller_id == -1){
 					var _index_connected = ds_map_find_value(_event, "pad_index")
 					var _config = get_controller_config(_index_connected)
@@ -337,8 +642,8 @@ function InputSystem() constructor{
 				}/*else{
 					//There's already a controller connected, cannot assign another.	
 				}*/
-			break
-			case "gamepad lost":
+			break}
+			case "gamepad lost":{
 				var _index_disconnected = ds_map_find_value(_event, "pad_index")
 				if (controller_id == _index_disconnected){
 					if (control_type == CONTROL_TYPE.MAPPING_CONTROLLER){
@@ -355,7 +660,7 @@ function InputSystem() constructor{
 					controller_cancel_button = -1
 					controller_menu_button = -1
 				}
-			break
+			break}
 		}
 	}
 
@@ -473,5 +778,42 @@ function InputSystem() constructor{
 		_file = file_text_open_write("controller settings.save")
 		file_text_write_string(_file, json_stringify(_list))
 		file_text_close(_file)
+	}
+}
+
+function draw_mobile_buttons(){
+	var _mobile = global.game_settings.mobile_buttons
+	var _scale = _mobile.button_size
+	var _alpha = _mobile.alpha
+	var _width = display_get_width()
+	var _height = display_get_height()
+		
+	draw_sprite_ext(spr_mobile_buttons, get_confirm_button(), _width - _mobile.confirm_button.x, _height - _mobile.confirm_button.y, _scale, _scale, 0, c_white, _alpha)
+	draw_sprite_ext(spr_mobile_buttons, 2 + get_cancel_button(), _width - _mobile.cancel_button.x, _height - _mobile.cancel_button.y, _scale, _scale, 0, c_white, _alpha)
+	draw_sprite_ext(spr_mobile_buttons, 4 + get_menu_button(), _width - _mobile.menu_button.x, _height - _mobile.menu_button.y, _scale, _scale, 0, c_white, _alpha)
+		
+	if (_mobile.type == MOBILE_CONTROL.CROSS){
+		var _sum = abs(get_horizontal_button_force()) + abs(get_vertical_button_force())
+		var _direction = 0
+			
+		if (get_left_button()){
+			_direction = 90
+				
+			if (get_down_button()){
+				_direction += 90
+			}
+		}else if (get_up_button()){
+			//Nothing
+		}else if (get_right_button()){
+			_direction = -90
+		}else if (get_down_button()){
+			_direction = 180
+		}
+			
+		draw_sprite_ext(spr_mobile_cross, _sum, _mobile.move_button.x, _height - _mobile.move_button.y, _scale, _scale, _direction, c_white, _alpha)
+		draw_sprite_ext(spr_mobile_cross_pointer, 0, _mobile.move_button.x + input_system.mobile_distance*dcos(input_system.mobile_direction), _height - _mobile.move_button.y + input_system.mobile_distance*dsin(input_system.mobile_direction), _scale, _scale, 0, c_white, _alpha)
+	}else{
+		draw_sprite_ext(spr_mobile_joystick_background, 0, _mobile.move_button.x, _height - _mobile.move_button.y, _scale, _scale, 0, c_white, _alpha)
+		draw_sprite_ext(spr_mobile_joystick, 0, _mobile.move_button.x + input_system.mobile_distance*dcos(input_system.mobile_direction), _height - _mobile.move_button.y + input_system.mobile_distance*dsin(input_system.mobile_direction), _scale, _scale, 0, c_white, _alpha)
 	}
 }

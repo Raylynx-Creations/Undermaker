@@ -44,6 +44,7 @@ Global variable that holds persistent data for configuration settings.
 You don't have to create or remove any variable in it tho, you just have to define the default settings the game starts with.
 Since player don't start with configuration settings file, so give them a default to start with.
 */
+var _ratio = display_get_height()/768 //Ratio needed for the buttons's positions and heights, I used my screen size to measure it, so that's why it's divided by 768.
 global.game_settings = {
 	language: 0, //This is the index of the available languages list, the one that is selected
 	resolution_active: 0, //This is the resolution index of all the possible resolutions the game can have in the user's PC, recommended to leave it at 0, you don't know what resource the user can have depending of their PC.
@@ -53,7 +54,18 @@ global.game_settings = {
 	border_id: 0, //Id of the border to use if active, use -1 for dynamic borders, saveable configuration.
 	border_last_id: 0, //Auxiliar to the border ID in case you enter battles with dynamic borders, gets overwritten so don't touch.
 	sound_volume: 50, //Volumes of audio sounds.
-	music_volume: 50 //And musics.
+	music_volume: 50, //And musics.
+	mobile_buttons: {
+		type: MOBILE_CONTROL.CROSS, //Type of default control for phones devices, recommended be CROSS.
+		movable_move_button: false, //Flag to define it the movement button (CROSS or JOYSTICK) moves around wherever the player taps on, on the side of the screen it is.
+		button_size: 6*_ratio, //Size of the buttons, recommended leave 4 as default as it's a decent size for the screen's height
+		alpha: 0.25, //Transparency of the buttons
+		left_handed: false, //Left handed option to swap position, leave as false, this alone will not move the buttons to the other side of the screen, use mobile_toggle_left_handed() function instead.
+		move_button: {x: 225*_ratio, y: 225*_ratio}, //Position of the movement button relative to the bottom left corner and Y inverted, so positive means up instead of down.
+		confirm_button: {x: 150*_ratio, y: 125*_ratio}, //Position of the buttons relative to the bottom right corner, so X and Y coordinates are inverted for these ones.
+		cancel_button: {x: 150*_ratio, y: 325*_ratio}, //Same as above
+		menu_button: {x: 150*_ratio, y: 525*_ratio} //Same as above
+	}
 }
 
 /*

@@ -31,3 +31,6 @@ global.battle_serious_mode = false
 global.item_pool = []
 global.UI_texts = {}
 global.last_save = {}
+
+//DEVICE VARIABLE
+global.is_mobile = (os_type == os_android or os_type == os_ios)

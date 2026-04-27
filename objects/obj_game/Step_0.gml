@@ -295,12 +295,31 @@ if (keyboard_check_pressed(vk_f4)){
 //Step the dialog system of the overworld
 dialog.step()
 
-if (get_escape_button() and state != GAME_STATE.MENU_CONTROL){
-	quit_timer++
+//Quitting feature
+if (state != GAME_STATE.MENU_CONTROL){ //Only applies if you're in game
+	if (global.is_mobile){ //For mobile we wait for two taps in a span of 3 seconds of the back button
+		if (get_escape_button(false)){
+			if (quit_timer <= 0){
+				quit_timer = 180
+			}else{
+				quit_timer = 0
+				
+				go_to_game_menu() //We go to the menu of the game, you could quit game if desired
+			}
+		}else if (quit_timer > 0){
+			quit_timer--
+		}
+	}else{ //This is for PC where you have to hold the ESC button for 3 seconds
+		if (get_escape_button()){
+			quit_timer++
 	
-	if (quit_timer == 180){
-		go_to_game_menu()
+			if (quit_timer == 180){
+				go_to_game_menu() //Go to menu of the game, you could quit game if desired
+			}
+		}else{
+			quit_timer = 0
+		}
 	}
-}else{
-	quit_timer = 0
+}else if (global.is_mobile and quit_timer > 0){ //This is in case you want to use the quit_timer for the built in engine's quit message for exiting the game in your menu, check scr_game_menu, it's only for mobile devices
+	quit_timer--
 }

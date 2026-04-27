@@ -101,7 +101,8 @@ if (_show_ui){
 		draw_set_halign(fa_left)
 		draw_set_valign(fa_top)
 		
-		draw_text_transformed_color(10, 6 + (is_undefined(input_system.control_message) ? 0 : 20), global.UI_texts.quitting + string_repeat(".", ceil((quit_timer - 60)/30)), 1.5, 1.5, 0, c_white, c_white, c_white, c_white, min(quit_timer/120, 1))
+		var _message = (global.is_mobile ? ((state == GAME_STATE.MENU_CONTROL) ? global.UI_texts.mobile_exit_game : global.UI_texts.mobile_quitting) : global.UI_texts.quitting + string_repeat(".", ceil((quit_timer - 60)/30)))
+		draw_text_transformed_color(10, 6 + (is_undefined(input_system.control_message) ? 0 : 20), _message, 1.5, 1.5, 0, c_white, c_white, c_white, c_white, min(quit_timer/120, 1))
 	}
 
 	surface_reset_target()
@@ -135,6 +136,10 @@ if (global.game_settings.border_active){
 		if (_show_ui){
 			draw_surface_ext(ui_surface, _x, _y, _x_scale, _y_scale, 0, c_white, 1)
 		}
+		
+		if (global.is_mobile){
+			draw_mobile_buttons()
+		}
 	}else{
 		var _x = (1.5*resolutions_width[global.game_settings.resolution_active] - _game_width)/2
 		var _y = _screen_height*0.0625
@@ -157,6 +162,10 @@ if (global.game_settings.border_active){
 	
 	if (_show_ui){
 		draw_surface_ext(ui_surface, _x, 0, _x_scale, _y_scale, 0, c_white, 1)
+	}
+	
+	if (global.is_mobile){
+		draw_mobile_buttons()
 	}
 }
 

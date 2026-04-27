@@ -8,6 +8,8 @@ function language_ui_texts_en(){ //en - english
 	    "gold": "G",
 	    "none": "None",
 	    "quitting": "Quitting",
+		"mobile_quitting": "Press [Back] again to quit",
+		"mobile_exit_game": "Press [Back] again to exit the game",
 	    "game menu":{
 	        "new game": "New Game",
 	        "load game": "Load Game",
@@ -146,6 +148,8 @@ function language_ui_texts_es(){ //es - español
 	    "gold": "G",
 	    "none": "None",
 	    "quitting": "Quitting",
+		"mobile_quitting": "Press [Back] again to quit",
+		"mobile_exit_game": "Press [Back] again to exit the game",
 	    "game menu":{
 	        "new game": "Nuevo Juego",
 	        "load game": "Cargar Juego",

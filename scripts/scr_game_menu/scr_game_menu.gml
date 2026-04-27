@@ -175,10 +175,18 @@ function GameMenu() constructor{
 					}
 					
 					audio_play_sound(snd_menu_selecting, 0, false)
+				}else if (global.is_mobile and get_escape_button(false)){ //Quitting feature for mobile only
+					if (obj_game.quit_timer <= 0){
+						obj_game.quit_timer = 180
+					}else{
+						obj_game.quit_timer = 0
+				
+						game_end()
+					}
 				}
 			break}
 			case GAME_MENU.VOLUME_MENU:{
-				if (get_confirm_button(false) and selection[1] == 2){
+				if ((get_confirm_button(false) and selection[1] == 2) or get_escape_button(false)){
 					state = GAME_MENU.MAIN_MENU
 					
 					save_game_settings()
@@ -216,7 +224,7 @@ function GameMenu() constructor{
 				}
 			break}
 			case GAME_MENU.BORDER_AND_RESOLUTION_MENU:{
-				if (get_confirm_button(false) and selection[1] == 4){
+				if ((get_confirm_button(false) and selection[1] == 4) or get_escape_button(false)){
 					state = GAME_MENU.MAIN_MENU
 					
 					save_game_settings()

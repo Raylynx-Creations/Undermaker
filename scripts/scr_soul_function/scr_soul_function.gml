@@ -95,15 +95,30 @@ function soul_update_collision(){
 				}
 				
 				var _type = ((type == BATTLE_BOX_TYPE.MERGE) ? 1 : ((type == BATTLE_BOX_TYPE.HOLE) ? 2 : 0))
-				if (_type == 2){
-					array_push(_data[0], box_polygon_points.outside)
-					array_push(_data[1], box_polygon_points.inside)
+				if (array_length(box_polygon_points.inside) == 4){
+					var _points = []
+					array_copy(_points, 0, box_polygon_points.inside, 0, 4)
+					array_copy(_points, 4, box_polygon_points.outside, 2, 2)
+					array_copy(_points, 6, box_polygon_points.outside, 0, 2)
+					
+					if (_type == 2){
+						array_push(_data[0], _points)
+						array_push(_data[2], _type)
+					}else{
+						array_push(_data[1], _points)
+						array_push(_data[3], _type)
+					}
 				}else{
-					array_push(_data[0], box_polygon_points.inside)
-					array_push(_data[1], box_polygon_points.outside)
+					if (_type == 2){
+						array_push(_data[0], box_polygon_points.outside)
+						array_push(_data[1], box_polygon_points.inside)
+					}else{
+						array_push(_data[0], box_polygon_points.inside)
+						array_push(_data[1], box_polygon_points.outside)
+					}
+					array_push(_data[2], _type)
+					array_push(_data[3], _type)
 				}
-				array_push(_data[2], _type)
-				array_push(_data[3], _type)
 			}
 			
 			//show_debug_message("INPUT")
@@ -175,88 +190,6 @@ function soul_update_collision(){
 						array_push(_lines, [_line, _direction, _line_id + 1, true])
 						
 						_line_id += 2
-					}else{
-						var _p1_o_x = _result_outside[_i][_j]
-						var _p1_o_y = _result_outside[_i][_j + 1]
-						var _p2_o_x, _p2_o_y
-				
-						if (_j + 2 >= _points_length){
-							_p2_o_x = _result_outside[_i][0]
-							_p2_o_y = _result_outside[_i][1]
-						}else{
-							_p2_o_x = _result_outside[_i][_j + 2]
-							_p2_o_y = _result_outside[_i][_j + 3]
-						}
-					
-						_normal_angle = _direction - 90
-						_horizontal_axis = ((dcos(_normal_angle) >= 0) ? other.sprite_left_collision_offset : other.sprite_right_collision_offset)
-						_vertical_axis = ((dsin(_normal_angle) >= 0) ? other.sprite_bottom_collision_offset : other.sprite_top_collision_offset)
-						_offset = _horizontal_axis*_vertical_axis/sqrt(power(_vertical_axis*dcos(_normal_angle), 2) + power(_horizontal_axis*dsin(_normal_angle), 2))
-				
-						_p1_o_x += _offset*dcos(_normal_angle)
-						_p1_o_y -= _offset*dsin(_normal_angle)
-						_p2_o_x += _offset*dcos(_normal_angle)
-						_p2_o_y -= _offset*dsin(_normal_angle)
-					
-						_normal_angle = _direction + 180
-						_horizontal_axis = ((dcos(_normal_angle) >= 0) ? sprite_left_collision_offset : sprite_right_collision_offset)
-						_vertical_axis = ((dsin(_normal_angle) >= 0) ? sprite_bottom_collision_offset : sprite_top_collision_offset)
-						_offset = _horizontal_axis*_vertical_axis/sqrt(power(_vertical_axis*dcos(_normal_angle), 2) + power(_horizontal_axis*dsin(_normal_angle), 2))
-					
-						var _p3_i_x = _p1_x + _offset*dcos(_normal_angle)
-						var _p3_i_y = _p1_x - _offset*dsin(_normal_angle)
-						var _p3_o_x = _result_outside[_i][_j] + _offset*dcos(_normal_angle)
-						var _p3_o_y = _result_outside[_i][_j + 1] - _offset*dsin(_normal_angle)
-					
-						_horizontal_axis = ((dcos(_direction) >= 0) ? sprite_left_collision_offset : sprite_right_collision_offset)
-						_vertical_axis = ((dsin(_direction) >= 0) ? sprite_bottom_collision_offset : sprite_top_collision_offset)
-						_offset = _horizontal_axis*_vertical_axis/sqrt(power(_vertical_axis*dcos(_direction), 2) + power(_horizontal_axis*dsin(_direction), 2))
-					
-						var _p4_i_x = _p2_x + _offset*dcos(_direction)
-						var _p4_i_y = _p2_y - _offset*dsin(_direction)
-						var _p4_o_x = _result_outside[_i][(_j + 2)%_points_length] + _offset*dcos(_direction)
-						var _p4_o_y = _result_outside[_i][(_j + 3)%_points_length] - _offset*dsin(_direction)
-						
-						var _line = [_p3_i_x, _p3_i_y, _p1_i_x, _p1_i_y]
-						var _dir = point_direction(_p3_i_x, _p3_i_y, _p1_i_x, _p1_i_y)
-						_collision_amount = general_line_collision_handler(id, _line, _dir, _line_id + 4, true, _colliding_instances, _instance_directions, _collision_amount, obj_battle_box.player_collision_function)
-						array_push(_lines, [_line, _dir, true])
-						
-						_line = [_p3_o_x, _p3_o_y, _p1_o_x, _p1_o_y]
-						_dir = point_direction(_p3_o_x, _p3_o_y, _p1_o_x, _p1_o_y)
-						_collision_amount = general_line_collision_handler(id, _line, _dir, _line_id + 5, false, _colliding_instances, _instance_directions, _collision_amount, obj_battle_box.player_collision_function)
-						array_push(_lines, [_line, _dir, false])
-						
-						_line = [_p2_i_x, _p2_i_y, _p4_i_x, _p4_i_y]
-						_dir = point_direction(_p2_i_x, _p2_i_y, _p4_i_x, _p4_i_y)
-						_collision_amount = general_line_collision_handler(id, _line, _dir, _line_id + 6, true, _colliding_instances, _instance_directions, _collision_amount, obj_battle_box.player_collision_function)
-						array_push(_lines, [_line, _dir, true])
-						
-						_line = [_p2_o_x, _p2_o_y, _p4_o_x, _p4_o_y]
-						_dir = point_direction(_p2_o_x, _p2_o_y, _p4_o_x, _p4_o_y)
-						_collision_amount = general_line_collision_handler(id, _line, _dir, _line_id + 7, false, _colliding_instances, _instance_directions, _collision_amount, obj_battle_box.player_collision_function)
-						array_push(_lines, [_line, _dir, false])
-						
-						_line = [_p1_i_x, _p1_i_y, _p2_i_x, _p2_i_y]
-						_collision_amount = general_line_collision_handler(id, _line, _direction, _line_id + 1, true, _colliding_instances, _instance_directions, _collision_amount, obj_battle_box.player_collision_function)
-						array_push(_lines, [_line, _direction, true])
-						
-						_line = [_p1_o_x, _p1_o_y, _p2_o_x, _p2_o_y]
-						_collision_amount = general_line_collision_handler(id, _line, _direction, _line_id + 2, false, _colliding_instances, _instance_directions, _collision_amount, obj_battle_box.player_collision_function)
-						array_push(_lines, [_line, _direction, false])
-						
-						_line = [_p3_i_x, _p3_i_y, _p3_o_x, _p3_o_y]
-						_dir = _direction + 90
-						_collision_amount = general_line_collision_handler(id, _line, _dir, _line_id, false, _colliding_instances, _instance_directions, _collision_amount, obj_battle_box.player_collision_function)
-						array_push(_lines, [_line, _dir, false])
-						
-						_line = [_p4_i_x, _p4_i_y, _p4_o_x, _p4_o_y]
-						_dir = _direction + 90
-						_collision_amount = general_line_collision_handler(id, _line, _dir, _line_id + 3, true, _colliding_instances, _instance_directions, _collision_amount, obj_battle_box.player_collision_function)
-						array_push(_lines, [_line, _dir, true])
-						
-						_line_id += 8
-						break
 					}
 				}
 			}

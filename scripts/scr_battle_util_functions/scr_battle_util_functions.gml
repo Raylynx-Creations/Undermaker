@@ -217,7 +217,7 @@ function battle_set_box_origin(_x, _y, _relative=true, _box=inst_battle_box){
 	}
 }
 
-function battle_set_box_polygon_points(_points, _relative=true, _invert=false, _box=inst_battle_box){ //TODO: Ensure CCW
+function battle_set_box_polygon_points(_points, _relative=true, _invert=false, _box=inst_battle_box){
 	if (array_length(_points) < 4){
 		show_message("The box must have at least 2 points to be shown.")
 		

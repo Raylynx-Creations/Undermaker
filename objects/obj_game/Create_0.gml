@@ -78,3 +78,7 @@ game_ready = function(){
 }
 
 gpu_set_default_blendmode()
+
+if (global.is_mobile){
+	set_fullscreen(true)
+}

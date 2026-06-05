@@ -166,6 +166,7 @@
     {"id":{"name":"scr_save_functions","path":"scripts/scr_save_functions/scr_save_functions.yy",},},
     {"id":{"name":"scr_soul_function","path":"scripts/scr_soul_function/scr_soul_function.yy",},},
     {"id":{"name":"shd_alpha_masking","path":"shaders/shd_alpha_masking/shd_alpha_masking.yy",},},
+    {"id":{"name":"shd_outline","path":"shaders/shd_outline/shd_outline.yy",},},
     {"id":{"name":"shd_sprite_masking","path":"shaders/shd_sprite_masking/shd_sprite_masking.yy",},},
     {"id":{"name":"mus_enemy_approaching","path":"sounds/mus_enemy_approaching/mus_enemy_approaching.yy",},},
     {"id":{"name":"mus_game_over","path":"sounds/mus_game_over/mus_game_over.yy",},},

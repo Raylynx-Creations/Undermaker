@@ -1,5 +1,3 @@
-add_instance_reference(id, "inst_movable_interactable_wall_1")
-
 if (global.save_data.wall_1_moved){
 	y = 240
 }

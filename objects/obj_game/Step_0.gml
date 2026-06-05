@@ -73,6 +73,23 @@ switch (state){
 			if (battle_pause_music){
 				overworld_music_system.pause_music() //If it has to pause the music, pause it.
 			}
+			
+			if (battle_start_animation_type == BATTLE_START_ANIMATION.INSTANT){
+				state = GAME_STATE.BATTLE
+				obj_player_overworld.image_alpha = 0
+				
+				if (room != rm_battle){
+					player_prev_room = room //Save the room where it comes from
+				}
+				
+				room_persistent = true
+				
+				border_prev_id = border_id
+				
+				room_goto(rm_battle)
+				
+				break
+			}
 		}
 		
 		//Depending on the animation the animation timer may go faster or start early, either way, it stops counting at 100.
@@ -204,10 +221,10 @@ switch (state){
 			audio_play_sound(snd_menu_selecting, 0, false)
 			
 			if (_prev_selection >= 0){
-				plus_options[_prev_selection][4].set_dialogues("[skip:false][progress_mode:none][asterisk:false]" + plus_options[_prev_selection][2])
+				plus_options[_prev_selection][4].set_dialogues(, "[skip:false][progress_mode:none][asterisk:false]" + plus_options[_prev_selection][2])
 			}
 			
-			plus_options[selection][4].set_dialogues("[skip:false][progress_mode:none][asterisk:false][color_rgb:255,255,0]" + plus_options[selection][2])
+			plus_options[selection][4].set_dialogues(, "[skip:false][progress_mode:none][asterisk:false][color_rgb:255,255,0]" + plus_options[selection][2])
 		}
 	break}
 	case GAME_STATE.DIALOG_GRID_CHOICE:{ //This is for the ones that are laid out in a grid, use start_grid_choice() and create_grid_choice_option() to enter these states.
@@ -261,10 +278,10 @@ switch (state){
 		//Updating their color
 		if (_prev_selection != selection and (_prev_selection < 0 or !is_undefined(grid_options[_prev_selection])) and !is_undefined(grid_options[selection])){
 			if (_prev_selection >= 0){
-				grid_options[_prev_selection][4].set_dialogues("[skip:false][progress_mode:none][asterisk:false]" + grid_options[_prev_selection][2])
+				grid_options[_prev_selection][4].set_dialogues(, "[skip:false][progress_mode:none][asterisk:false]" + grid_options[_prev_selection][2])
 			}
 			
-			grid_options[selection][4].set_dialogues("[skip:false][progress_mode:none][asterisk:false][color_rgb:255,255,0]" + grid_options[selection][2])
+			grid_options[selection][4].set_dialogues(, "[skip:false][progress_mode:none][asterisk:false][color_rgb:255,255,0]" + grid_options[selection][2])
 		}
 	break}
 }
@@ -292,15 +309,17 @@ if (keyboard_check_pressed(vk_f4)){
 	save_game_settings()
 }
 
-//Step the dialog system of the overworld
+//Step dialog and music systems.
 dialog.step()
+overworld_music_system.step()
+battle_music_system.step()
 
 //Quitting feature
 if (state != GAME_STATE.MENU_CONTROL){ //Only applies if you're in game
 	if (global.is_mobile){ //For mobile we wait for two taps in a span of 3 seconds of the back button
 		if (get_escape_button(false)){
 			if (quit_timer <= 0){
-				quit_timer = 180
+				quit_timer = 90
 			}else{
 				quit_timer = 0
 				
@@ -314,6 +333,8 @@ if (state != GAME_STATE.MENU_CONTROL){ //Only applies if you're in game
 			quit_timer++
 	
 			if (quit_timer == 180){
+				quit_timer = 0
+				
 				go_to_game_menu() //Go to menu of the game, you could quit game if desired
 			}
 		}else{

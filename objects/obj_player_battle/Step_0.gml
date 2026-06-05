@@ -188,6 +188,7 @@ switch (battle_get_state()){
 					ignore_first_frame = false
 					cannot_jump = false
 					on_platform = false
+					on_box = false
 					
 					//Set its angle depending on the diirection of the gravity
 					other.image_angle = 90*direction

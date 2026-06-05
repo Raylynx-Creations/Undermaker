@@ -83,7 +83,7 @@ function start_plus_choice(_x, _y, _start_centered=true){
 					_found_option = _i
 				}
 			
-				var _dialog_system = new DialogSystem(0, 0, "[skip:false][progress_mode:none][asterisk:false]" + plus_options[_i][2], 640,, 2, 2)
+				var _dialog_system = new DialogSystem(, 0, 0, "[skip:false][progress_mode:none][asterisk:false]" + plus_options[_i][2], 640,, 2, 2)
 				plus_options[_i][4] = _dialog_system //Yes it literally loads a dialog displaying for each one, for the effects it contains.
 			
 				switch (_i){
@@ -118,7 +118,7 @@ function start_plus_choice(_x, _y, _start_centered=true){
 				selection = -1
 			}else{
 				selection = _found_option //The first one that finds is left, if not then, down, if not then, right, if not then, up it's always secure it's one of those 4 cases.
-				plus_options[_found_option][4].set_dialogues("[skip:false][progress_mode:none][asterisk:false][color_rgb:255,255,0]" + plus_options[_found_option][2])
+				plus_options[_found_option][4].set_dialogues(, "[skip:false][progress_mode:none][asterisk:false][color_rgb:255,255,0]" + plus_options[_found_option][2])
 			}
 		}
 	}
@@ -145,7 +145,7 @@ function start_grid_choice(_x, _y, _x_spacing=280, _y_spacing=-1){
 		}
 		
 		for (var _i=0; _i<_length; _i++){
-			var _dialog_system = new DialogSystem(0, 0, "[skip:false][progress_mode:none][asterisk:false]" + grid_options[_i][2], 640,, 2, 2)
+			var _dialog_system = new DialogSystem(, 0, 0, "[skip:false][progress_mode:none][asterisk:false]" + grid_options[_i][2], 640,, 2, 2)
 			grid_options[_i][4] = _dialog_system //Yes it literally loads a dialog displaying for each one, for the effects it contains.
 			
 			grid_options[_i][0] = _option_x
@@ -172,7 +172,7 @@ function start_grid_choice(_x, _y, _x_spacing=280, _y_spacing=-1){
 			options_y = _y
 	
 			selection = 0
-			grid_options[_found_option][4].set_dialogues("[skip:false][progress_mode:none][asterisk:false][color_rgb:255,255,0]" + grid_options[_found_option][2])
+			grid_options[_found_option][4].set_dialogues(, "[skip:false][progress_mode:none][asterisk:false][color_rgb:255,255,0]" + grid_options[_found_option][2])
 		}
 	}
 }
@@ -180,7 +180,7 @@ function start_grid_choice(_x, _y, _x_spacing=280, _y_spacing=-1){
 function overworld_dialog(_dialogues, _set_event=true, _top=true, _width=261, _height=56, _face_sprite=undefined, _face_subimages=undefined, _box=spr_box_normal, _tail=-1, _tail_mask=-1){
 	with (obj_game){
 		dialog.text_speed = 2
-		dialog.set_dialogues(_dialogues, _width, _height, _face_sprite, _face_subimages)
+		dialog.set_dialogues(other, _dialogues, _width, _height, _face_sprite, _face_subimages)
 		dialog.set_scale(2, 2)
 		dialog.set_container_sprite(_box)
 		dialog.set_container_tail_sprite(_tail)
@@ -197,6 +197,42 @@ function overworld_dialog(_dialogues, _set_event=true, _top=true, _width=261, _h
 			}
 		}
 	}
+}
+
+function overworld_music_set(_music, _fade_time_out=0, _fade_time_in=0){
+	obj_game.overworld_music_system.set_music(_music, _fade_time_out, _fade_time_in)
+}
+
+function overworld_music_pause(_fade_time_out=0){
+	obj_game.overworld_music_system.pause_music(_fade_time_out)
+}
+
+function overworld_music_stop(_fade_time_out=0){
+	obj_game.overworld_music_system.stop_music(_fade_time_out)
+}
+
+function overworld_music_resume(_fade_time_in=0){
+	obj_game.overworld_music_system.resume_music(_fade_time_in)
+}
+
+function overworld_music_set_gain(_gain, _fade_time=0){
+	obj_game.overworld_music_system.set_gain(_gain, _fade_time)
+}
+
+function overworld_music_is_playing(){
+	return obj_game.overworld_music_system.is_playing()
+}
+
+function overworld_music_is_paused(){
+	return obj_game.overworld_music_system.is_paused()
+}
+
+function overworld_music_get_name(){
+	return obj_game.overworld_music_system.music_name
+}
+
+function overworld_music_get_gain(){
+	return obj_game.overworld_music_system.get_gain()
 }
 
 function change_room(_room_id, _spawn_point_instance, _sides=true, _room_change_fade_in_time=20, _room_change_wait_time=0, _room_change_fade_out_time=20, _end_room_func=undefined, _start_room_func=undefined, _after_transition_func=undefined){

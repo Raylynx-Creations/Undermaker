@@ -13,6 +13,24 @@ function save_game_settings(){
 	file_text_close(_file)
 }
 
+function save_persistent_data(){
+	var _file = file_text_open_write(working_directory + "/persistent_save.save")
+	file_text_write_string(_file, json_stringify(global.persistent_save_data))
+	file_text_close(_file)
+}
+
+function get_persistent_data(_key=undefined){
+	if (is_undefined(_key)){
+		return global.persistent_save_data
+	}else{
+		return struct_get(global.persistent_save_data, _key)
+	}
+}
+
+function set_persistent_data(_key, _value){
+	struct_set(global.persistent_save_data, _key, _value)
+}
+
 function load_game_texts(_id){
 	var _texts = global.language_texts[_id]
 	global.game_settings.language = _id
@@ -32,10 +50,6 @@ function get_languages_amount(){
 }
 
 function set_resolution(_index){
-	if (global.is_mobile){
-		return
-	}
-	
 	with (obj_game){
 		if (_index == array_length(resolutions_width) - 1){
 			return //Invalidate, that space contains the size for the fullscreen window, use set_fullscreen() to set fullscreen and not set_resolution.
@@ -66,10 +80,6 @@ function set_resolution(_index){
 }
 
 function set_fullscreen(_state){
-	if (global.is_mobile and _state == false){
-		return
-	}
-	
 	global.game_settings.fullscreen = _state
 	
 	with (obj_game){
@@ -103,10 +113,6 @@ function get_current_resolution_id(){
 }
 
 function get_resolutions_amount(){
-	if (global.is_mobile){
-		return 1
-	}
-	
 	return array_length(obj_game.resolutions_width) - 1 //Last ID is always fullscreen, use the set_fullscreen function for that.
 }
 
@@ -182,6 +188,10 @@ function get_music_volume(){
 
 function get_sound_volume(){
 	return global.game_settings.sound_volume
+}
+
+function set_border_alpha(_value){
+	obj_game.border_mult = clamp(_value, 0, 1)
 }
 
 function trigger_game_over(_music=mus_game_over, _dialog=undefined){ //This function is also used for the battle room, so it has a condition to separate both cases.
@@ -306,6 +316,51 @@ function get_language_font(_name){
 	return variable_struct_get(global.language_fonts, _name)[get_current_language_id()]
 }
 
+function remap_controller(){
+	with (obj_game.input_system){
+		control_type = CONTROL_TYPE.MAPPING_CONTROLLER
+		controller_mapping_state = CONTROLLER_MAPPING.WAITING_ENTER
+		map_controller(controller_id)
+	}
+}
+
+function get_controller_id(){
+	return obj_game.input_system.controller_id
+}
+
+function is_controller_connected(){
+	return (obj_game.input_system.controller_id != -1)
+}
+
+function mobile_start_button_reposition(){
+	with (obj_game.input_system){
+		if (control_type == CONTROL_TYPE.MOBILE_REPOSITION){
+			return
+		}
+		
+		obj_game.border_alpha = 0.25
+		mobile_movable_control = mobile_get_movable_move_button_state()
+		control_type = CONTROL_TYPE.MOBILE_REPOSITION
+		
+		mobile_confirm = -1
+		mobile_cancel = -1
+		mobile_menu = -1
+		mobile_movement = -1
+		
+		temp_confirm_button = 0
+		temp_cancel_button = 0
+		temp_menu_button = 0
+		temp_up_button = 0
+		temp_down_button = 0
+		temp_left_button = 0
+		temp_right_button = 0
+		
+		if (mobile_movable_control){
+			mobile_toggle_movable_move_button(false)
+		}
+	}
+}
+
 function mobile_toggle_left_handed(_state){
 	var _mobile = global.game_settings.mobile_buttons
 	if (_state != _mobile.left_handed){
@@ -318,6 +373,12 @@ function mobile_toggle_left_handed(_state){
 		
 		_mobile.left_handed = _state
 	}
+	
+	obj_game.input_system.mobile_movement_invalidate = true
+}
+
+function mobile_get_left_handed(){
+	return global.game_settings.mobile_buttons.left_handed
 }
 
 function mobile_set_move_button_position(_x, _y){
@@ -327,11 +388,25 @@ function mobile_set_move_button_position(_x, _y){
 	_mobile.move_button.y = display_get_height() - _y
 }
 
+function mobile_get_move_button_position(){
+	var _button = global.game_settings.mobile_buttons.move_button
+	var _pos = {x: _button.x, y: display_get_height() - _button.y}
+	
+	return _pos
+}
+
 function mobile_set_confirm_button_position(_x, _y){
 	var _mobile = global.game_settings.mobile_buttons
 	
 	_mobile.confirm_button.x = display_get_width() - _x
 	_mobile.confirm_button.y = display_get_height() - _y
+}
+
+function mobile_get_confirm_button_position(){
+	var _button = global.game_settings.mobile_buttons.confirm_button
+	var _pos = {x: display_get_width() - _button.x, y: display_get_height() - _button.y}
+	
+	return _pos
 }
 
 function mobile_set_cancel_button_position(_x, _y){
@@ -341,6 +416,13 @@ function mobile_set_cancel_button_position(_x, _y){
 	_mobile.cancel_button.y = display_get_height() - _y
 }
 
+function mobile_get_cancel_button_position(){
+	var _button = global.game_settings.mobile_buttons.cancel_button
+	var _pos = {x: display_get_width() - _button.x, y: display_get_height() - _button.y}
+	
+	return _pos
+}
+
 function mobile_set_menu_button_position(_x, _y){
 	var _mobile = global.game_settings.mobile_buttons
 	
@@ -348,18 +430,63 @@ function mobile_set_menu_button_position(_x, _y){
 	_mobile.menu_button.y = display_get_height() - _y
 }
 
+function mobile_get_menu_button_position(){
+	var _button = global.game_settings.mobile_buttons.menu_button
+	var _pos = {x: display_get_width() - _button.x, y: display_get_height() - _button.y}
+	
+	return _pos
+}
+
 function mobile_set_button_size(_size){
 	global.game_settings.mobile_buttons.button_size = _size
 }
 
+function mobile_get_button_size(){
+	return global.game_settings.mobile_buttons.button_size
+}
+
 function mobile_set_button_alpha(_alpha){
-	global.game_settings.mobile_buttons.alpha = _alpha
+	global.game_settings.mobile_buttons.alpha = clamp(_alpha, 0.1, 1)
+}
+
+function mobile_get_button_alpha(){
+	return global.game_settings.mobile_buttons.alpha
 }
 
 function mobile_toggle_movable_move_button(_state){
-	global.game_settings.mobile_buttons.movable_move_button = _state
+	with (global.game_settings.mobile_buttons){
+		if (!_state and movable_move_button != _state){
+			var _ratio = display_get_height()/768
+			var _width = display_get_width()
+			
+			move_button.x = round(225*_ratio)
+			move_button.y = round(225*_ratio)
+			
+			if (left_handed){
+				move_button.x *= -1
+				move_button.x += _width
+			}
+			
+			obj_game.input_system.mobile_movement_invalidate = true
+		}
+		
+		movable_move_button = _state
+	}
+}
+
+function mobile_get_movable_move_button_state(){
+	return global.game_settings.mobile_buttons.movable_move_button
 }
 
 function mobile_set_move_button_type(_type){
-	global.game_settings.mobile_buttons.type = _type
+	var _mobile = global.game_settings.mobile_buttons
+	
+	if (_mobile.type != _type){
+		_mobile.type = _type
+		obj_game.input_system.mobile_movement_invalidate = true
+	}
+}
+
+function mobile_get_move_button_type(){
+	return global.game_settings.mobile_buttons.type
 }

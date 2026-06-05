@@ -8,7 +8,7 @@ function GameOverSystem() constructor{
 	game_over_dialog = []
 	game_over_shards = []
 	
-	game_over_dialog_system = new DialogSystem(0, 0, [], 1)
+	game_over_dialog_system = new DialogSystem(, 0, 0, [], 1)
 	game_over_music_system = new MusicSystem()
 	
 	step = function(){
@@ -29,7 +29,7 @@ function GameOverSystem() constructor{
 				game_over_music_system.set_music(game_over_music)
 			break}
 			case 350:{
-				game_over_dialog_system.set_dialogues(game_over_dialog, 170)
+				game_over_dialog_system.set_dialogues(, game_over_dialog, 170)
 				game_over_dialog_system.set_scale(2, 2)
 				game_over_dialog_system.set_container_sprite(undefined)
 				game_over_dialog_system.set_container_tail_sprite(undefined)

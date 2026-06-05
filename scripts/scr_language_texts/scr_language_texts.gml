@@ -10,6 +10,8 @@ function language_ui_texts_en(){ //en - english
 	    "quitting": "Quitting",
 		"mobile_quitting": "Press [Back] again to quit",
 		"mobile_exit_game": "Press [Back] again to exit the game",
+		"mobile_reposition_tip": "Drag the buttons around to position\nthem to your liking.\n\nTo save and go back press twice\nthe back button of your phone.",
+		"mobile_go_back": "Press [Back] again to go back",
 	    "game menu":{
 	        "new game": "New Game",
 	        "load game": "Load Game",
@@ -97,7 +99,14 @@ function language_ui_texts_en(){ //en - english
 	        "mapping complete": "Controller/Gamepad mapping complete!\n\nTest your mapping on this section.",
 	        "mapping error": "Your controller/gamepad was lost\nduring the mapping, no configuration\nwill be saved.\n\nReconnect your controller/gamepad\nto start the mapping process again.\n\nPress Enter on your keyboard\nto go back to the game.",
 	        "mapping again": "If you want to change it, press\nBackspace on your keyboard to start\nthe mapping process again.\n\nOtherwise, press Enter on your\nkeyboard to confirm your mapping\nand play the game.",
-	        "lost": "Your controller/gamepad was lost.\nYour input is now controlled by the keyboard."
+			"lost": "Your controller/gamepad was lost.\nYour input is now controlled by the keyboard.",
+			"mobile discovered with no mapping": "Controller/Gamepad detected but\nno mapping for it could be found.\n\nPress [Z] on screen to start mapping\nyour controller/gamepad.",
+			"mobile mapping error": "Your controller/gamepad was lost\nduring the mapping, no configuration\nwill be saved.\n\nReconnect your controller/gamepad\nto start the mapping process again.\n\nPress [Z] on screen to\ngo back to the game.",
+			"mobile mapping again": "If you want to change it, press\n[X] on screen to start the\nmapping again.\n\nOtherwise, press [Z] on screen\nto confirm your mapping\nand play game.",
+			"mobile lost": "Your controller/gamepad was lost.\nYour input is now controlled by the touch on phone.",
+			"confirm": "Confirm",
+			"cancel": "Cancel",
+			"menu": "Menu"
 	    },
 		"no items": {
 			"normal": [
@@ -150,6 +159,8 @@ function language_ui_texts_es(){ //es - español
 	    "quitting": "Quitting",
 		"mobile_quitting": "Press [Back] again to quit",
 		"mobile_exit_game": "Press [Back] again to exit the game",
+		"mobile_reposition_tip": "Drag the buttons around to position\nthem to your liking.\n\nTo save and go back press twice\nthe back button of your phone.",
+		"mobile_go_back": "Press [Back] again to go back",
 	    "game menu":{
 	        "new game": "Nuevo Juego",
 	        "load game": "Cargar Juego",
@@ -237,7 +248,14 @@ function language_ui_texts_es(){ //es - español
 	        "mapping complete": "Controller/Gamepad mapping complete!\n\nTest your mapping on this section.",
 	        "mapping error": "Your controller/gamepad was lost\nduring the mapping, no configuration\nwill be saved.\n\nReconnect your controller/gamepad\nto start the mapping process again.\n\nPress Enter on your keyboard\nto go back to the game.",
 	        "mapping again": "If you want to change it, press\nBackspace on your keyboard to start\nthe mapping process again.\n\nOtherwise, press Enter on your\nkeyboard to confirm your mapping\nand play the game.",
-	        "lost": "Your controller/gamepad was lost.\nYour input is now controlled by the keyboard."
+			"lost": "Your controller/gamepad was lost.\nYour input is now controlled by the keyboard.",
+			"mobile discovered with no mapping": "Controller/Gamepad detected but\nno mapping for it could be found.\n\nPress [Z] on screen to start mapping\nyour controller/gamepad.",
+			"mobile mapping error": "Your controller/gamepad was lost\nduring the mapping, no configuration\nwill be saved.\n\nReconnect your controller/gamepad\nto start the mapping process again.\n\nPress [Z] on screen to\ngo back to the game.",
+			"mobile mapping again": "If you want to change it, press\n[X] on screen to start the\nmapping again.\n\nOtherwise, press [Z] on screen\nto confirm your mapping\nand play game.",
+			"mobile lost": "Your controller/gamepad was lost.\nYour input is now controlled by the touch on phone.",
+			"confirm": "Confirm",
+			"cancel": "Cancel",
+			"menu": "Menu"
 	    },
 		"no items": {
 			"normal": [
@@ -291,13 +309,13 @@ function language_dialogues_en(){
 	    ],
 	    "grass_land": {
 	        "inst_kris_dog_1": [
-	            "[bind_instance:inst_kris_dog_1]Hi[w:10], I'm a test entity that has a dialog interaction.",
+	            "[bind_instance:self]Hi[w:10], I'm a test entity that has a dialog interaction.",
 	            "If you talk to the other entity on the left I will look as if I'm talking too.",
 	            "[bind_instance:ref object obj_entity]That's because we both are instances of the same object[w:10], but with different data on creation",
 	            "isn't that really neat simply?"
 	        ],
 	        "inst_kris_dog_2": [
-	            "[bind_instance:inst_kris_dog_2]Hi![w:10] I'm just chilling out here.",
+	            "[bind_instance:self]Hi![w:10] I'm just chilling out here.",
 	            "[bind_instance:ref object obj_entity]As you can see there are many interaction collisions around here.",
 	            "You can exit this room if you talk to the interaction object on the right.",
 	            "[bind_instance:inst_kris_dog_1]Just tell it that you don't know and it will let you pass[w:10], easy as that."
@@ -355,7 +373,7 @@ function language_dialogues_en(){
 	            "option_3": "[asterisk:true]Wing Gaster?[w:20] Pff[w:20], don't be stupid[w:20], that dude doesn't exist.",
 	            "option_4": [
 	                "[asterisk:true]...[w:20]Well[w:20], at least you're honest[w:20], you may pass then.",
-	                "[func:inst_movable_interactable_wall_1,epic_movement][next]"
+	                "[func:self,epic_movement][next]"
 	            ]
 	        }
 	    },

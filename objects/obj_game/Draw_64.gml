@@ -97,12 +97,25 @@ if (_show_ui){
 	input_system.draw() //Input drawing in case a controller/gamepad is connected
 	
 	if (quit_timer > 0){
-		draw_set_font(get_language_font("fnt_determination_sans"))
 		draw_set_halign(fa_left)
 		draw_set_valign(fa_top)
 		
+		var _font = get_language_font("fnt_determination_sans")
+		draw_set_font(_font)
+				
+		shader_set(shd_outline)
+		
+		var _texture = font_get_texture(_font)
+		var _alpha = min(quit_timer/60, 1)
+		
+		shader_set_uniform_f(shader_get_uniform(shd_outline, "pixel_width"), texture_get_texel_width(_texture))
+		shader_set_uniform_f(shader_get_uniform(shd_outline, "pixel_height"), texture_get_texel_height(_texture))
+		shader_set_uniform_f(shader_get_uniform(shd_outline, "outline_alpha"), _alpha)
+		
 		var _message = (global.is_mobile ? ((state == GAME_STATE.MENU_CONTROL) ? global.UI_texts.mobile_exit_game : global.UI_texts.mobile_quitting) : global.UI_texts.quitting + string_repeat(".", ceil((quit_timer - 60)/30)))
-		draw_text_transformed_color(10, 6 + (is_undefined(input_system.control_message) ? 0 : 20), _message, 1.5, 1.5, 0, c_white, c_white, c_white, c_white, min(quit_timer/120, 1))
+		draw_text_transformed_color(10, 6 + (is_undefined(input_system.control_message) ? 0 : 20), _message, 1.5, 1.5, 0, c_white, c_white, c_white, c_white, _alpha)
+		
+		shader_reset()
 	}
 
 	surface_reset_target()
@@ -129,7 +142,7 @@ if (global.game_settings.border_active){
 		var _x_scale = _game_width/GAME_WIDTH
 		var _y_scale = _game_height/GAME_HEIGHT
 		
-		draw_sprite_ext(spr_border, _border_id, (_screen_width - _border_width)/2, 0, _border_width/1920, _screen_height/1080, 0, c_white, border_alpha)
+		draw_sprite_ext(spr_border, _border_id, (_screen_width - _border_width)/2, 0, _border_width/1920, _screen_height/1080, 0, c_white, border_alpha*border_mult)
 		draw_surface_ext(application_surface, _x, _y, _x_scale, _y_scale, 0, c_white, 1)
 		
 		//The UI always draws on front
@@ -138,7 +151,7 @@ if (global.game_settings.border_active){
 		}
 		
 		if (global.is_mobile){
-			draw_mobile_buttons()
+			input_system.draw_gui_mobile_buttons()
 		}
 	}else{
 		var _x = (1.5*resolutions_width[global.game_settings.resolution_active] - _game_width)/2
@@ -146,7 +159,7 @@ if (global.game_settings.border_active){
 		var _x_scale = _game_width/GAME_WIDTH
 		var _y_scale = _screen_height/GAME_HEIGHT
 		
-		draw_sprite_ext(spr_border, _border_id, 0, 0, _screen_height*(16/9)*1.125/1920, _screen_height*1.125/1080, 0, c_white, border_alpha)
+		draw_sprite_ext(spr_border, _border_id, 0, 0, _screen_height*(16/9)*1.125/1920, _screen_height*1.125/1080, 0, c_white, border_alpha*border_mult)
 		draw_surface_ext(application_surface, _x, _y, _x_scale, _y_scale, 0, c_white, 1)
 		
 		if (_show_ui){
@@ -165,7 +178,7 @@ if (global.game_settings.border_active){
 	}
 	
 	if (global.is_mobile){
-		draw_mobile_buttons()
+		input_system.draw_gui_mobile_buttons()
 	}
 }
 

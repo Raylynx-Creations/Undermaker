@@ -39,6 +39,15 @@ global.language_fonts = {
 }
 
 /*
+Global variable that holds persistent data that is not related to game configuration, but the features of your fangames.
+
+Use this to manage stuff like achievements and some flags to trigger on your game, like omega flowey does with closing your game but keeping in memory all deaths and progress.
+*/
+global.persistent_save_data = {
+	//It's like save_data but it's permanent, no amount of resets in game can undo this data.
+}
+
+/*
 Global variable that holds persistent data for configuration settings.
 
 You don't have to create or remove any variable in it tho, you just have to define the default settings the game starts with.
@@ -58,13 +67,13 @@ global.game_settings = {
 	mobile_buttons: {
 		type: MOBILE_CONTROL.CROSS, //Type of default control for phones devices, recommended be CROSS.
 		movable_move_button: false, //Flag to define it the movement button (CROSS or JOYSTICK) moves around wherever the player taps on, on the side of the screen it is.
-		button_size: 6*_ratio, //Size of the buttons, recommended leave 4 as default as it's a decent size for the screen's height
+		button_size: round(6*_ratio*2)/2, //Size of the buttons, recommended leave 4 as default as it's a decent size for the screen's height
 		alpha: 0.25, //Transparency of the buttons
 		left_handed: false, //Left handed option to swap position, leave as false, this alone will not move the buttons to the other side of the screen, use mobile_toggle_left_handed() function instead.
-		move_button: {x: 225*_ratio, y: 225*_ratio}, //Position of the movement button relative to the bottom left corner and Y inverted, so positive means up instead of down.
-		confirm_button: {x: 150*_ratio, y: 125*_ratio}, //Position of the buttons relative to the bottom right corner, so X and Y coordinates are inverted for these ones.
-		cancel_button: {x: 150*_ratio, y: 325*_ratio}, //Same as above
-		menu_button: {x: 150*_ratio, y: 525*_ratio} //Same as above
+		move_button: {x: round(225*_ratio), y: round(225*_ratio)}, //Position of the movement button relative to the bottom left corner and Y inverted, so positive means up instead of down.
+		confirm_button: {x: round(150*_ratio), y: round(125*_ratio)}, //Position of the buttons relative to the bottom right corner, so X and Y coordinates are inverted for these ones.
+		cancel_button: {x: round(150*_ratio), y: round(325*_ratio)}, //Same as above
+		menu_button: {x: round(150*_ratio), y: round(525*_ratio)} //Same as above
 	}
 }
 

@@ -16,6 +16,9 @@ if (mode == SOUL_MODE.NORMAL){
 	conveyor_push.y = 0
 }
 
+x_previous = x
+y_previous = y
+
 //Movement only applies when dodging an attack, this is where the collision is checked by the movement
 if (battle_get_state() == BATTLE_STATE.ENEMY_ATTACK or battle_get_state() == BATTLE_STATE.END_DODGE_ATTACK){
 	//If there's a movement we have to check if the movement is valid and if it results in a collision, move it out of the collision by the conditions given by it

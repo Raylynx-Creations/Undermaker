@@ -6,7 +6,8 @@ enum CONTROL_TYPE{
 	KEYBOARD,
 	CONTROLLER,
 	MAPPING_CONTROLLER,
-	MOBILE
+	MOBILE,
+	MOBILE_REPOSITION
 }
 
 enum MOBILE_CONTROL{
@@ -38,6 +39,11 @@ function InputSystem() constructor{
 	controller_cancel_button = -1
 	controller_menu_button = -1
 	
+	controller_temp_up_button = 0
+	controller_temp_down_button = 0
+	controller_temp_left_button = 0
+	controller_temp_right_button = 0
+	
 	temp_up_button = 0
 	temp_down_button = 0
 	temp_left_button = 0
@@ -46,20 +52,185 @@ function InputSystem() constructor{
 	temp_cancel_button = 0
 	temp_menu_button = 0
 	
+	mobile_reposition_go_back_timer = 0
+	mobile_movable_control = false
+	mobile_movement_invalidate = false
+	mobile_tap_invalidate = -1
 	mobile_movement = -1
+	mobile_move_x = undefined
+	mobile_move_y = undefined
 	mobile_confirm = -1
+	mobile_confirm_x = undefined
+	mobile_confirm_y = undefined
 	mobile_cancel = -1
+	mobile_cancel_x = undefined
+	mobile_cancel_y = undefined
 	mobile_menu = -1
+	mobile_menu_x = undefined
+	mobile_menu_y = undefined
 	
 	mobile_distance = 0
 	mobile_direction = 0
 	
 	step = function(){
+		var _ignore_first = false
+		
 		switch (control_type){
+			case CONTROL_TYPE.MOBILE_REPOSITION:{
+				for (var _i = 0; _i < 10; _i++){
+					var _x = device_mouse_x_to_gui(_i)
+					var _y = device_mouse_y_to_gui(_i)
+					var _width = display_get_width()
+					var _height = display_get_height()
+					var _size = mobile_get_button_size()
+					var _button_size = 13*_size
+					var _move_size = 29*_size
+					
+					if (device_mouse_check_button_pressed(_i, mb_left)){
+						var _button = mobile_get_confirm_button_position()
+						if (mobile_confirm == -1 and point_distance(_button.x + 0.5, _button.y - 0.5, _x, _y) < _button_size){
+							mobile_confirm = _i
+							mobile_confirm_x = _x - _button.x
+							mobile_confirm_y = _y - _button.y
+							
+							continue
+						}
+						
+						_button = mobile_get_cancel_button_position()
+						if (mobile_cancel == -1 and point_distance(_button.x + 0.5, _button.y - 0.5, _x, _y) < _button_size){
+							mobile_cancel = _i
+							mobile_cancel_x = _x - _button.x
+							mobile_cancel_y = _y - _button.y
+							
+							continue
+						}
+						
+						_button = mobile_get_menu_button_position()
+						if (mobile_menu == -1 and point_distance(_button.x + 0.5, _button.y - 0.5, _x, _y) < _button_size){
+							mobile_menu = _i
+							mobile_menu_x = _x - _button.x
+							mobile_menu_y = _y - _button.y
+							
+							continue
+						}
+						
+						_button = mobile_get_move_button_position()
+						if (mobile_movement == -1 and point_distance(_button.x + 0.5, _button.y - 0.5, _x, _y) < _move_size){
+							mobile_movement = _i
+							mobile_move_x = _x - _button.x
+							mobile_move_y = _y - _button.y
+						}
+					}else{
+						var _half = _width/2
+						var _middle_button_limit = _half + _button_size
+						var _middle_move_limit = _half - _move_size
+						var _left_limit = _move_size
+						var _right_limit = _width - _button_size
+						var _bottom_limit = _height - _button_size
+						
+						if (mobile_get_left_handed()){
+							_middle_button_limit -= _half
+							_middle_move_limit += _half
+							_left_limit += _half
+							_right_limit -= _half
+						}
+						
+						if (mobile_confirm != -1 and mobile_confirm == _i){
+							mobile_set_confirm_button_position(clamp(_x - mobile_confirm_x, _middle_button_limit, _right_limit), clamp(_y - mobile_confirm_y, _button_size, _bottom_limit))
+							
+							if (device_mouse_check_button_released(mobile_confirm, mb_left)){
+								mobile_confirm = -1
+							}
+						}
+						
+						if (mobile_cancel != -1 and mobile_cancel == _i){
+							mobile_set_cancel_button_position(clamp(_x - mobile_cancel_x, _middle_button_limit, _right_limit), clamp(_y - mobile_cancel_y, _button_size, _bottom_limit))
+							
+							if (device_mouse_check_button_released(mobile_cancel, mb_left)){
+								mobile_cancel = -1
+							}
+						}
+						
+						if (mobile_menu != -1 and mobile_menu == _i){
+							mobile_set_menu_button_position(clamp(_x - mobile_menu_x, _middle_button_limit, _right_limit), clamp(_y - mobile_menu_y, _button_size, _bottom_limit))
+							
+							if (device_mouse_check_button_released(mobile_menu, mb_left)){
+								mobile_menu = -1
+							}
+						}
+						
+						if (mobile_movement != -1 and mobile_movement == _i){
+							mobile_set_move_button_position(clamp(_x - mobile_move_x, _left_limit, _middle_move_limit), clamp(_y - mobile_move_y, _move_size, _height - _move_size))
+							
+							if (device_mouse_check_button_released(mobile_movement, mb_left)){
+								mobile_movement = -1
+							}
+						}
+					}
+				}
+					
+				if (keyboard_check_pressed(vk_backspace)){
+					if (mobile_reposition_go_back_timer <= 0){
+						mobile_reposition_go_back_timer = 90
+					}else{
+						_ignore_first = true
+						
+						mobile_confirm = -1
+						mobile_cancel = -1
+						mobile_menu = -1
+						mobile_movement = -1
+						
+						mobile_reposition_go_back_timer = 0
+						obj_game.border_alpha = 1
+						if (mobile_movable_control){
+							mobile_toggle_movable_move_button(true)
+							mobile_movable_control = false
+						}
+						control_type = ((controller_id != -1) ? CONTROL_TYPE.CONTROLLER : CONTROL_TYPE.MOBILE)
+						save_game_settings()
+					}
+				}else if (mobile_reposition_go_back_timer > 0){
+					mobile_reposition_go_back_timer--
+				}
+				
+				global.up_button = 0
+				global.left_button = 0
+				global.down_button = 0
+				global.right_button = 0
+				global.confirm_button = 0
+				global.cancel_button = 0
+				global.menu_button = 0
+		
+				global.up_hold_button = 0
+				global.left_hold_button = 0
+				global.down_hold_button = 0
+				global.right_hold_button = 0
+				global.confirm_hold_button = 0
+				global.cancel_hold_button = 0
+				global.menu_hold_button = 0
+			break}
 			case CONTROL_TYPE.MAPPING_CONTROLLER:{
 				switch (controller_mapping_state){
 					case CONTROLLER_MAPPING.WAITING_ENTER:{ //make macros for this in scr_init.
-						if (keyboard_check_pressed(vk_enter)){
+						if (global.is_mobile){
+							var _width = display_get_width()/2
+							var _height = display_get_height()
+							var _button_size = 78*_height/768
+							_height *= 167/192
+							
+							for (var _i = 0; _i < 10; _i++){
+								if (device_mouse_check_button_pressed(_i, mb_left)){
+									var _x = device_mouse_x_to_gui(_i)
+									var _y = device_mouse_y_to_gui(_i)
+									
+									if (point_distance(_x, _y, _width, _height) < _button_size){
+										controller_mapping_state = CONTROLLER_MAPPING.GET_CONFIRM
+										
+										break
+									}
+								}
+							}
+						}else if (keyboard_check_pressed(vk_enter)){
 							controller_mapping_state = CONTROLLER_MAPPING.GET_CONFIRM
 						}
 					break}
@@ -88,7 +259,36 @@ function InputSystem() constructor{
 						}
 					break}
 					case CONTROLLER_MAPPING.TESTING:{
-						if (keyboard_check(vk_backspace)){
+						if (global.is_mobile){
+							var _width = display_get_width()/2
+							var _height = display_get_height()
+							var _offset = _height*2/3
+							var _button_size = 78*_height/768
+							_height *= 167/192
+							
+							for (var _i = 0; _i < 10; _i++){
+								if (device_mouse_check_button_pressed(_i, mb_left)){
+									var _x = device_mouse_x_to_gui(_i)
+									var _y = device_mouse_y_to_gui(_i)
+									
+									if (point_distance(_x, _y, _width - _offset, _height) < _button_size){
+										controller_mapping_state = CONTROLLER_MAPPING.GET_CONFIRM
+										controller_confirm_button = -1
+										controller_cancel_button = -1
+										controller_menu_button = -1
+										
+										break
+									}else if (point_distance(_x, _y, _width + _offset, _height) < _button_size){
+										mobile_tap_invalidate = _i
+										controller_mapping_state = CONTROLLER_MAPPING.DONE
+										control_type = CONTROL_TYPE.CONTROLLER
+										save_controller_config(controller_id)
+										
+										break
+									}
+								}
+							}
+						}else if (keyboard_check(vk_backspace)){
 							controller_mapping_state = CONTROLLER_MAPPING.GET_CONFIRM
 							controller_confirm_button = -1
 							controller_cancel_button = -1
@@ -100,7 +300,27 @@ function InputSystem() constructor{
 						}
 					break}
 					case CONTROLLER_MAPPING.ERROR:{
-						if (keyboard_check(vk_enter)){
+						if (global.is_mobile){
+							var _width = display_get_width()/2
+							var _height = display_get_height()
+							var _button_size = 78*_height/768
+							_height *= 167/192
+							
+							for (var _i = 0; _i < 10; _i++){
+								if (device_mouse_check_button_pressed(_i, mb_left)){
+									var _x = device_mouse_x_to_gui(_i)
+									var _y = device_mouse_y_to_gui(_i)
+									
+									if (point_distance(_x, _y, _width, _height) < _button_size){
+										mobile_tap_invalidate = _i
+										control_type = CONTROL_TYPE.MOBILE
+										controller_mapping_state = -1
+										
+										break
+									}
+								}
+							}
+						}else if (keyboard_check(vk_enter)){
 							control_type = CONTROL_TYPE.KEYBOARD
 							controller_mapping_state = -1
 						}
@@ -140,7 +360,7 @@ function InputSystem() constructor{
 				global.cancel_hold_button = (keyboard_check(ord("X")) or keyboard_check(vk_shift))
 				global.menu_hold_button = (keyboard_check(ord("C")) or keyboard_check(vk_control))
 			break}
-			case CONTROL_TYPE.CONTROLLER:{
+			case CONTROL_TYPE.CONTROLLER:{ //No break
 				var _axislv = gamepad_axis_value(controller_id, gp_axislv)
 				var _axislh = gamepad_axis_value(controller_id, gp_axislh)
 				var _axislv_round = round(_axislv)
@@ -154,34 +374,34 @@ function InputSystem() constructor{
 				var _down_button = max(_axislv_round, _padd, 0)
 				var _right_button = max(_axislh_round, _padr, 0)
 		
-				if (temp_up_button == _up_button){
+				if (controller_temp_up_button == _up_button){
 					global.up_button = 0
 				}else{
-					temp_up_button = _up_button
+					controller_temp_up_button = _up_button
 			
 					global.up_button = _up_button
 				}
 		
-				if (temp_down_button == _down_button){
+				if (controller_temp_down_button == _down_button){
 					global.down_button = 0
 				}else{
-					temp_down_button = _down_button
+					controller_temp_down_button = _down_button
 			
 					global.down_button = _down_button
 				}
 		
-				if (temp_left_button == _left_button){
+				if (controller_temp_left_button == _left_button){
 					global.left_button = 0
 				}else{
-					temp_left_button = _left_button
+					controller_temp_left_button = _left_button
 			
 					global.left_button = _left_button
 				}
 		
-				if (temp_right_button == _right_button){
+				if (controller_temp_right_button == _right_button){
 					global.right_button = 0
 				}else{
-					temp_right_button = _right_button
+					controller_temp_right_button = _right_button
 			
 					global.right_button = _right_button
 				}
@@ -210,27 +430,57 @@ function InputSystem() constructor{
 				}
 		
 				//Keyboard included
-				global.up_button = max(global.up_button, keyboard_check_pressed(ord("W")) or keyboard_check_pressed(vk_up))
-				global.left_button = max(global.left_button, keyboard_check_pressed(ord("A")) or keyboard_check_pressed(vk_left))
-				global.down_button = max(global.down_button, keyboard_check_pressed(ord("S")) or keyboard_check_pressed(vk_down))
-				global.right_button = max(global.right_button, keyboard_check_pressed(ord("D")) or keyboard_check_pressed(vk_right))
-				global.confirm_button = max(global.confirm_button, keyboard_check_pressed(ord("Z")) or keyboard_check_pressed(vk_enter))
-				global.cancel_button = max(global.cancel_button, keyboard_check_pressed(ord("X")) or keyboard_check_pressed(vk_shift))
-				global.menu_button = max(global.menu_button, keyboard_check_pressed(ord("C")) or keyboard_check_pressed(vk_control))
+				if (!global.is_mobile){
+					global.up_button = max(global.up_button, keyboard_check_pressed(ord("W")) or keyboard_check_pressed(vk_up))
+					global.left_button = max(global.left_button, keyboard_check_pressed(ord("A")) or keyboard_check_pressed(vk_left))
+					global.down_button = max(global.down_button, keyboard_check_pressed(ord("S")) or keyboard_check_pressed(vk_down))
+					global.right_button = max(global.right_button, keyboard_check_pressed(ord("D")) or keyboard_check_pressed(vk_right))
+					global.confirm_button = max(global.confirm_button, keyboard_check_pressed(ord("Z")) or keyboard_check_pressed(vk_enter))
+					global.cancel_button = max(global.cancel_button, keyboard_check_pressed(ord("X")) or keyboard_check_pressed(vk_shift))
+					global.menu_button = max(global.menu_button, keyboard_check_pressed(ord("C")) or keyboard_check_pressed(vk_control))
 		
-				global.up_hold_button = max(global.up_hold_button, keyboard_check(ord("W")) or keyboard_check(vk_up))
-				global.left_hold_button = max(global.left_hold_button, keyboard_check(ord("A")) or keyboard_check(vk_left))
-				global.down_hold_button = max(global.down_hold_button, keyboard_check(ord("S")) or keyboard_check(vk_down))
-				global.right_hold_button = max(global.right_hold_button, keyboard_check(ord("D")) or keyboard_check(vk_right))
-				global.confirm_hold_button = max(global.confirm_hold_button, keyboard_check(ord("Z")) or keyboard_check(vk_enter))
-				global.cancel_hold_button = max(global.cancel_hold_button, keyboard_check(ord("X")) or keyboard_check(vk_shift))
-				global.menu_hold_button = max(global.menu_hold_button, keyboard_check(ord("C")) or keyboard_check(vk_control))
-			break}
+					global.up_hold_button = max(global.up_hold_button, keyboard_check(ord("W")) or keyboard_check(vk_up))
+					global.left_hold_button = max(global.left_hold_button, keyboard_check(ord("A")) or keyboard_check(vk_left))
+					global.down_hold_button = max(global.down_hold_button, keyboard_check(ord("S")) or keyboard_check(vk_down))
+					global.right_hold_button = max(global.right_hold_button, keyboard_check(ord("D")) or keyboard_check(vk_right))
+					global.confirm_hold_button = max(global.confirm_hold_button, keyboard_check(ord("Z")) or keyboard_check(vk_enter))
+					global.cancel_hold_button = max(global.cancel_hold_button, keyboard_check(ord("X")) or keyboard_check(vk_shift))
+					global.menu_hold_button = max(global.menu_hold_button, keyboard_check(ord("C")) or keyboard_check(vk_control))
+					
+					break
+				}
+			}
 			case CONTROL_TYPE.MOBILE:{
 				var _mobile = global.game_settings.mobile_buttons
+				var _is_controller_connected = (controller_id != -1)
 				
 				for (var _i = 0; _i < 10; _i++){
 					if (device_mouse_check_button(_i, mb_left)){
+						if (mobile_tap_invalidate == _i){
+							continue
+						}else if (mobile_movement == _i and mobile_movement_invalidate){
+							mobile_distance = 0
+							mobile_direction = 0
+							
+							temp_up_button = 0
+							temp_down_button = 0
+							temp_left_button = 0
+							temp_right_button = 0
+							
+							if (!_is_controller_connected){
+								global.up_button = 0
+								global.left_button = 0
+								global.down_button = 0
+								global.right_button = 0
+								global.up_hold_button = 0
+								global.left_hold_button = 0
+								global.down_hold_button = 0
+								global.right_hold_button = 0
+							}
+							
+							continue
+						}
+						
 						var _x = device_mouse_x_to_gui(_i)
 						var _y = device_mouse_y_to_gui(_i)
 						var _width = display_get_width()
@@ -240,7 +490,9 @@ function InputSystem() constructor{
 						if (mobile_confirm == _i or mobile_confirm == -1){
 							if (point_distance(_mobile.confirm_button.x + 0.5, _mobile.confirm_button.y - 0.5, _width - _x, _height - _y) < _button_size){
 								if (temp_confirm_button == 1){
-									global.confirm_button = 0
+									if (!_is_controller_connected){
+										global.confirm_button = 0
+									}
 								}else{
 									temp_confirm_button = 1
 			
@@ -252,16 +504,20 @@ function InputSystem() constructor{
 							}else{
 								mobile_confirm = -1
 								temp_confirm_button = 0
-						
-								global.confirm_button = 0
-								global.confirm_hold_button = 0
+								
+								if (!_is_controller_connected){
+									global.confirm_button = 0
+									global.confirm_hold_button = 0
+								}
 							}
 						}
 						
 						if (mobile_cancel == _i or mobile_cancel == -1){
 							if (point_distance(_mobile.cancel_button.x + 0.5, _mobile.cancel_button.y - 0.5, _width - _x, _height - _y) < _button_size){
 								if (temp_cancel_button == 1){
-									global.cancel_button = 0
+									if (!_is_controller_connected){
+										global.cancel_button = 0
+									}
 								}else{
 									temp_cancel_button = 1
 			
@@ -273,16 +529,20 @@ function InputSystem() constructor{
 							}else{
 								mobile_cancel = -1
 								temp_cancel_button = 0
-						
-								global.cancel_button = 0
-								global.cancel_hold_button = 0
+								
+								if (!_is_controller_connected){
+									global.cancel_button = 0
+									global.cancel_hold_button = 0
+								}
 							}
 						}
 					
 						if (mobile_menu == _i or mobile_menu == -1){
 							if (point_distance(_mobile.menu_button.x + 0.5, _mobile.menu_button.y - 0.5, _width - _x, _height - _y) < _button_size){
 								if (temp_menu_button == 1){
-									global.menu_button = 0
+									if (!_is_controller_connected){
+										global.menu_button = 0
+									}
 								}else{
 									temp_menu_button = 1
 			
@@ -295,8 +555,10 @@ function InputSystem() constructor{
 								mobile_menu = -1
 								temp_menu_button = 0
 						
-								global.menu_button = 0
-								global.menu_hold_button = 0
+								if (!_is_controller_connected){
+									global.menu_button = 0
+									global.menu_hold_button = 0
+								}
 							}
 						}
 						
@@ -329,7 +591,9 @@ function InputSystem() constructor{
 										if (mobile_distance > _deadzone){
 											if (mobile_direction <= 67.5 or mobile_direction > 292.5){
 												if (temp_right_button == 1){
-													global.right_button = 0
+													if (!_is_controller_connected){
+														global.right_button = 0
+													}
 												}else{
 													temp_right_button = 1
 			
@@ -340,13 +604,17 @@ function InputSystem() constructor{
 											}else{
 												temp_right_button = 0
 												
-												global.right_button = 0
-												global.right_hold_button = 0
+												if (!_is_controller_connected){
+													global.right_button = 0
+													global.right_hold_button = 0
+												}
 											}
 											
 											if (mobile_direction > 22.5 and mobile_direction <= 157.5){
 												if (temp_down_button == 1){
-													global.down_button = 0
+													if (!_is_controller_connected){
+														global.down_button = 0
+													}
 												}else{
 													temp_down_button = 1
 			
@@ -357,13 +625,17 @@ function InputSystem() constructor{
 											}else{
 												temp_down_button = 0
 												
-												global.down_button = 0
-												global.down_hold_button = 0
+												if (!_is_controller_connected){
+													global.down_button = 0
+													global.down_hold_button = 0
+												}
 											}
 											
 											if (mobile_direction > 112.5 and mobile_direction <= 247.5){
 												if (temp_left_button == 1){
-													global.left_button = 0
+													if (!_is_controller_connected){
+														global.left_button = 0
+													}
 												}else{
 													temp_left_button = 1
 			
@@ -374,13 +646,17 @@ function InputSystem() constructor{
 											}else{
 												temp_left_button = 0
 												
-												global.left_button = 0
-												global.left_hold_button = 0
+												if (!_is_controller_connected){
+													global.left_button = 0
+													global.left_hold_button = 0
+												}
 											}
 											
 											if (mobile_direction > 202.5 and mobile_direction <= 337.5){
 												if (temp_up_button == 1){
-													global.up_button = 0
+													if (!_is_controller_connected){
+														global.up_button = 0
+													}
 												}else{
 													temp_up_button = 1
 			
@@ -391,8 +667,10 @@ function InputSystem() constructor{
 											}else{
 												temp_up_button = 0
 												
-												global.up_button = 0
-												global.up_hold_button = 0
+												if (!_is_controller_connected){
+													global.up_button = 0
+													global.up_hold_button = 0
+												}
 											}
 										}else{
 											temp_up_button = 0
@@ -400,14 +678,16 @@ function InputSystem() constructor{
 											temp_left_button = 0
 											temp_right_button = 0
 						
-											global.up_button = 0
-											global.left_button = 0
-											global.down_button = 0
-											global.right_button = 0
-											global.up_hold_button = 0
-											global.left_hold_button = 0
-											global.down_hold_button = 0
-											global.right_hold_button = 0
+											if (!_is_controller_connected){
+												global.up_button = 0
+												global.left_button = 0
+												global.down_button = 0
+												global.right_button = 0
+												global.up_hold_button = 0
+												global.left_hold_button = 0
+												global.down_hold_button = 0
+												global.right_hold_button = 0
+											}
 										}
 									break}
 									case MOBILE_CONTROL.JOYSTICK:{
@@ -423,71 +703,113 @@ function InputSystem() constructor{
 										var _right_button = max(_axislh_round, 0)
 		
 										if (temp_up_button == _up_button){
-											global.up_button = 0
+											if (!_is_controller_connected){
+												global.up_button = 0
+											}
 										}else{
 											temp_up_button = _up_button
-			
-											global.up_button = _up_button
+											
+											if (_is_controller_connected){
+												global.up_button = max(_up_button, global.up_button)
+											}else{
+												global.up_button = _up_button
+											}
 										}
 		
 										if (temp_down_button == _down_button){
-											global.down_button = 0
+											if (!_is_controller_connected){
+												global.down_button = 0
+											}
 										}else{
 											temp_down_button = _down_button
-			
-											global.down_button = _down_button
+											
+											if (_is_controller_connected){
+												global.down_button = max(_down_button, global.down_button)
+											}else{
+												global.down_button = _down_button
+											}
 										}
 		
 										if (temp_left_button == _left_button){
-											global.left_button = 0
+											if (!_is_controller_connected){
+												global.left_button = 0
+											}
 										}else{
 											temp_left_button = _left_button
 			
-											global.left_button = _left_button
+											if (_is_controller_connected){
+												global.left_button = max(_left_button, global.left_button)
+											}else{
+												global.left_button = _left_button
+											}
 										}
 		
 										if (temp_right_button == _right_button){
-											global.right_button = 0
+											if (!_is_controller_connected){
+												global.right_button = 0
+											}
 										}else{
 											temp_right_button = _right_button
 			
-											global.right_button = _right_button
+											if (_is_controller_connected){
+												global.right_button = max(_right_button, global.right_button)
+											}else{
+												global.right_button = _right_button
+											}
 										}
 		
-										global.up_hold_button = max(-_axislv, 0)
-										global.left_hold_button = max(-_axislh, 0)
-										global.down_hold_button = max(_axislv, 0)
-										global.right_hold_button = max(_axislh, 0)
+										if (_is_controller_connected){
+											global.up_hold_button = max(-_axislv, global.up_hold_button)
+											global.left_hold_button = max(-_axislh, global.left_hold_button)
+											global.down_hold_button = max(_axislv, global.down_hold_button)
+											global.right_hold_button = max(_axislh, global.right_hold_button)
+										}else{
+											global.up_hold_button = max(-_axislv, 0)
+											global.left_hold_button = max(-_axislh, 0)
+											global.down_hold_button = max(_axislv, 0)
+											global.right_hold_button = max(_axislh, 0)
+										}
 									break}
 								}
 							}
 						}
 					}else{
+						if (mobile_tap_invalidate == _i){
+							mobile_tap_invalidate = -1
+						}
+						
 						if (mobile_confirm == _i){
 							mobile_confirm = -1
 							temp_confirm_button = 0
 						
-							global.confirm_button = 0
-							global.confirm_hold_button = 0
+							if (!_is_controller_connected){
+								global.confirm_button = 0
+								global.confirm_hold_button = 0
+							}
 						}
 						
 						if (mobile_cancel == _i){
 							mobile_cancel = -1
 							temp_cancel_button = 0
 						
-							global.cancel_button = 0
-							global.cancel_hold_button = 0
+							if (!_is_controller_connected){
+								global.cancel_button = 0
+								global.cancel_hold_button = 0
+							}
 						}
 						
 						if (mobile_menu == _i){
 							mobile_menu = -1
 							temp_menu_button = 0
 						
-							global.menu_button = 0
-							global.menu_hold_button = 0
+							if (!_is_controller_connected){
+								global.menu_button = 0
+								global.menu_hold_button = 0
+							}
 						}
 						
 						if (mobile_movement == _i){
+							mobile_movement_invalidate = false
 							mobile_movement = -1
 							mobile_distance = 0
 							mobile_direction = 0
@@ -497,14 +819,18 @@ function InputSystem() constructor{
 							temp_left_button = 0
 							temp_right_button = 0
 						
-							global.up_button = 0
-							global.left_button = 0
-							global.down_button = 0
-							global.right_button = 0
-							global.up_hold_button = 0
-							global.left_hold_button = 0
-							global.down_hold_button = 0
-							global.right_hold_button = 0
+							if (!_is_controller_connected){
+								global.up_button = 0
+								global.left_button = 0
+								global.down_button = 0
+								global.right_button = 0
+								global.up_hold_button = 0
+								global.left_hold_button = 0
+								global.down_hold_button = 0
+								global.right_hold_button = 0
+							}
+						}else if (mobile_movement == -1){
+							mobile_movement_invalidate = false
 						}
 					}
 				}
@@ -528,8 +854,13 @@ function InputSystem() constructor{
 		}
 		
 		if (global.is_mobile){
-			global.escape_button = keyboard_check_pressed(vk_backspace)
-			global.escape_hold_button = keyboard_check(vk_backspace)
+			if (control_type == CONTROL_TYPE.MOBILE_REPOSITION or _ignore_first){
+				global.escape_button = 0
+				global.escape_hold_button = 0
+			}else{
+				global.escape_button = keyboard_check_pressed(vk_backspace)
+				global.escape_hold_button = keyboard_check(vk_backspace)
+			}
 		}else{
 			global.escape_button = keyboard_check_pressed(vk_escape) //Exclusive to keyboard.
 			global.escape_hold_button = keyboard_check(vk_escape) //Exclusive to keyboard.
@@ -541,6 +872,17 @@ function InputSystem() constructor{
 	}
 	
 	draw = function(){
+		if (control_type == CONTROL_TYPE.MOBILE_REPOSITION){
+			draw_sprite_ext(spr_pixel, 0, 0, 0, GAME_WIDTH, GAME_HEIGHT, 0, c_black, 0.75)
+					
+			draw_set_halign(fa_center)
+			draw_set_valign(fa_center)
+			draw_text_transformed(320, 100, global.UI_texts.mobile_reposition_tip, 2, 2, 0)
+					
+			if (mobile_reposition_go_back_timer > 0){
+				draw_text_transformed_color(320, 240, global.UI_texts.mobile_go_back, 2, 2, 0, c_white, c_white, c_white, c_white, min(mobile_reposition_go_back_timer/60, 1))
+			}
+		}
 		if (control_type == CONTROL_TYPE.MAPPING_CONTROLLER){
 			draw_set_halign(fa_center)
 			draw_set_valign(fa_top)
@@ -548,18 +890,19 @@ function InputSystem() constructor{
 		
 			draw_sprite_ext(spr_pixel, 0, 0, 0, GAME_WIDTH, GAME_HEIGHT, 0, c_black, 0.75)
 	
+			var _string = (global.is_mobile ? "mobile " : "")
 			switch (controller_mapping_state){
 				case CONTROLLER_MAPPING.WAITING_ENTER:{
-					draw_text_transformed(GAME_WIDTH/2, 140, global.UI_texts.controller[$"discovered with no mapping"], 2, 2, 0)
+					draw_text_transformed(GAME_WIDTH/2, (global.is_mobile ? 90 : 140), global.UI_texts.controller[$string_concat(_string, "discovered with no mapping")], 2, 2, 0)
 				break}
 				case CONTROLLER_MAPPING.GET_CONFIRM:{
-					draw_text_transformed(GAME_WIDTH/2, 180, string_replace(global.UI_texts.controller[$"mapping button"], "[Action]", "Z/Confirm"), 2, 2, 0)
+					draw_text_transformed(GAME_WIDTH/2, 180, string_replace(global.UI_texts.controller[$"mapping button"], "[Action]", string_concat("Z/", global.UI_texts.controller.confirm)), 2, 2, 0)
 				break}
 				case CONTROLLER_MAPPING.GET_CANCEL:{
-					draw_text_transformed(GAME_WIDTH/2, 180, string_replace(global.UI_texts.controller[$"mapping button"], "[Action]", "X/Cancel"), 2, 2, 0)
+					draw_text_transformed(GAME_WIDTH/2, 180, string_replace(global.UI_texts.controller[$"mapping button"], "[Action]", string_concat("X/", global.UI_texts.controller.cancel)), 2, 2, 0)
 				break}
 				case CONTROLLER_MAPPING.GET_MENU:{
-					draw_text_transformed(GAME_WIDTH/2, 180, string_replace(global.UI_texts.controller[$"mapping button"], "[Action]", "C/Menu"), 2, 2, 0)
+					draw_text_transformed(GAME_WIDTH/2, 180, string_replace(global.UI_texts.controller[$"mapping button"], "[Action]", string_concat("C/", global.UI_texts.controller.menu)), 2, 2, 0)
 				break}
 				case CONTROLLER_MAPPING.TESTING:{
 					draw_text_transformed(GAME_WIDTH/2, 20, global.UI_texts.controller[$"mapping complete"], 2, 2, 0)
@@ -586,20 +929,92 @@ function InputSystem() constructor{
 					draw_text_transformed(410, 164, "C", 2, 2, 0)
 					draw_set_color(c_white)
 				
-					draw_text_transformed(GAME_WIDTH/2, 240, global.UI_texts.controller[$"mapping again"], 2, 2, 0)
+					draw_text_transformed(GAME_WIDTH/2, 240, global.UI_texts.controller[$string_concat(_string, "mapping again")], 2, 2, 0)
 				break}
 				case CONTROLLER_MAPPING.ERROR:{
-					draw_text_transformed(GAME_WIDTH/2, 100, global.UI_texts.controller[$"mapping error"], 2, 2, 0)
+					draw_text_transformed(GAME_WIDTH/2, (global.is_mobile ? 50 : 100), global.UI_texts.controller[$string_concat(_string, "mapping error")], 2, 2, 0)
 				break}
 			}
-		}else{
+		}else if (control_alpha > 0){
 			draw_set_halign(fa_left)
 			draw_set_valign(fa_top)
-			draw_set_font(get_language_font("fnt_determination_sans"))
+			
+			var _font = get_language_font("fnt_determination_sans")
+			draw_set_font(_font)
+				
+			shader_set(shd_outline)
+				
+			var _texture = font_get_texture(_font)
+			shader_set_uniform_f(shader_get_uniform(shd_outline, "pixel_width"), texture_get_texel_width(_texture))
+			shader_set_uniform_f(shader_get_uniform(shd_outline, "pixel_height"), texture_get_texel_height(_texture))
+			shader_set_uniform_f(shader_get_uniform(shd_outline, "outline_alpha"), control_alpha)
 		
 			draw_set_alpha(control_alpha)
 			draw_text_transformed(10, 6, control_message, 1.5, 1.5, 0)
 			draw_set_alpha(1)
+			
+			shader_reset()
+		}
+	}
+	
+	draw_gui_mobile_buttons = function(){
+		if (control_type == CONTROL_TYPE.MAPPING_CONTROLLER){
+			var _width = display_get_width()/2
+			var _height = display_get_height()
+			var _ratio = _height/768
+			
+			switch (controller_mapping_state){
+				case CONTROLLER_MAPPING.WAITING_ENTER:{ //The numbers came from my display size, they work just fine -w-
+					draw_sprite_ext(spr_mobile_buttons, 0, _width, _height*167/192, 6*_ratio, 6*_ratio, 0, c_white, 1)
+				break}
+				case CONTROLLER_MAPPING.TESTING:{
+					var _offset = _height*2/3
+					_height *= 167/192
+					
+					draw_sprite_ext(spr_mobile_buttons, 0, _width + _offset, _height, 6*_ratio, 6*_ratio, 0, c_white, 1)
+					draw_sprite_ext(spr_mobile_buttons, 2, _width - _offset, _height, 6*_ratio, 6*_ratio, 0, c_white, 1)
+				break}
+				case CONTROLLER_MAPPING.ERROR:{
+					draw_sprite_ext(spr_mobile_buttons, 0, _width, _height*167/192, 6*_ratio, 6*_ratio, 0, c_white, 1)
+				break}
+			}
+		
+			return
+		}
+	
+		var _mobile = global.game_settings.mobile_buttons
+		var _scale = _mobile.button_size
+		var _alpha = _mobile.alpha
+		var _width = display_get_width()
+		var _height = display_get_height()
+		
+		draw_sprite_ext(spr_mobile_buttons, get_confirm_button(), _width - _mobile.confirm_button.x, _height - _mobile.confirm_button.y, _scale, _scale, 0, c_white, _alpha)
+		draw_sprite_ext(spr_mobile_buttons, 2 + get_cancel_button(), _width - _mobile.cancel_button.x, _height - _mobile.cancel_button.y, _scale, _scale, 0, c_white, _alpha)
+		draw_sprite_ext(spr_mobile_buttons, 4 + get_menu_button(), _width - _mobile.menu_button.x, _height - _mobile.menu_button.y, _scale, _scale, 0, c_white, _alpha)
+		
+		if (_mobile.type == MOBILE_CONTROL.CROSS){
+			var _sum = abs(get_horizontal_button_force()) + abs(get_vertical_button_force())
+			var _direction = 0
+			
+			if (get_left_button()){
+				_direction = 90
+				
+				if (get_down_button()){
+					_direction += 90
+				}
+			}else if (get_up_button()){
+				//Nothing
+			}else if (get_right_button()){
+				_direction = -90
+			}else if (get_down_button()){
+				_direction = 180
+			}
+			
+			draw_sprite_ext(spr_mobile_cross, _sum, _mobile.move_button.x, _height - _mobile.move_button.y, _scale, _scale, _direction, c_white, _alpha)
+			draw_sprite_ext(spr_mobile_cross_pointer, 0, _mobile.move_button.x + mobile_distance*dcos(mobile_direction), _height - _mobile.move_button.y + mobile_distance*dsin(mobile_direction), _scale, _scale, 0, c_white, _alpha)
+		}else{
+			draw_sprite_ext(spr_mobile_joystick_background, 0, _mobile.move_button.x, _height - _mobile.move_button.y, _scale, _scale, 0, c_white, _alpha)
+			draw_sprite_ext(spr_mobile_joystick, 0, _mobile.move_button.x + mobile_distance*dcos(mobile_direction), _height - _mobile.move_button.y + mobile_distance*dsin(mobile_direction), _scale, _scale, 0, c_white, _alpha)
 		}
 	}
 	
@@ -615,22 +1030,21 @@ function InputSystem() constructor{
 						gamepad_set_axis_deadzone(_index_connected, _config.deadzone)
 					}
 					var _mapping = gamepad_get_mapping(_index_connected)
-					if (_index_connected >= 4 and _mapping == "no mapping"){
+					if (_config != -1){
+						control_timer = 0
+						control_message = global.UI_texts.controller.discovered
+						control_alpha = 1
 						controller_id = _index_connected
-						if (_config == -1){
-							control_type = CONTROL_TYPE.MAPPING_CONTROLLER
-							controller_mapping_state = CONTROLLER_MAPPING.WAITING_ENTER
-							map_controller(_index_connected)
-						}else{
-							control_timer = 0
-							control_message = global.UI_texts.controller.discovered
-							control_alpha = 1
-							control_type = CONTROL_TYPE.CONTROLLER
-							controller_mapping_state = CONTROLLER_MAPPING.DONE
-							controller_confirm_button = _config.confirm
-							controller_cancel_button = _config.cancel
-							controller_menu_button = _config.menu
-						}
+						control_type = CONTROL_TYPE.CONTROLLER
+						controller_mapping_state = CONTROLLER_MAPPING.DONE
+						controller_confirm_button = _config.confirm
+						controller_cancel_button = _config.cancel
+						controller_menu_button = _config.menu
+					}else if (_index_connected >= 4 and _mapping == "no mapping"){
+						controller_id = _index_connected
+						control_type = CONTROL_TYPE.MAPPING_CONTROLLER
+						controller_mapping_state = CONTROLLER_MAPPING.WAITING_ENTER
+						map_controller(_index_connected)
 					}else if (_mapping != "device index out of range" and _mapping != ""){
 						control_timer = 0
 						control_message = global.UI_texts.controller.discovered
@@ -649,9 +1063,14 @@ function InputSystem() constructor{
 					if (control_type == CONTROL_TYPE.MAPPING_CONTROLLER){
 						controller_mapping_state = CONTROLLER_MAPPING.ERROR
 					}else{
-						control_type = CONTROL_TYPE.KEYBOARD
+						if (global.is_mobile){
+							control_type = CONTROL_TYPE.MOBILE
+							control_message = global.UI_texts.controller[$"mobile lost"]
+						}else{
+							control_type = CONTROL_TYPE.KEYBOARD
+							control_message = global.UI_texts.controller.lost
+						}
 						control_timer = 0
-						control_message = global.UI_texts.controller.lost
 						control_alpha = 1
 						controller_mapping_state = -1
 					}
@@ -778,42 +1197,5 @@ function InputSystem() constructor{
 		_file = file_text_open_write("controller settings.save")
 		file_text_write_string(_file, json_stringify(_list))
 		file_text_close(_file)
-	}
-}
-
-function draw_mobile_buttons(){
-	var _mobile = global.game_settings.mobile_buttons
-	var _scale = _mobile.button_size
-	var _alpha = _mobile.alpha
-	var _width = display_get_width()
-	var _height = display_get_height()
-		
-	draw_sprite_ext(spr_mobile_buttons, get_confirm_button(), _width - _mobile.confirm_button.x, _height - _mobile.confirm_button.y, _scale, _scale, 0, c_white, _alpha)
-	draw_sprite_ext(spr_mobile_buttons, 2 + get_cancel_button(), _width - _mobile.cancel_button.x, _height - _mobile.cancel_button.y, _scale, _scale, 0, c_white, _alpha)
-	draw_sprite_ext(spr_mobile_buttons, 4 + get_menu_button(), _width - _mobile.menu_button.x, _height - _mobile.menu_button.y, _scale, _scale, 0, c_white, _alpha)
-		
-	if (_mobile.type == MOBILE_CONTROL.CROSS){
-		var _sum = abs(get_horizontal_button_force()) + abs(get_vertical_button_force())
-		var _direction = 0
-			
-		if (get_left_button()){
-			_direction = 90
-				
-			if (get_down_button()){
-				_direction += 90
-			}
-		}else if (get_up_button()){
-			//Nothing
-		}else if (get_right_button()){
-			_direction = -90
-		}else if (get_down_button()){
-			_direction = 180
-		}
-			
-		draw_sprite_ext(spr_mobile_cross, _sum, _mobile.move_button.x, _height - _mobile.move_button.y, _scale, _scale, _direction, c_white, _alpha)
-		draw_sprite_ext(spr_mobile_cross_pointer, 0, _mobile.move_button.x + input_system.mobile_distance*dcos(input_system.mobile_direction), _height - _mobile.move_button.y + input_system.mobile_distance*dsin(input_system.mobile_direction), _scale, _scale, 0, c_white, _alpha)
-	}else{
-		draw_sprite_ext(spr_mobile_joystick_background, 0, _mobile.move_button.x, _height - _mobile.move_button.y, _scale, _scale, 0, c_white, _alpha)
-		draw_sprite_ext(spr_mobile_joystick, 0, _mobile.move_button.x + input_system.mobile_distance*dcos(input_system.mobile_direction), _height - _mobile.move_button.y + input_system.mobile_distance*dsin(input_system.mobile_direction), _scale, _scale, 0, c_white, _alpha)
 	}
 }

@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"scr_game_constants",
   "parent":{
-    "name":"Custom Stuff",
-    "path":"folders/Scripts/Custom Stuff.yy",
+    "name":"Engine",
+    "path":"folders/Scripts/Engine.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

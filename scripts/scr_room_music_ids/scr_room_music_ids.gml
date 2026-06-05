@@ -1,3 +1,8 @@
+global.room_music_settings = {
+	fade_in_time: 1000, //In miliseconds
+	fade_out_time: 1000
+}
+
 /*
 Similar to scr_room_border_ids.
 

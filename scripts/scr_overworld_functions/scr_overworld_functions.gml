@@ -36,17 +36,19 @@ function handle_interaction_action(_direction, _movement_speed){
 function set_battle_scene(_animation, _background, _init_function, _end_function, _heart_x, _heart_y){
 	obj_game.battle_start_animation_player_heart_x = _heart_x
 	obj_game.battle_start_animation_player_heart_y = _heart_y
+	obj_game.battle_start_animation_type = _animation
 	
 	battle_init_function = _init_function
 	battle_end_function = _end_function
-	battle_start_animation_type = _animation
 	
 	battle_black_alpha = 1
 	battle_background_name = _background
 	
 	update_border_alpha = is_border_dynamic()
 	
-	if (_animation == BATTLE_START_ANIMATION.NORMAL or _animation == BATTLE_START_ANIMATION.FAST){
+	if (_animation == BATTLE_START_ANIMATION.INSTANT){
+		obj_game.anim_timer = 0
+	}else if (_animation == BATTLE_START_ANIMATION.NORMAL or _animation == BATTLE_START_ANIMATION.FAST){
 		obj_game.anim_timer = -36
 		
 		audio_play_sound(snd_warning, 100, false) //Plays the warning sound

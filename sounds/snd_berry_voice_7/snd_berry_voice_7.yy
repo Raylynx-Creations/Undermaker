@@ -2,8 +2,8 @@
   "$GMSound":"v2",
   "%Name":"snd_berry_voice_7",
   "audioGroupId":{
-    "name":"audiogroup_default",
-    "path":"audiogroups/audiogroup_default",
+    "name":"audiogroup_sound",
+    "path":"audiogroups/audiogroup_sound",
   },
   "bitDepth":1,
   "channelFormat":0,

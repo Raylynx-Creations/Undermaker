@@ -31,10 +31,16 @@ function battle_apply_rewards(_sound=true){
 }
 
 function battle_set_box_dialog(_dialogues, _x_offset=0, _face_sprite=undefined, _face_subimages=undefined){
+	if (typeof(_dialogues) == "string"){
+		_dialogues = string_concat("[voice:snd_ui_voice]", _dialogues)
+	}else{
+		_dialogues[0] = string_concat("[voice:snd_ui_voice]", _dialogues[0])
+	}
+	
 	battle_dialog_x_offset = _x_offset
 		
 	battle_dialog.text_speed = 2
-	battle_dialog.set_dialogues(_dialogues, obj_battle_box.box_size.x/2 - 15 - _x_offset/2, 0, _face_sprite, _face_subimages)
+	battle_dialog.set_dialogues(, _dialogues, obj_battle_box.box_size.x/2 - 15 - _x_offset/2, 0, _face_sprite, _face_subimages)
 	battle_dialog.set_scale(2, 2)
 	battle_dialog.set_container_sprite(-1)
 	battle_dialog.set_container_tail_sprite(-1)
@@ -178,7 +184,7 @@ function battle_set_enemy_dialog(_enemy){
 		_enemy.next_dialog = "[font:fnt_monster][color_rgb:0,0,0][asterisk:false]" + _enemy.next_dialog
 	}
 	
-	var _dialog = new DialogSystem(_enemy.x + _enemy.bubble_x, _enemy.y + _enemy.bubble_y, _enemy.next_dialog, _enemy.bubble_width, 0, 1, 1,,,, _enemy.bubble_sprite, _enemy.bubble_tail_sprite, _enemy.bubble_tail_mask_sprite)
+	var _dialog = new DialogSystem(_enemy, _enemy.x + _enemy.bubble_x, _enemy.y + _enemy.bubble_y, _enemy.next_dialog, _enemy.bubble_width, 0, 1, 1,,,, _enemy.bubble_sprite, _enemy.bubble_tail_sprite, _enemy.bubble_tail_mask_sprite)
 	
 	_enemy.next_dialog = undefined
 	

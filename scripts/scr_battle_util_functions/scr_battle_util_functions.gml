@@ -319,7 +319,7 @@ function battle_rotate_box(_angle, _instant=false, _box=inst_battle_box){
 		box_rotation += _angle
 		
 		if (_instant){
-			var _diff_angle = angle_difference(_angle, image_angle)
+			var _diff_angle = angle_difference(box_rotation, image_angle)
 			
 			image_angle = box_rotation
 			
@@ -471,4 +471,40 @@ function battle_set_button_selecting_up_function(_func=undefined){
 
 function battle_set_button_selecting_down_function(_func=undefined){
 	obj_game.battle_system.battle_button_selecting_down = _func
+}
+
+function battle_music_set(_music, _fade_time_out=0, _fade_time_in=0){
+	obj_game.battle_music_system.set_music(_music, _fade_time_out, _fade_time_in)
+}
+
+function battle_music_pause(_fade_time_out=0){
+	obj_game.battle_music_system.pause_music(_fade_time_out)
+}
+
+function battle_music_stop(_fade_time_out=0){
+	obj_game.battle_music_system.stop_music(_fade_time_out)
+}
+
+function battle_music_resume(_fade_time_in=0){
+	obj_game.battle_music_system.resume_music(_fade_time_in)
+}
+
+function battle_music_set_gain(_gain, _fade_time=0){
+	obj_game.battle_music_system.set_gain(_gain, _fade_time)
+}
+
+function battle_music_is_playing(){
+	return obj_game.battle_music_system.is_playing()
+}
+
+function battle_music_is_paused(){
+	return obj_game.battle_music_system.is_paused()
+}
+
+function battle_music_get_name(){
+	return obj_game.battle_music_system.music_name
+}
+
+function battle_music_get_gain(){
+	return obj_game.battle_music_system.get_gain()
 }

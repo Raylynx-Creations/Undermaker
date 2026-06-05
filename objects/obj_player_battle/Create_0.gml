@@ -64,6 +64,8 @@ move_x = 0
 move_y = 0
 move_to_x = undefined
 move_to_y = undefined
+x_previous = x
+y_previous = y
 
 //Calculate the collision offsets and assign them to 4 variables, one for each side
 calculate_object_collision_offset()

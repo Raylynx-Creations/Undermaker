@@ -121,7 +121,7 @@ function GameMenu() constructor{
 						//We make a little event to showcase the example of cutscenes when creating a new game.
 						//In this case the event is just a dialog, we use the overworld_dialog function to set the event with the second argument being true (which is the default).
 						overworld_dialog(global.dialogues.welcome,, false) //We lose control after this since it sets the obj_game.state to another value.
-						obj_game.border_alpha = 1 //Since the draw phase is skipped in the last frame, we set it to 1 here.
+						set_border_alpha(1) //Since the draw phase is skipped in the last frame, we set it to 1 here.
 					break}
 				}
 			break}
@@ -320,7 +320,7 @@ function GameMenu() constructor{
 				draw_sprite_ext(spr_pixel, 0, 0, 0, GAME_WIDTH, GAME_HEIGHT, 0, c_black, _alpha)
 				
 				if (is_border_dynamic()){
-					obj_game.border_alpha = 1 - _alpha
+					set_border_alpha(1 - _alpha)
 				}
 			break}
 			case GAME_MENU.GO_TO_GAME:{
@@ -337,7 +337,7 @@ function GameMenu() constructor{
 				draw_sprite_ext(spr_pixel, 0, 0, 0, GAME_WIDTH, GAME_HEIGHT, 0, c_black, _alpha)
 				
 				if (is_border_dynamic()){
-					obj_game.border_alpha = 1 - _alpha
+					set_border_alpha(1 - _alpha)
 				}
 			break}
 			case GAME_MENU.MAIN_MENU:{

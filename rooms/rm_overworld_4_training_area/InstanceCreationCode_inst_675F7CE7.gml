@@ -20,6 +20,6 @@ trigger_function = function(){
 		
 		var _attacks = [ENEMY_ATTACK.BOX_ATTACK]
 	
-		start_attack(_attacks,,,,,,, 240)
+		start_attack(_attacks, BATTLE_START_ANIMATION.INSTANT,,,,,, 240)
 	}
 }

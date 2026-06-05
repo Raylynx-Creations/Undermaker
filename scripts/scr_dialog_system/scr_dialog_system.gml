@@ -95,6 +95,7 @@ This can be used separatedly to make dialogs anytime you want, anywhere you want
 Some functionality it lacks that you need can be done by using the [func] command, so you call the functions yourself for whatever purpose you need, it's limited however due to how this system works.
 For the masking of the container's tail sprite the shader shd_alpha_masking, it is a pretty simple shader that inverts the alpha like this: (1 - source_alpha), if you remove it, you may cause an error when using the masking sprite, avoid deleting it unless you know what you're doing.
 
+INSTANCE REFERENCE _other -------------------> Reference used to quickly access functions from a scope when using functions like [func] and [bind_instance] by using self as keyword in them.
 REAL _x -------------------------------------> Initial X position of the dialog, being the origin the left top corner.
 REAL _y -------------------------------------> Initial Y position of the dialog, being the origin the left top corner.
 ARRAY OF STRINGS / STRING _dialogues --------> Dialogues that will be displayed on screen, using the proper format for dialogues.
@@ -109,7 +110,7 @@ INTEGER _container_sprite -------------------> ID of the sprite to be used as a 
 INTEGER _container_tail_sprite --------------> ID of the sprite to be used as the tail of the container, used to make the dialog bubbles with tail, so you don't have to make multiple sprites with different position of the tail, the heavy calculation for its positioning was already made by me and a friend, really heavy math XD.
 INTEGER _container_tail_mask_sprite ---------> ID of the sprite to be used as a mask region to determinate where the tail should be drawn, can be any size but have in mind that it will scale to fit the size of the container itself.
 */
-function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=1, _voices=snd_monster_voice, _face_sprite=undefined, _face_subimages=undefined, _container_sprite=undefined, _container_tail_sprite=undefined, _container_tail_mask_sprite=undefined) constructor{
+function DialogSystem(_other, _x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=1, _voices=snd_monster_voice, _face_sprite=undefined, _face_subimages=undefined, _container_sprite=undefined, _container_tail_sprite=undefined, _container_tail_mask_sprite=undefined) constructor{
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	//INITIALIZATION OF VARIABLES
 	//--------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1100,6 +1101,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 	This function is used by the command [pop_up], which makes a tiny dialog appear overlapped with the current dialog, this one doesn't have a container in its arguments, but it doesn't prevent it from having one, it's your choice.
 	You can use this function in your code to display pop_up whenever you want, as long as there's a dialog.
 	
+	INSTANCE REFERENCE _other ---------> Reference used to quickly access functions from a scope when using functions like [func] and [bind_instance] by using self as keyword in them.
 	INTEGER _mode ---------------------> Mode the dialog pop up will be displayed and handled, please use only the constants of POP_UP_MODE.
 	REAL _x ---------------------------> Relative X position inside the dialog where the pop up will be displayed.
 	REAL _y ---------------------------> Relative Y position inside the dialog where the pop up will be displayed.
@@ -1108,12 +1110,12 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 	INTEGER _face_sprite --------------> Portrait sprite to be used on the dialog.
 	ARRAY OF INTEGERS _face_subimages -> ID or IDs of subimages of the portrait sprite to animate the pop up when it's talking, in instant modes this is kinda useless, so just give 1 integer.
 	*/
-	make_tiny_dialog_pop_up = function(_mode, _x, _y, _dialog, _width, _face_sprite, _face_subimages){
+	make_tiny_dialog_pop_up = function(_other, _mode, _x, _y, _dialog, _width, _face_sprite, _face_subimages){
 		if (dialogues_amount == 0){
 			return
 		}
 		
-		array_push(dialog_pop_ups, {timer: 0, mode: _mode, x: _x, y: _y, system: new DialogSystem(0, 0, _dialog, 2*_width,, xscale/2, yscale/2,, _face_sprite, _face_subimages)})
+		array_push(dialog_pop_ups, {timer: 0, mode: _mode, x: _x, y: _y, system: new DialogSystem(_other, 0, 0, _dialog, 2*_width,, xscale/2, yscale/2,, _face_sprite, _face_subimages)})
 		dialog_pop_ups_amount++
 		
 		var _system = dialog_pop_ups[dialog_pop_ups_amount - 1].system
@@ -1322,9 +1324,10 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 	This functions lets you add dialogues to the dialogues already being displayed, adding them manually yourself is a bit of a long process, so use this function instead please or you may end up with errors.
 	This function is also used for the dialog system to work, so be cautious when adding or modifying stuff in it, as this formats all the dialogues and gets all the needed information to make everything functional.
 	
+	INSTANCE REFERENCE _other ------------> Reference used to quickly access functions from a scope when using functions like [func] and [bind_instance] by using self as keyword in them.
 	ARRAY OF STRINGS / STRING _dialogues -> Dialogues that will be added to the list of dialogues to be displayed on screen, using the proper format for dialogues.
 	*/
-	add_dialogues = function(_dialogues){
+	add_dialogues = function(_other, _dialogues){
 		//Set the font that will be once all the dialogues have passed, even if the dialogues are not yet in that point, this variables holds the one that should be the last state of the font.
 		draw_set_font(final_font)
 		
@@ -1472,7 +1475,9 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 							_command_data.type = COMMAND_TYPE.BIND_INSTANCE
 							_command_data.value = string_split(_command_content[1], ",")
 							var _inst = get_instance_reference(_command_data.value[0])
-							if (is_undefined(_inst)){
+							if (string_trim(_command_data.value[0]) == "self"){
+								_command_data.inst = _other
+							}else if (is_undefined(_inst)){
 								_inst = handle_parse(_command_data.value[0])
 								if (!is_undefined(_inst) and _inst != -1 and _inst != noone){
 									_command_data.inst = _inst
@@ -1605,6 +1610,8 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 								
 								_arguments[_k] = int64(_arguments[_k])
 							}
+							
+							array_insert(_arguments, 0, _other)
 						break}
 						case "animation_speed": case "anim_speed": case "sprite_speed":{
 							_command_data.type = COMMAND_TYPE.SET_SPRITE_SPEED
@@ -1894,7 +1901,10 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 							}
 							
 							var _inst = get_instance_reference(_arguments[0])
-							if (is_undefined(_inst)){
+							if (string_trim(_arguments[0]) == "self"){
+								_command_data.value = variable_instance_get(_other, _arguments[1])
+								array_delete(_arguments, 0, 2)
+							}else if (is_undefined(_inst)){
 								var _parsed = handle_parse(_arguments[0])
 								if (!is_undefined(_parsed) and _parsed != -1 and _parsed != noone and string_pos("instance", _arguments[0]) == 5){
 									_command_data.value = variable_instance_get(_parsed, _arguments[1])
@@ -2036,7 +2046,10 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 							}
 							
 							var _inst = get_instance_reference(_arguments[0])
-							if (is_undefined(_inst)){
+							if (string_trim(_arguments[0]) == "self"){
+								_command_data.value = variable_instance_get(_other, _arguments[1])
+								array_delete(_arguments, 0, 2)
+							}else if (is_undefined(_inst)){
 								var _parsed = handle_parse(_arguments[0])
 								if (!is_undefined(_parsed) and _parsed != -1 and _parsed != -4 and string_pos("instance", _arguments[0]) == 5){
 									_command_data.value = variable_instance_get(_parsed, _arguments[1])
@@ -2349,12 +2362,13 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 	The only exception to this is the portrait sprite in the dialog, as that one will be reset/removed when calling this function, you can set the starting one by passing the arguments of it of course.
 	In short, nothing is being reset or removed with this function, except the portrait sprite, the asterisk configuration and the instance that may be binded is unbinded, have that in mind when using it.
 	
+	INSTANCE REFERENCE _other -------------------> Reference used to quickly access functions from a scope when using functions like [func] and [bind_instance] by using self as keyword in them.
 	ARRAY OF STRINGS / STRING _dialogues --------> Dialogues that will be added to the list of dialogues to be displayed on screen, using the proper format for dialogues.
 	INTEGER _width ------------------------------> Sets a new width for the dialog itself, since all dialogs are cleared, this is helpful to resize the box and new dialog will be affected by the new value.
 	INTEGER _face_sprite ------------------------> ID of the new sprite to use as portrait sprite, if it's not a valid sprite, then the new dialog won't contain a portrait sprite.
 	ARRAY OF INTEGERS / INTEGER _face_subimages -> ID or IDS of the subimages of the portrait sprite to use for the animation of the sprite, if none are given, it will use all the subimages of the sprite for it.
 	*/
-	set_dialogues = function(_dialogues, _width=undefined, _height=undefined, _face_sprite=undefined, _face_subimages=undefined){
+	set_dialogues = function(_other, _dialogues, _width=undefined, _height=undefined, _face_sprite=undefined, _face_subimages=undefined){
 		//Delete all dialogs and dialog heights.
 		if (dialogues_amount){ //It's never negative, 0 is False
 			array_delete(dialogues, 0, dialogues_amount)
@@ -2397,6 +2411,8 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 		face_subimages_length = 0
 		face_x_offset = 0
 		face_y_offset = 0
+		voices = [snd_monster_voice]
+		voices_length = 1
 		
 		//Set the info of the new face sprite properly.
 		if (sprite_exists(face_sprite)){
@@ -2427,7 +2443,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 		final_text_align_x = text_align_x
 		
 		//add the dialogues in the empty dialogues.
-		add_dialogues(_dialogues)
+		add_dialogues(_other, _dialogues)
 	}
 	
 	/*
@@ -3017,32 +3033,33 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 					case COMMAND_TYPE.SHOW_DIALOG_POP_UP:{
 						var _arguments = _command_data.value
 						
-						var _mode = _arguments[0]
-						var _x = _arguments[1]
-						var _y = _arguments[2]
-						var _dialog = _arguments[3]
-						var _width = _arguments[4]
+						var _other = _arguments[0]
+						var _mode = _arguments[1]
+						var _x = _arguments[2]
+						var _y = _arguments[3]
+						var _dialog = _arguments[4]
+						var _width = _arguments[5]
 						var _face_sprite = undefined
 						var _face_subimages = undefined
 						
 						var _length = array_length(_arguments)
 						
-						if (_length > 5){
-							_face_sprite = _arguments[5]
+						if (_length > 6){
+							_face_sprite = _arguments[6]
 							
 							//Handling of _face_subimages.
-							if (_length == 7){
-								_face_subimages = _arguments[6]
-							}else if (_length > 7){
+							if (_length == 8){
+								_face_subimages = _arguments[7]
+							}else if (_length > 8){
 								_face_subimages = []
 								
-								for (var _i = 6; _i < _length; _i++){
+								for (var _i = 7; _i < _length; _i++){
 									array_push(_face_subimages, _arguments[_i])
 								}
 							}
 						}
 						
-						make_tiny_dialog_pop_up(_mode, _x, _y, _dialog, _width, _face_sprite, _face_subimages)
+						make_tiny_dialog_pop_up(_other, _mode, _x, _y, _dialog, _width, _face_sprite, _face_subimages)
 					break}
 					case COMMAND_TYPE.BIND_INSTANCE:{
 						bind_instance(_command_data.inst, _command_data.value)
@@ -3452,7 +3469,7 @@ function DialogSystem(_x, _y, _dialogues, _width, _height=0, _xscale=1, _yscale=
 	}
 	
 	//Add the dialogues.
-	add_dialogues(_dialogues)
+	add_dialogues(_other, _dialogues)
 	
 	//Set the containers sprites if they exist.
 	set_container_sprite(_container_sprite)

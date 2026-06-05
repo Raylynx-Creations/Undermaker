@@ -34,7 +34,7 @@ function BattleSystem() constructor{
 	
 	battle_background_name = BATTLE_BACKGROUND.NO_BG
 	battle_background = undefined
-	battle_dialog = new DialogSystem(0, 0, [], 1)
+	battle_dialog = new DialogSystem(, 0, 0, [], 1)
 	
 	battle_init_function = undefined
 	battle_end_function = undefined

@@ -11,7 +11,7 @@ if (room == rm_battle){
 		change_border_dynamicly(_border_id)
 	}
 	
-	battle_music_system.step()
+	battle_music_system.update_music_change()
 	overworld_music_system.ignore_next_update()
 }else{
 	if (previous_room != rm_battle){
@@ -26,7 +26,7 @@ if (room == rm_battle){
 	}
 	
 	overworld_music_system.schedule_music_change_to(get_music_id_by_room(room))
-	overworld_music_system.step()
+	overworld_music_system.update_music_change(global.room_music_settings.fade_out_time, global.room_music_settings.fade_in_time)
 }
 
 //Execution of the starting room function if defined

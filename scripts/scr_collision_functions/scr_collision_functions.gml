@@ -282,8 +282,28 @@ function handle_collision_object_and_interaction_collision(_id){
 		var _points_collided = 0
 		var _image_xscale = abs(image_xscale)
 		var _image_yscale = abs(image_yscale)
+		var _corner_x1, _corner_y1, _corner_x2, _corner_y2
 		
-		if ((_id_center_y >= _center_y and ((_angle < 90 and _id_center_x < _center_x + 10*(_image_yscale*_sin - _image_xscale*_cos)) or (_angle > 90 and _id_center_x < _center_x - 10*(_image_xscale*_cos + _image_yscale*_sin)))) or (_id_center_y < _center_y and ((_angle < 90 and _id_center_x < _center_x + 10*(_image_xscale*_cos - _image_yscale*_sin)) or (_angle > 90 and _id_center_x < _center_x + 10*(_image_xscale*_cos + _image_yscale*_sin))))){
+		if (_angle < 90){
+			_corner_x1 = _center_x + 10*(_image_xscale*_cos - _image_yscale*_sin)
+			_corner_y1 = _center_y - 10*(_image_xscale*_sin + _image_yscale*_cos)
+			_corner_x2 = _center_x - 10*(_image_xscale*_cos + _image_yscale*_sin)
+			_corner_y2 = _center_y + 10*(_image_xscale*_sin - _image_yscale*_cos)
+		}else{
+			_corner_x1 = _center_x + 10*(_image_xscale*_cos + _image_yscale*_sin)
+			_corner_y1 = _center_y - 10*(_image_xscale*_sin - _image_yscale*_cos)
+			_corner_x2 = _center_x + 10*(_image_xscale*_cos - _image_yscale*_sin)
+			_corner_y2 = _center_y - 10*(_image_xscale*_sin + _image_yscale*_cos)
+		}
+		
+		var _direction_1 = point_direction(_center_x, _center_y, _corner_x1, _corner_y1)
+		var _direction_2 = point_direction(_center_x, _center_y, _corner_x2, _corner_y2)
+		var _id_direction = point_direction(_center_x, _center_y, _id_center_x, _id_center_y)
+		
+		//show_debug_message(_direction_1)
+		//show_debug_message(_direction_2)
+		
+		if (_id_direction >= _direction_1 and _id_direction < _direction_1 + 180){
 			_point_orientation = 180
 			
 			if (_angle < 90){
@@ -305,7 +325,7 @@ function handle_collision_object_and_interaction_collision(_id){
 			}
 		}
 		
-		if ((_id_center_x >= _center_x and ((_angle < 90 and _id_center_y < _center_y + 10*(_image_yscale*_cos - _image_xscale*_sin)) or (_angle > 90 and _id_center_y < _center_y + 10*(_image_yscale*_cos + _image_xscale*_sin)))) or (_id_center_x < _center_x and ((_angle < 90 and _id_center_y < _center_y + 10*(_image_xscale*_sin - _image_yscale*_cos)) or (_angle > 90 and _id_center_y < _center_y - 10*(_image_yscale*_cos + _image_xscale*_sin))))){
+		if ((_direction_2 < 180 and (_id_direction < _direction_2 or _id_direction >= _direction_2 + 180)) or (_direction_2 >= 180 and _id_direction >= _direction_2 - 180 and _id_direction < _direction_2)){
 			_point_orientation2 = 90
 			
 			if (_angle < 90){

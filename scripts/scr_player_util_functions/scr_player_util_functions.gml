@@ -87,7 +87,7 @@ function is_player_soul_moving(_player=obj_player_battle){
 		_extra_x += platform_vel.x
 		_extra_y += platform_vel.y
 		
-		return x != xprevious + _extra_x or y != yprevious + _extra_y or move_x != _extra_x or move_y != _extra_y or (!is_undefined(move_to_x) and move_to_x != x + _extra_x) or (!is_undefined(move_to_y) and move_to_y != y + _extra_y)
+		return (x != x_previous + _extra_x or y != y_previous + _extra_y)
 	}
 }
 

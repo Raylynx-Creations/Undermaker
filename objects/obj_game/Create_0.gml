@@ -26,6 +26,7 @@ ui_surface = -1 //UI surface reference variable
 border_id = 0
 border_prev_id = 0
 border_alpha = 1
+border_mult = 1
 
 //Variable to store the previous room the player was in
 previous_room = undefined
@@ -46,7 +47,7 @@ battle_music_system = new MusicSystem()
 battle_pause_music = false
 game_over_system = new GameOverSystem()
 player_menu_system = new PlayerMenuSystem()
-dialog = new DialogSystem(0, 0, [], 1)
+dialog = new DialogSystem(self, 0, 0, [], 1)
 input_system = new InputSystem()
 room_transition_system = new RoomTransitionSystem()
 

@@ -70,8 +70,26 @@ function load_game_settings(){
 	}
 }
 
+function load_persistent_save_data(){
+	var _file_path = working_directory + "/persistent_save.save"
+	
+	if (file_exists(_file_path)){
+		var _file = file_text_open_read(working_directory + "/persistent_save.save")
+		var _text = ""
+		
+		while (!file_text_eof(_file)){
+			_text += file_text_read_string(_file)
+			file_text_readln(_file)
+		}
+		file_text_close(_file)
+	
+		global.persistent_save_data = json_parse(_text)
+	}
+}
+
 function load_game_data(){
 	load_game_settings()
+	load_persistent_save_data()
 	load_game_texts(global.game_settings.language)
 }
 
